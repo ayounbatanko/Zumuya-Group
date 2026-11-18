@@ -1,3 +1,4 @@
+/* PROJET SUPABASE UNIQUE : portail ET Service de Restauration lisent cette configuration. */
 window.ZUMAYA_CONFIG = {
   SUPABASE_URL: 'https://dusznqvwhrklcqhmbylu.supabase.co',
   SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR1c3pucXZ3aHJrbGNxaG1ieWx1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM5MTMxODUsImV4cCI6MjEwOTQ4OTE4NX0.K_xKjAzdQi0UyZlc4OoogCBVHCd9Ooc2dVupr7KyjYI'

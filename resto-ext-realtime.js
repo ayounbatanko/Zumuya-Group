@@ -1,6 +1,6 @@
 /* Supabase Realtime : rafraîchit instantanément les données dès qu'une ligne change (le polling de resto-db.js reste en secours, ralenti). */
 (function(){var X=window.RGX;if(!X)return;
-var URL='https://azfunhfjmybekzakhtbu.supabase.co';
+var URL=window.RGX_SUPABASE_URL;
 function start(key){
   var s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js';
   s.onload=function(){try{var c=supabase.createClient(URL,key,{realtime:{params:{eventsPerSecond:10}}});

@@ -1,7 +1,12 @@
-/* Attribution automatique des livreurs : à l'acceptation d'une commande de livraison, le livreur libre le plus proche reçoit la course.
-   Chargé sur la page restaurant (le restaurant "accepte" -> la course est proposée). Le livreur accepte/refuse dans la page livreur. */
+/* Pôle 3 — Attribution des courses. L'attribution (livreur libre le plus proche, délai 90 s, puis suivant) est faite CÔTÉ SERVEUR
+   (supabase-setup.sql : rg_dispatch_tick + déclencheur + pg_cron), donc elle marche même appli du restaurant fermée.
+   Repli : si le script SQL n'est pas installé, l'ancien mécanisme (navigateur du restaurant) reste actif. */
 (function(){var X=window.RGX;if(!X)return;
-var TIMEOUT=90*1000; /* délai de réponse du livreur */
+var TIMEOUT=90*1000,server=null;
+function rpc(fn,args){return fetch(window.RGX_SUPABASE_URL+'/rest/v1/rpc/'+fn,{method:'POST',headers:{apikey:window.RGX_ANON_KEY,Authorization:'Bearer '+window.RGX_ANON_KEY,'Content-Type':'application/json'},body:JSON.stringify(args||{})})}
+/* détection du mode serveur */
+rpc('rg_dispatch_tick').then(function(r){server=r.ok},function(){server=false});
+
 function drivers(d,restId){return d.users.filter(function(u){return u.role==='driver'&&!u.disabled&&!u.inactive&&(!u.restId||u.restId==restId)})}
 function busy(d,id){return d.orders.some(function(o){return o.driverId==id&&!['terminée','annulée','refusée'].includes(o.status)})}
 X.pickDriver=function(d,o){var r=d.rests.find(function(x){return x.id==o.restId});if(!r)return null;var tried=o.offerTried||[];
@@ -9,15 +14,19 @@ X.pickDriver=function(d,o){var r=d.rests.find(function(x){return x.id==o.restId}
   c.forEach(function(u){u._d=(u.lat!=null&&r.lat!=null)?X.haversine(u.lat,u.lng,r.lat,r.lng):9999});
   c.sort(function(a,b){return a._d-b._d});return c[0]||null};
 X.offer=function(orderId){var d=X.db().get(),o=d.orders.find(function(x){return x.id==orderId});if(!o||o.driverId||o.deliveryMode==='room')return;
-  var u=X.pickDriver(d,o);if(!u){o.offer=null;X.db().save(d);return}
+  var u=X.pickDriver(d,o);if(!u){o.offer=null;o.offerTried=[];X.db().save(d);return}
   o.offer={driverId:u.id,expires:Date.now()+TIMEOUT};o.offerTried=(o.offerTried||[]).concat(u.id);X.db().save(d)};
-/* Surveillance côté restaurant : propose les commandes acceptées sans livreur, et passe au suivant si délai dépassé */
-function tick(){var u=X.me();if(!u||u.role!=='restaurant')return;var d=X.db().get();
+/* Repli côté restaurant (uniquement si le serveur n'assure pas l'attribution) */
+function tick(){if(server!==false)return;var u=X.me();if(!u||u.role!=='restaurant')return;var d=X.db().get();
   d.orders.forEach(function(o){if(['acceptée','préparée'].indexOf(o.status)<0||o.driverId||o.deliveryMode==='room'||o.serviceType==='À emporter')return;
     if(!o.offer||o.offer.expires<Date.now())X.offer(o.id)})}
-/* Côté livreur : bannière d'offre */
-X.driverAccept=function(id){var u=X.me();var d=X.db().get(),o=d.orders.find(function(x){return x.id==id});if(!o||o.driverId||!o.offer||o.offer.driverId!=u.id)return;o.driverId=u.id;o.offer=null;X.db().save(d)};
-X.driverRefuse=function(id){var d=X.db().get(),o=d.orders.find(function(x){return x.id==id});if(o&&o.offer){o.offer.expires=0;X.db().save(d)}};
+/* Côté livreur : acceptation / refus atomiques (un seul livreur peut prendre la course) */
+X.driverAccept=function(id){var u=X.me();if(!u)return;
+  if(server)return rpc('rg_driver_accept',{p_order:String(id),p_driver:String(u.id)}).then(function(){X.db().refresh&&X.db().refresh()});
+  var d=X.db().get(),o=d.orders.find(function(x){return x.id==id});if(!o||o.driverId||!o.offer||o.offer.driverId!=u.id)return;o.driverId=u.id;o.offer=null;X.db().save(d)};
+X.driverRefuse=function(id){var u=X.me();if(!u)return;
+  if(server)return rpc('rg_driver_refuse',{p_order:String(id),p_driver:String(u.id)}).then(function(){X.db().refresh&&X.db().refresh()});
+  var d=X.db().get(),o=d.orders.find(function(x){return x.id==id});if(o&&o.offer){o.offer.expires=0;X.db().save(d)}};
 function driverTick(){var u=X.me();if(!u||u.role!=='driver')return;var d=X.db().get();
   var o=d.orders.find(function(x){return x.offer&&x.offer.driverId==u.id&&x.offer.expires>Date.now()&&!x.driverId});var b=document.getElementById('rgx-offer');
   if(!o){if(b)b.remove();return}

@@ -1,7 +1,8 @@
 /* Service de Restauration - couche de données partagée (Supabase). Remplace le localStorage pour users / rests / orders. */
 (function(){
-var URL='https://azfunhfjmybekzakhtbu.supabase.co';
-var KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF6ZnVuaGZqbXliZWt6YWtodGJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ0Njg1MTYsImV4cCI6MjExMDA0NDUxNn0.Dz_8eSYVUfSqZQ3rA93FPclg1_zc8kdlyUxNkcDJ_0I';
+var CF=window.ZUMAYA_CONFIG||{};
+var URL=CF.SUPABASE_URL;
+var KEY=CF.SUPABASE_ANON_KEY;
 var T=['users','rests','orders','chats'],TB={users:'rg_users',rests:'rg_rests',orders:'rg_orders',chats:'rg_chats'},LS='rm_db',PAYID='__ownerpay',CP='__chat_',PREF='resolution=merge-duplicates,return=minimal';
 var H={apikey:KEY,Authorization:'Bearer '+KEY,'Content-Type':'application/json'};
 var cache={users:[],rests:[],orders:[],chats:[],ownerPay:null},snap={users:{},rests:{},orders:{},chats:{}},snapPay='null',chatLoc={},chatsTable=true,pending=0,ver=0,online=false;
