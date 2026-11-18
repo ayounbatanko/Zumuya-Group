@@ -282,7 +282,19 @@ async function signup(){const d=D.get(),ph=tel.value.trim(),pw=pwd.value;
    businessType:accountType,hotel:accountType==='hotel'?{enabled:true,name:u.name,category:'Hôtel',manager:'',rooms:0,services:['Restaurant','Service en chambre','Petit-déjeuner','Bar / Café','Banquets et séminaires','À emporter'],hours:'07:00 - 23:00',instructions:''}:undefined,
    sub:'trial',trialEnd:Date.now()+30*864e5,subEnd:0,pay:[],menu:[],sales:[]};d.rests.push(r);u.restId=r.id}
  d.users.push(u);D.save(d);store.s('s','uid',u.id);navTo(go[u.role])}
-if(me())navTo(isOwnerAccount(me())?'resto-owner.html':go[me().role]);else draw();
+/* CORRECTIF : plus aucune entrée automatique dans un compte. Une session existante propose seulement « Continuer » ou « Changer de compte ». */
+{const qp=new URLSearchParams(location.search);
+ if(qp.get('mode')==='signup')view='s';
+ if(qp.get('type')==='hotel'){view='s';kind='r';accountType='hotel'}
+ const labels={owner:'Propriétaire',restaurant:'Restaurant / Hôtel',client:'Client',driver:'Livreur'};
+ const cu=me();draw();
+ if(cu){
+  const box=document.createElement('div');box.className='card col';box.style.cssText='margin:0 0 12px;border-inline-start:6px solid var(--ok,#12a36b)';
+  box.innerHTML='<b>✅ Session ouverte</b><div class="mut">Connecté en tant que <b>'+esc(cu.name||'')+'</b> ('+esc(labels[cu.role]||cu.role)+').</div><button type="button" id="goSpace">Continuer vers mon espace</button><button type="button" class="sec" id="switchAcc">Changer de compte</button>';
+  tabs.parentNode.insertBefore(box,tabs);
+  document.getElementById('goSpace').onclick=()=>navTo(isOwnerAccount(cu)?'resto-owner.html':go[cu.role]);
+  document.getElementById('switchAcc').onclick=()=>{store.clr();location.reload()};
+ }}
 </script>
 <script>
 (()=> {

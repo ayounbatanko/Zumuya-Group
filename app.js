@@ -28,6 +28,22 @@ $('#moduleModal').addEventListener('click',e=>{if(e.target===$('#moduleModal'))c
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
 $('#menuBtn').addEventListener('click',()=>{const nav=$('#mainNav'),open=nav.classList.toggle('open');$('#menuBtn').setAttribute('aria-expanded',String(open))});
 $$('#mainNav a').forEach(a=>a.addEventListener('click',()=>{$('#mainNav').classList.remove('open');$('#menuBtn').setAttribute('aria-expanded','false')}));
+
+/* Bouton « Connecté » : visible dès qu'un utilisateur est connecté (portail ou service). */
+function applyAuth(){
+ const w=window.ZS&&ZS.who(),login=$('#navLogin'),signup=document.querySelector('.nav-signup'),hero=$('#heroActions'),foot=$('#footLogin');
+ if(w){
+  login.textContent='Connecté';login.className='nav-connected';login.title=(w.name||w.email||'')+' — ouvrir mon compte';
+  login.href=w.kind==='resto'?'resto-index.html':'compte.html';
+  if(signup)signup.hidden=true;
+  if(hero)hero.innerHTML='<a class="btn btn-gold" href="#services">Découvrir les services <span>→</span></a><a class="btn btn-glass" href="'+login.href+'">Mon compte</a>';
+  document.querySelectorAll('.steps-cta,.cta .btn').forEach(e=>e.hidden=true);
+  if(foot){foot.textContent='Mon compte';foot.href=login.href}
+ }else{
+  login.textContent='Se connecter';login.className='nav-login';login.href='compte.html';if(signup)signup.hidden=false;
+ }
+}
+applyAuth();addEventListener('storage',applyAuth);addEventListener('pageshow',applyAuth);
 $('#year').textContent=new Date().getFullYear();renderModules();
 if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js').catch(()=>{});
 })();

@@ -42,3 +42,20 @@ Voir `COORDINATION-POLES.md` pour le fonctionnement commun des pôles 01, 02 et 
 
 - Le portail et le Service de Restauration utilisent maintenant **un seul projet Supabase** (`config.js`). Les données de l'ancien projet de restauration ne sont pas reprises automatiquement.
 - Les images de partage (`og:image`) pointent encore vers l'ancien dépôt `ayounbatanko.github.io/Restaurant-gestion-multiples/`. À remplacer par l'adresse du nouveau site quand elle sera connue (l'image est `resto-apercu-facebook.jpg`).
+
+## Retouches de novembre 2026
+
+1. **Bug grave corrigé** (`resto-index.html`) : l'ancienne page ouvrait automatiquement le compte restaurant dès qu'une session existait. Désormais, une session ouverte affiche seulement « Continuer vers mon espace » / « Changer de compte ». Le portail n'ouvre plus `resto-index.html` : « En savoir plus » mène aux pages de service ci-dessous.
+2. **`restauration.html`** (pôle 01) : réservé à l'utilisateur connecté ; restaurants classés par distance (GPS), catalogue complet, prix de chaque repas, frais de livraison = distance × tarif/km du restaurant. Les comptes hôtels n'y figurent pas.
+3. **`hotel.html`** (pôle 02) : service à part, ouvert uniquement avec un compte hôtel (commandes, chambres, accès à la gestion de l'hôtel). Création : `resto-index.html?type=hotel`.
+4. **`livraison.html`** (pôle 03) : service à part, coordonné avec 01 et 02 (statistiques réseau, tableau des livraisons du restaurant/hôtel, accès livreur).
+5. **Bouton « Connecté »** sur l'accueil (`app.js` + `zsession.js`) dès qu'un utilisateur est connecté (portail ou service).
+6. **Visuel technologique** du hero (réseau animé des pôles).
+7. **Tableau de bord propriétaire** refait (`proprietaire.*`) : menu latéral, indicateurs, graphique des commandes, supervision des restaurants/hôtels/livraisons, partenaires, pays, organisations, transactions, activité.
+
+Nouveaux fichiers : `zsession.js`, `zservice.css`, `restauration.html`, `hotel.html`, `livraison.html`.
+
+## Limites à connaître
+- Les comptes du portail (e-mail, Supabase Auth) et ceux du Service (téléphone, base `rg_users`) sont encore deux systèmes séparés : un utilisateur du portail doit aussi avoir un compte Service pour commander.
+- La réservation aux hôtels est appliquée côté navigateur ; une vraie protection demande les règles RLS (`resto-sql-v2_securite_rls.sql`) après migration des comptes.
+- `rg_users` contient des mots de passe en clair lisibles avec la clé publique : à migrer vers Supabase Auth en priorité.

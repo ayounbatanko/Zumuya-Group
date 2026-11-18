@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#102b45"><link rel="icon" href="logo.svg" type="image/svg+xml"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&family=Manrope:wght@700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="zservice.css?v=1"><title>ZUMUYA Hôtel — espace réservé aux hôtels</title></head><body>
+<header class="zbar"><a class="zbrand" href="index.html"><img src="logo.svg" alt=""><span>ZUMUYA <b>GROUP</b></span></a>
+<nav><a href="index.html#services">Services</a><a href="restauration.html">Restauration</a><a href="livraison.html">Livraison</a><a id="who" href="compte.html">Se connecter</a></nav></header>
+<section class="zhero"><span class="eyebrow">PÔLE 02 · HÔTELLERIE</span><h1>ZUMUYA <em>Hôtel</em></h1><p>Un service à part, réservé aux comptes hôtels : service en chambre, notes de chambre et restauration de l’établissement.</p></section>
+<main class="zwrap" id="app"></main>
+<script src="config.js"></script><script src="zsession.js?v=1"></script>
+<script>
+(()=>{'use strict';
+const $=s=>document.querySelector(s),esc=ZS.esc,who=ZS.resto(),pw=ZS.portal();
+const w=who||pw;if(w){const a=$('#who');a.textContent='Connecté';a.className='zpill';a.href=who?'resto-index.html':'compte.html'}
+const app=$('#app');
+function gate(title,text,btns){app.innerHTML='<div class="card lock"><span class="eyebrow" style="color:#0b7d6f">ACCÈS RÉSERVÉ AUX HÔTELS</span><h2>'+title+'</h2><p>'+text+'</p>'+btns+'</div>'}
+if(!who){gate('Connectez-vous avec le compte de votre hôtel','Ce service n’est ouvert qu’aux établissements inscrits comme hôtels. Les comptes clients, restaurants et livreurs n’y ont pas accès.','<a class="btn btn-gold" href="resto-index.html">Ouvrir le compte de mon hôtel</a><a class="btn btn-line" href="resto-index.html?type=hotel">Créer le compte de mon hôtel</a>')}
+else if(!who.isHotel){gate('Ce service est réservé aux comptes hôtels','Vous êtes connecté avec le compte « '+esc(who.name)+' », qui n’est pas un compte hôtel. Pour accéder à ZUMUYA Hôtel, utilisez le compte de votre établissement.','<a class="btn btn-gold" href="resto-index.html?type=hotel">Créer un compte hôtel</a><a class="btn btn-line" href="index.html#services">Retour aux services</a>')}
+else hub(who.rest);
+async function hub(r){const h=r.hotel||{},sub=ZS.subOk(r);
+ app.innerHTML='<div class="sec-title"><div><span class="eyebrow" style="color:#0b7d6f">'+esc(h.category||'HÔTEL')+'</span><h2>'+esc(h.name||r.name)+'</h2><div class="mut">'+esc(r.address||'')+' '+(h.hours?'· Restauration '+esc(h.hours):'')+'</div></div><span class="badge '+(sub?'':'red')+'">'+(sub?'Compte actif':'Abonnement à renouveler')+'</span></div>'+
+ '<div class="kpis" id="k"></div><div class="flow">'+
+ '<a class="card step" href="resto-restaurant.html" style="text-decoration:none"><i>01</i><b>🏨 Gérer mon hôtel</b><span>Paramètres, service en chambre, notes de chambre, caisse et catalogue.</span></a>'+
+ '<a class="card step" href="resto-restaurant.html" style="text-decoration:none"><i>02</i><b>🍽️ Commandes en cours</b><span>Acceptation, préparation et remise en chambre.</span></a>'+
+ '<a class="card step" href="livraison.html" style="text-decoration:none"><i>03</i><b>📦 Livraison coordonnée</b><span>Commandes à l’extérieur : livreur libre le plus proche, suivi en direct.</span></a></div>'+
+ '<div class="sec-title"><h2>Dernières commandes de l’hôtel</h2></div><div class="card tw"><table class="table"><thead><tr><th>Réf.</th><th>Service</th><th>Chambre</th><th>Montant</th><th>Statut</th></tr></thead><tbody id="t"><tr><td colspan="5">Chargement…</td></tr></tbody></table></div>';
+ try{const os=(await ZS.orders()).filter(o=>o.restId===r.id),day=t=>new Date(t).toDateString(),done=['terminée','refusée','annulée'];
+  const act=os.filter(o=>!done.includes(o.status)),room=os.filter(o=>o.deliveryMode==='room'&&!done.includes(o.status)),tod=os.filter(o=>day(o.created||Date.now())===day(Date.now()));
+  $('#k').innerHTML=[['Commandes en cours',act.length],['En chambre',room.length],['Aujourd’hui',tod.length],['Chambres',h.rooms||'—']].map(x=>'<div class="card kpi"><small>'+x[0]+'</small><strong>'+x[1]+'</strong></div>').join('');
+  $('#t').innerHTML=os.slice(0,12).map(o=>'<tr><td>#'+esc(o.id)+'</td><td>'+esc(o.serviceType||'—')+'</td><td>'+esc(o.buildingNumber?(o.buildingNumber+' · '+(o.roomNumber||'')):'—')+'</td><td>'+ZS.money(o.total,r.currency)+'</td><td><span class="badge grey">'+esc(o.status)+'</span></td></tr>').join('')||'<tr><td colspan="5">Aucune commande pour le moment.</td></tr>'}
+ catch(e){$('#t').innerHTML='<tr><td colspan="5">Impossible de charger les commandes.</td></tr>'}}
+})();
+</script></body></html>

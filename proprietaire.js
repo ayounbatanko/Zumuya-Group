@@ -1,26 +1,88 @@
-(()=>{'use strict';const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));let sb,session,countries=[];
-function msg(s){$('#loginMsg').textContent=s}
-async function start(){if(!window.ZUMAYA_CONFIG||!ZUMAYA_CONFIG.SUPABASE_URL||ZUMAYA_CONFIG.SUPABASE_URL.includes('VOTRE-PROJET'))throw Error('Configuration Supabase non renseignée.');sb=window.supabase.createClient(ZUMAYA_CONFIG.SUPABASE_URL,ZUMAYA_CONFIG.SUPABASE_ANON_KEY);const {data:{session:s}}=await sb.auth.getSession();if(s)await verify(s)}
-async function verify(s){session=s;const {data,error}=await sb.rpc('rg_is_platform_owner');if(error)throw error;if(data!==true){await sb.auth.signOut();session=null;throw Error('Ce compte ne figure pas dans la liste d’autorisation du propriétaire.');}$('#login').hidden=true;$('#dashboard').hidden=false;$('#topUser').hidden=false;$('#who').textContent=s.user.email;await refresh()}
-async function count(table){const {count,error}=await sb.from(table).select('id',{count:'exact',head:true});if(error)throw error;return count||0}
-async function refresh(){const [orgs,ests,records,partners,payments,c]=await Promise.all([
- sb.from('rg_organizations').select('id,legal_name,public_name,country_code,organization_type,verification_status,created_at').order('created_at',{ascending:false}).limit(100),
- sb.from('rg_establishments').select('id',{count:'exact',head:true}),sb.from('rg_service_records').select('id,organization_id,module_code,record_type,status,created_at').order('created_at',{ascending:false}).limit(15),
- sb.from('rg_partner_applications').select('id,organization_name,country_code,category,city,status,contact_email,contact_phone,message').order('created_at',{ascending:false}).limit(100),
- sb.from('rg_payment_transactions').select('id,module_code,amount_minor,currency_code,provider,status,created_at').order('created_at',{ascending:false}).limit(30),
- sb.from('rg_countries').select('code,name,enabled').order('name')]);
- for(const r of [orgs,ests,records,partners,payments,c])if(r.error)throw r.error;countries=c.data||[];
- const {count:userCount,error:userErr}=await sb.from('rg_profiles').select('user_id',{count:'exact',head:true});if(userErr)throw userErr;const [norg,nest,nrecords,npay]=[orgs.data?.length||0,ests.count||0,records.data?.length||0,payments.data?.length||0];$('#stats').innerHTML=[['Organisations',norg],['Comptes Zumaya',userCount||0],['Établissements',nest],['Transactions',npay]].map(x=>`<div class="stat"><small>${x[0]}</small><strong>${x[1]}</strong></div>`).join('');
- $('#countries').innerHTML=countries.map(x=>`<div class="country"><div><b>${esc(x.name)}</b><small>${x.code} · ${x.enabled?'Marché activé':'Marché en préparation'}</small></div><button class="toggle ${x.enabled?'on':'off'}" data-country="${x.code}" data-enabled="${x.enabled}">${x.enabled?'Désactiver':'Activer'}</button></div>`).join('');
- $('#partners').innerHTML=(partners.data||[]).length?(partners.data||[]).map(x=>`<div class="partner"><strong>${esc(x.organization_name)}</strong><small>${esc(x.country_code)} · ${esc(x.category)+' · '+esc(x.city)} · ${esc(x.contact_email||'Sans e-mail')+' · '+esc(x.contact_phone||'')} · <b>${esc(x.status)}</b></small>${x.status==='pending'?`<div class="actions"><button data-partner="${x.id}" data-status="approved">Approuver</button><button class="reject" data-partner="${x.id}" data-status="rejected">Refuser</button></div>`:''}</div>`).join(''):'<div class="empty">Aucune demande de partenariat.</div>';
- $('#orgCount').textContent=`${norg} affichée(s)`;$('#orgs').innerHTML=(orgs.data||[]).map(x=>`<tr><td>${esc(x.public_name)}</td><td>${esc(x.country_code)}</td><td>${esc(x.organization_type)}</td><td><span class="badge ${x.verification_status==='verified'?'good':'warn'}">${esc(x.verification_status)}</span></td><td><select data-org-status="${x.id}"><option value="">Changer…</option><option value="verified">Vérifier</option><option value="rejected">Refuser</option><option value="suspended">Suspendre</option><option value="pending">En attente</option></select></td><td>${new Date(x.created_at).toLocaleDateString('fr-FR')}</td></tr>`).join('')||'<tr><td colspan="6">Aucune organisation.</td></tr>';
- $('#payments').innerHTML=(payments.data||[]).map(x=>`<tr><td>${new Date(x.created_at).toLocaleDateString('fr-FR')}</td><td>${esc(x.module_code)}</td><td>${Number(x.amount_minor).toLocaleString('fr-FR')}</td><td>${esc(x.currency_code)}</td><td>${esc(x.provider)}</td><td>${esc(x.status)}</td></tr>`).join('')||'<tr><td colspan="6">Aucune transaction.</td></tr>';
- const orgNames=Object.fromEntries((orgs.data||[]).map(x=>[x.id,x.public_name]));$('#activity').innerHTML=(records.data||[]).map(x=>`<tr><td>${new Date(x.created_at).toLocaleDateString('fr-FR')}</td><td>${esc(orgNames[x.organization_id]||'Organisation')}</td><td>${esc(x.module_code)}</td><td>${esc(x.record_type)}</td><td>${esc(x.status)}</td></tr>`).join('')||'<tr><td colspan="5">Aucune activité.</td></tr>';
-}
-$('#loginForm').onsubmit=async e=>{e.preventDefault();try{msg('Connexion…');const {data,error}=await sb.auth.signInWithPassword({email:$('#email').value.trim(),password:$('#password').value});if(error)throw error;await verify(data.session)}catch(e){msg(e.message||'Connexion impossible')}};
+(()=>{'use strict';
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let sb,session,countries=[],rests=[],orders=[];
+const TITLES={overview:'Vue d’ensemble',services:'Services : restauration, hôtel, livraison',partners:'Partenaires',countries:'Déploiement par pays',orgs:'Organisations',payments:'Transactions',activity:'Activité métier'};
+const msg=s=>{$('#loginMsg').textContent=s};
+const fail=s=>{const e=$('#err');e.hidden=!s;e.textContent=s||''};
+const dt=x=>x?new Date(x).toLocaleDateString('fr-FR'):'—';
+const stat=(l,v,n)=>`<div class="stat"><small>${l}</small><strong>${v}</strong>${n?`<em>${n}</em>`:''}</div>`;
+const isHotel=r=>!!(r&&(r.businessType==='hotel'||(r.hotel&&r.hotel.enabled)));
+const subOk=r=>{const n=Date.now();return r.sub==='suspended'?false:r.sub==='active'?r.subEnd>n:r.trialEnd>n};
+const subLabel=r=>r.sub==='suspended'?['Désactivé','bad']:r.sub==='active'?(r.subEnd>Date.now()?['Pro actif','good']:['Pro expiré','bad']):(r.trialEnd>Date.now()?['Essai gratuit','warn']:['Essai terminé','bad']);
+
+/* ---------- Navigation par onglets ---------- */
+function show(){const t=(location.hash||'#overview').slice(1),k=TITLES[t]?t:'overview';
+ $$('[data-p]').forEach(s=>s.hidden=s.dataset.p!==k);$$('#tabs a').forEach(a=>a.classList.toggle('on',a.dataset.t===k));$('#title').textContent=TITLES[k];scrollTo(0,0)}
+addEventListener('hashchange',show);
+
+/* ---------- Démarrage / authentification ---------- */
+async function start(){
+ if(!window.ZUMAYA_CONFIG||!ZUMAYA_CONFIG.SUPABASE_URL||ZUMAYA_CONFIG.SUPABASE_URL.includes('VOTRE-PROJET'))throw Error('Configuration Supabase non renseignée.');
+ sb=window.supabase.createClient(ZUMAYA_CONFIG.SUPABASE_URL,ZUMAYA_CONFIG.SUPABASE_ANON_KEY);
+ const {data:{session:s}}=await sb.auth.getSession();if(s)await verify(s)}
+async function verify(s){session=s;
+ const {data,error}=await sb.rpc('rg_is_platform_owner');if(error)throw error;
+ if(data!==true){await sb.auth.signOut();session=null;throw Error('Ce compte ne figure pas dans la liste d’autorisation du propriétaire.')}
+ $('#login').hidden=true;$('#shell').hidden=false;$('#who').textContent=s.user.email;show();await refresh()}
+
+/* ---------- Chargement des données ---------- */
+async function optional(p){try{const r=await p;return r.error?null:r}catch(e){return null}}
+async function refresh(){fail('');
+ const [orgs,ests,records,partners,payments,c,prof,rr,oo]=await Promise.all([
+  sb.from('rg_organizations').select('id,legal_name,public_name,country_code,organization_type,verification_status,created_at').order('created_at',{ascending:false}).limit(100),
+  sb.from('rg_establishments').select('id',{count:'exact',head:true}),
+  sb.from('rg_service_records').select('id,organization_id,module_code,record_type,status,created_at').order('created_at',{ascending:false}).limit(15),
+  sb.from('rg_partner_applications').select('id,organization_name,country_code,category,city,status,contact_email,contact_phone,message').order('created_at',{ascending:false}).limit(100),
+  sb.from('rg_payment_transactions').select('id,module_code,amount_minor,currency_code,provider,status,created_at').order('created_at',{ascending:false}).limit(30),
+  sb.from('rg_countries').select('code,name,enabled').order('name'),
+  sb.from('rg_profiles').select('user_id',{count:'exact',head:true}),
+  optional(sb.from('rg_rests').select('id,data').order('seq',{ascending:true})),
+  optional(sb.from('rg_orders').select('id,data').order('seq',{ascending:false}).limit(500))]);
+ for(const r of [orgs,ests,records,partners,payments,c,prof])if(r.error)throw r.error;
+ countries=c.data||[];rests=(rr&&rr.data||[]).map(x=>x.data).filter(Boolean);orders=(oo&&oo.data||[]).map(x=>x.data).filter(o=>o&&o.restId&&!String(o.id).startsWith('__'));
+ const orgNames=Object.fromEntries((orgs.data||[]).map(x=>[x.id,x.public_name]));
+ const pend=(partners.data||[]).filter(x=>x.status==='pending');
+ renderOverview(orgs.data||[],prof.count||0,ests.count||0,payments.data||[],pend);
+ renderServices();renderPartners(partners.data||[]);renderCountries();renderOrgs(orgs.data||[]);renderPayments(payments.data||[]);renderActivity(records.data||[],orgNames);
+ if(!rr)fail('Les données du Service de Restauration ne sont pas lisibles : exécutez supabase-setup.sql dans ce projet Supabase.');
+ const b=$('#pBadge');b.hidden=!pend.length;b.textContent=pend.length;$('#live').textContent='● Connecté · '+new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}
+
+/* ---------- Rendus ---------- */
+function renderOverview(orgs,users,ests,pays,pend){
+ const hotels=rests.filter(isHotel),restos=rests.filter(r=>!isHotel(r)),done=['terminée','refusée','annulée'],act=orders.filter(o=>!done.includes(o.status));
+ $('#stats').innerHTML=stat('Organisations',orgs.length)+stat('Comptes ZUMUYA',users)+stat('Établissements',ests)+stat('Transactions',pays.length)+stat('Restaurants',restos.length,restos.filter(subOk).length+' actifs')+stat('Hôtels',hotels.length,hotels.filter(subOk).length+' actifs')+stat('Commandes en cours',act.length,orders.length+' au total');
+ const days=[...Array(7)].map((_,i)=>{const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-6+i);return d}),
+  cnt=days.map(d=>orders.filter(o=>o.created&&new Date(o.created).toDateString()===d.toDateString()).length),mx=Math.max(1,...cnt);
+ $('#ordTotal').textContent=cnt.reduce((a,b)=>a+b,0)+' commandes';
+ $('#chart').innerHTML='<div class="bars">'+days.map((d,i)=>`<div class="bar"><b>${cnt[i]}</b><i style="height:${Math.max(3,cnt[i]/mx*100)}%"></i><span>${d.toLocaleDateString('fr-FR',{weekday:'short'})}</span></div>`).join('')+'</div>';
+ const room=orders.filter(o=>o.deliveryMode==='room').length,del=orders.filter(o=>o.deliveryMode!=='room').length,tot=Math.max(1,orders.length),
+  roomShare=orders.filter(o=>isHotel(rests.find(r=>r.id===o.restId))).length,restoShare=orders.length-roomShare;
+ const line=(l,v)=>`<div><p><span>${l}</span><span>${v}</span></p><div class="track"><i style="width:${v/tot*100}%"></i></div></div>`;
+ $('#split').innerHTML='<div class="split">'+line('🍽️ Restauration',restoShare)+line('🏨 Hôtel (restauration d’hôtel)',roomShare)+line('📦 Livraison (hors chambre)',del)+line('🛏️ Service en chambre',room)+'</div>';
+ $('#pendingList').innerHTML=pend.length?pend.slice(0,4).map(x=>`<div class="partner"><strong>${esc(x.organization_name)}</strong><small>${esc(x.country_code)} · ${esc(x.category)} · ${esc(x.city)}</small></div>`).join(''):'<div class="empty">Aucune demande en attente.</div>'}
+function renderServices(){
+ const q=($('#q').value||'').toLowerCase(),f=$('#f').value;
+ const cntBy=id=>orders.filter(o=>o.restId===id).length;
+ const list=rests.filter(r=>(!q||(r.name||'').toLowerCase().includes(q))&&(!f||(f==='hotel')===isHotel(r)));
+ const hot=rests.filter(isHotel).length,drv=orders.filter(o=>o.driverId).length;
+ $('#svcStats').innerHTML=stat('🍽️ Restaurants',rests.length-hot)+stat('🏨 Hôtels',hot)+stat('📦 Courses attribuées',drv)+stat('Plats au catalogue',rests.reduce((a,r)=>a+(r.menu||[]).length,0));
+ $('#rests').innerHTML=list.map(r=>{const [l,c]=subLabel(r);return `<tr><td><b>${esc(r.name)}</b><br><small>${esc(r.phone||'')}</small></td><td>${isHotel(r)?'🏨 Hôtel':'🍽️ Restaurant'}</td><td><span class="badge ${c}">${l}</span></td><td>${(r.menu||[]).length} plat(s)</td><td>${+r.kmPrice>0?esc(r.kmPrice)+' '+esc(r.currency||'XOF')+'/km':'<span class="badge warn">non défini</span>'}</td><td>${r.lat!=null?'<span class="badge good">renseignée</span>':'<span class="badge bad">manquante</span>'}</td><td>${cntBy(r.id)}</td></tr>`}).join('')||'<tr><td colspan="7">Aucun établissement.</td></tr>'}
+function renderPartners(a){$('#partners').innerHTML=a.length?a.map(x=>`<div class="partner"><strong>${esc(x.organization_name)}</strong><small>${esc(x.country_code)} · ${esc(x.category)} · ${esc(x.city)} · ${esc(x.contact_email||'Sans e-mail')} · ${esc(x.contact_phone||'')} · <span class="badge ${x.status==='approved'?'good':x.status==='rejected'?'bad':'warn'}">${esc(x.status)}</span></small>${x.status==='pending'?`<div class="actions"><button data-partner="${x.id}" data-status="approved">Approuver</button><button class="reject" data-partner="${x.id}" data-status="rejected">Refuser</button></div>`:''}</div>`).join(''):'<div class="empty">Aucune demande de partenariat.</div>'}
+function renderCountries(){$('#countries').innerHTML=countries.map(x=>`<div class="country"><div><b>${esc(x.name)}</b><small>${esc(x.code)} · ${x.enabled?'Marché activé':'Marché en préparation'}</small></div><button class="toggle ${x.enabled?'on':'off'}" data-country="${x.code}" data-enabled="${x.enabled}">${x.enabled?'Désactiver':'Activer'}</button></div>`).join('')}
+function renderOrgs(a){$('#orgCount').textContent=a.length+' affichée(s)';$('#orgs').innerHTML=a.map(x=>`<tr><td>${esc(x.public_name)}</td><td>${esc(x.country_code)}</td><td>${esc(x.organization_type)}</td><td><span class="badge ${x.verification_status==='verified'?'good':'warn'}">${esc(x.verification_status)}</span></td><td><select data-org-status="${x.id}"><option value="">Changer…</option><option value="verified">Vérifier</option><option value="rejected">Refuser</option><option value="suspended">Suspendre</option><option value="pending">En attente</option></select></td><td>${dt(x.created_at)}</td></tr>`).join('')||'<tr><td colspan="6">Aucune organisation.</td></tr>'}
+function renderPayments(a){$('#payments').innerHTML=a.map(x=>`<tr><td>${dt(x.created_at)}</td><td>${esc(x.module_code)}</td><td>${Number(x.amount_minor).toLocaleString('fr-FR')}</td><td>${esc(x.currency_code)}</td><td>${esc(x.provider)}</td><td><span class="badge">${esc(x.status)}</span></td></tr>`).join('')||'<tr><td colspan="6">Aucune transaction.</td></tr>'}
+function renderActivity(a,names){$('#activity').innerHTML=a.map(x=>`<tr><td>${dt(x.created_at)}</td><td>${esc(names[x.organization_id]||'Organisation')}</td><td>${esc(x.module_code)}</td><td>${esc(x.record_type)}</td><td><span class="badge">${esc(x.status)}</span></td></tr>`).join('')||'<tr><td colspan="5">Aucune activité.</td></tr>'}
+
+/* ---------- Actions ---------- */
+const run=async f=>{try{await f()}catch(e){fail(e.message||'Action impossible')}};
+$('#loginForm').onsubmit=e=>{e.preventDefault();run(async()=>{try{msg('Connexion…');const {data,error}=await sb.auth.signInWithPassword({email:$('#email').value.trim(),password:$('#password').value});if(error)throw error;await verify(data.session);msg('')}catch(x){msg(x.message||'Connexion impossible')}})};
 $('#logout').onclick=async()=>{await sb.auth.signOut();location.reload()};
-$('#countries').onclick=async e=>{const b=e.target.closest('[data-country]');if(!b)return;const enable=b.dataset.enabled!=='true';if(!confirm(`${enable?'Activer':'Désactiver'} ce pays ? Cette action modifie la disponibilité du marché dans le référentiel.`))return;const {error}=await sb.rpc('rg_platform_set_country_enabled',{p_code:b.dataset.country,p_enabled:enable});if(error){alert(error.message);return}await refresh()};
-$('#orgs').onchange=async e=>{const sel=e.target.closest('[data-org-status]');if(!sel||!sel.value)return;const {error}=await sb.from('rg_organizations').update({verification_status:sel.value}).eq('id',sel.dataset.orgStatus);if(error){alert(error.message);return}await refresh()};
-$('#partners').onclick=async e=>{const b=e.target.closest('[data-partner]');if(!b)return;const patch={status:b.dataset.status};if(patch.status==='rejected'){const n=prompt('Motif du refus (visible par le demandeur) :');if(n===null)return;patch.review_note=n.trim()||null}const {error}=await sb.from('rg_partner_applications').update(patch).eq('id',b.dataset.partner);if(error){alert(error.message);return}await refresh()};
-start().catch(e=>{msg(e.message||'Configuration ou connexion impossible')});
+$('#logout2').onclick=$('#logout').onclick;
+$('#refresh').onclick=()=>run(refresh);
+$('#q').oninput=renderServices;$('#f').onchange=renderServices;
+$('#countries').onclick=e=>{const b=e.target.closest('[data-country]');if(!b)return;const en=b.dataset.enabled!=='true';if(!confirm(`${en?'Activer':'Désactiver'} ce pays ? Cette action modifie la disponibilité du marché dans le référentiel.`))return;run(async()=>{const {error}=await sb.rpc('rg_platform_set_country_enabled',{p_code:b.dataset.country,p_enabled:en});if(error)throw error;await refresh()})};
+$('#orgs').onchange=e=>{const sel=e.target.closest('[data-org-status]');if(!sel||!sel.value)return;run(async()=>{const {error}=await sb.from('rg_organizations').update({verification_status:sel.value}).eq('id',sel.dataset.orgStatus);if(error)throw error;await refresh()})};
+$('#partners').onclick=e=>{const b=e.target.closest('[data-partner]');if(!b)return;const patch={status:b.dataset.status};if(patch.status==='rejected'){const n=prompt('Motif du refus (visible par le demandeur) :');if(n===null)return;patch.review_note=n.trim()||null}run(async()=>{const {error}=await sb.from('rg_partner_applications').update(patch).eq('id',b.dataset.partner);if(error)throw error;await refresh()})};
+start().catch(e=>{$('#login').hidden=false;$('#shell').hidden=true;msg(e.message||'Configuration ou connexion impossible')});
+setInterval(()=>{if(session&&!document.hidden)refresh().catch(()=>{})},60000);
 })();
