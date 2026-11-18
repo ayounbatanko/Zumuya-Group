@@ -59,3 +59,12 @@ Nouveaux fichiers : `zsession.js`, `zservice.css`, `restauration.html`, `hotel.h
 - Les comptes du portail (e-mail, Supabase Auth) et ceux du Service (téléphone, base `rg_users`) sont encore deux systèmes séparés : un utilisateur du portail doit aussi avoir un compte Service pour commander.
 - La réservation aux hôtels est appliquée côté navigateur ; une vraie protection demande les règles RLS (`resto-sql-v2_securite_rls.sql`) après migration des comptes.
 - `rg_users` contient des mots de passe en clair lisibles avec la clé publique : à migrer vers Supabase Auth en priorité.
+
+## Pôle 04 — ZUMUYA Agro (ajout)
+
+- `agro.html`, `agro.css`, `agro.js` : espace professionnel partagé des restaurants partenaires, producteurs et commerçants agricoles.
+- `zumuya-agro.sql` : tables, index et politiques RLS pour les profils géolocalisés, les catalogues de produits et les demandes d'approvisionnement.
+- À exécuter dans Supabase après `sql-portail.sql`.
+- À la création du compte portail, choisissez le type de compte : restaurant partenaire, producteur agricole ou commerçant agricole. Après connexion, le navigateur ouvre automatiquement l'espace ZUMUYA Agro.
+- Le profil professionnel ne peut pas être enregistré sans position GPS. Les produits sont classés par distance chez les restaurants ; ces derniers peuvent envoyer des demandes d'approvisionnement aux fournisseurs.
+- Les comptes déjà existants sans `account_type` doivent être recréés avec le bon type ou leur métadonnée `account_type` doit être renseignée dans Supabase Auth.

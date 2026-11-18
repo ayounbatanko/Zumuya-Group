@@ -8,8 +8,8 @@ function setMode(m,init){
   mode=m;const up=m==='up';
   $('#tabIn').classList.toggle('active',!up);$('#tabUp').classList.toggle('active',up);
   $('#tabIn').setAttribute('aria-selected',String(!up));$('#tabUp').setAttribute('aria-selected',String(up));
-  $('#nameWrap').hidden=!up;$('#confirmWrap').hidden=!up;$('#pwHelp').hidden=!up;
-  $('#displayName').required=up;$('#passwordConfirm').required=up;
+  $('#nameWrap').hidden=!up;$('#confirmWrap').hidden=!up;$('#pwHelp').hidden=!up;$('#accountTypeWrap').hidden=!up;
+  $('#displayName').required=up;$('#passwordConfirm').required=up;$('#accountType').required=up;
   $('#password').autocomplete=up?'new-password':'current-password';
   $('#submitBtn').textContent=up?'Créer mon compte':'Se connecter';
   $('#authTitle').textContent=up?'Créer un compte':'Bienvenue';
@@ -26,7 +26,11 @@ function updateMatch(){
   else{h.textContent='Les deux mots de passe ne sont pas identiques.';h.className='bad';$('#passwordConfirm').setAttribute('aria-invalid','true')}
 }
 function showAccount(user){
+  const accountType=(user.user_metadata&&user.user_metadata.account_type)||'';
+  if(['restaurant','agro_producer','agro_trader'].includes(accountType)){location.replace('agro.html');return}
+  if(accountType==='customer'){location.replace('restauration.html');return}
   $('#auth').hidden=true;$('#account').hidden=false;
+  $('#agroLink').hidden=!['restaurant','agro_producer','agro_trader'].includes(accountType);
   $('#accEmail').textContent=user.email||'—';
   $('#accName').textContent=(user.user_metadata&&user.user_metadata.name)||'—';
   $('#recovery').hidden=true;
@@ -41,6 +45,7 @@ async function submit(e){
   if(!email||!/^\S+@\S+\.\S+$/.test(email))return showMsg('Saisissez une adresse e-mail valide.');
   if(mode==='up'){
     if(!name)return showMsg('Saisissez votre nom complet.');
+    if(!$('#accountType').value)return showMsg('Choisissez votre type de compte.');
     if(password.length<MIN)return showMsg('Le mot de passe doit contenir au moins '+MIN+' caractères.');
     if(password!==confirm){updateMatch();return showMsg('Les deux mots de passe ne sont pas identiques.')}
   }else if(!password)return showMsg('Saisissez votre mot de passe.');
@@ -48,7 +53,7 @@ async function submit(e){
   const btn=$('#submitBtn');btn.disabled=true;
   try{
     if(mode==='up'){
-      const {data,error}=await sb.auth.signUp({email,password,options:{data:{name},emailRedirectTo:location.origin+location.pathname}});
+      const {data,error}=await sb.auth.signUp({email,password,options:{data:{name,account_type:$('#accountType').value},emailRedirectTo:location.origin+location.pathname}});
       if(error)throw error;
       if(data.user&&Array.isArray(data.user.identities)&&data.user.identities.length===0)throw new Error('Un compte existe déjà avec cette adresse e-mail. Connectez-vous.');
       if(data.session){showAccount(data.session.user);return}

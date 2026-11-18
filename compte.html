@@ -20,6 +20,7 @@
   </div>
   <form id="authForm" novalidate>
     <label id="nameWrap" hidden>Nom complet<input id="displayName" type="text" autocomplete="name" placeholder="Ex. Aïssata Moussa"></label>
+    <label id="accountTypeWrap" hidden>Type de compte<select id="accountType" required><option value="" disabled selected>Choisir le type de compte…</option><option value="restaurant">Restaurant partenaire</option><option value="agro_producer">Producteur agricole</option><option value="agro_trader">Commerçant de produits agricoles</option><option value="customer">Client</option><option value="other">Autre activité</option></select><small>Votre espace sera ouvert automatiquement après connexion.</small></label>
     <label>Adresse e-mail<input id="email" type="email" autocomplete="email" inputmode="email" placeholder="vous@exemple.com" required></label>
     <label>Mot de passe
       <span class="pw"><input id="password" type="password" autocomplete="current-password" required><button type="button" class="eye" data-eye="password" aria-label="Afficher le mot de passe">Afficher</button></span>
@@ -55,6 +56,7 @@
   </dl>
   <p class="notice" id="ownerNotice" hidden>Vous êtes <b>propriétaire de la plateforme</b> : vous gérez toute l'infrastructure ZUMUYA GROUP depuis l'espace propriétaire.</p>
   <div class="services">
+    <a class="btn small" id="agroLink" href="agro.html" hidden>🌾 Mon espace ZUMUYA Agro</a>
     <a class="btn small" id="ownerLink" href="proprietaire.html" hidden>⚙️ Espace propriétaire</a>
     <a class="btn small" href="resto-index.html">🍽️ Service de Restauration</a>
     <a class="btn small" href="resto-client.html">🔍 Rechercher restaurants et commander</a>
@@ -100,6 +102,6 @@
 </main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
-<script src="compte.js?v=4"></script>
+<script src="compte.js?v=5"></script>
 </body>
 </html>
