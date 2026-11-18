@@ -16,6 +16,12 @@ function openModal(m){
  $('#modalIcon').textContent=m.icon;$('#modalCode').textContent='Pôle '+m.code+' · '+m.label;
  $('#modalTitle').textContent=m.name;$('#modalDescription').textContent=m.description;
  $('#modalNotice').textContent=m.note;$('#modalNotice').className='notice '+m.status;
+ const cta=$('#moduleModal .btn-gold');
+ if(m.status==='live'&&m.path){
+  cta.href=m.path;cta.textContent='Ouvrir le module →';
+ }else{
+  cta.href='compte.html?mode=signup';cta.textContent='Créer un compte →';
+ }
  const modal=$('#moduleModal');modal.classList.add('open');modal.setAttribute('aria-hidden','false');
  modal.querySelector('.modal-x').focus();
 }
