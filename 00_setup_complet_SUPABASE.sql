@@ -88,7 +88,7 @@ grant select, insert, update, delete on public.rg_rests  to anon, authenticated;
 grant select, insert, update, delete on public.rg_orders to anon, authenticated;
 grant select, insert, update, delete on public.rg_chats  to anon, authenticated;
 
--- 6) Compte propriétaire plateforme (tankobama73@gmail.com)
+-- 6) Compte propriétaire plateforme (ne pas exposer cet email côté public)
 --    Si le compte n'existe pas encore, il est créé. Sinon on force l'email.
 insert into public.rg_users (id, data)
 values (
