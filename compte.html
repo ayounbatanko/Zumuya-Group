@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#102b45">
 <title>Mon compte — ZUMUYA GROUP</title>
 <link rel="icon" href="logo.svg" type="image/svg+xml">
-<link rel="stylesheet" href="compte.css?v=4">
+<link rel="stylesheet" href="compte.css?v=5">
 </head>
 <body>
 <header class="bar"><a class="brand" href="index.html"><img src="logo.svg" alt=""><span>ZUMUYA <b>GROUP</b></span></a><a class="back" href="index.html">← Retour au site</a></header>
@@ -20,8 +20,21 @@
   </div>
   <form id="authForm" novalidate>
     <label id="nameWrap" hidden>Nom complet<input id="displayName" type="text" autocomplete="name" placeholder="Ex. Aïssata Moussa"></label>
-    <label id="accountTypeWrap" hidden>Type de compte<select id="accountType" required><option value="" disabled selected>Choisir le type de compte…</option><option value="restaurant">Restaurant partenaire</option><option value="agro_producer">Producteur agricole</option><option value="agro_trader">Commerçant de produits agricoles</option><option value="customer">Client</option><option value="other">Autre activité</option></select><small>Votre espace sera ouvert automatiquement après connexion.</small></label>
-    <label>Adresse e-mail<input id="email" type="email" autocomplete="email" inputmode="email" placeholder="vous@exemple.com" required></label>
+    <label id="accountTypeWrap" hidden>Type de compte<select id="accountType" required><option value="" disabled selected>Choisir le type de compte…</option><option value="restaurant">Restaurant partenaire</option><option value="agro_producer">Producteur agricole</option><option value="agro_trader">Commerçant de produits agricoles</option><option value="customer">Client (achat en ligne)</option><option value="hotel">Hôtel partenaire</option><option value="delivery">Livreur</option><option value="other">Autre activité</option></select><small>Votre espace sera ouvert automatiquement après connexion.</small></label>
+    <label>Numéro de téléphone
+      <span class="phone-field"><select id="dialCode" aria-label="Indicatif du pays" required>
+        <option value="+225" data-country="CI" selected>🇨🇮 +225 Côte d’Ivoire</option>
+        <option value="+227" data-country="NE">🇳🇪 +227 Niger</option><option value="+221" data-country="SN">🇸🇳 +221 Sénégal</option>
+        <option value="+226" data-country="BF">🇧🇫 +226 Burkina Faso</option><option value="+223" data-country="ML">🇲🇱 +223 Mali</option>
+        <option value="+228" data-country="TG">🇹🇬 +228 Togo</option><option value="+229" data-country="BJ">🇧🇯 +229 Bénin</option>
+        <option value="+233" data-country="GH">🇬🇭 +233 Ghana</option><option value="+234" data-country="NG">🇳🇬 +234 Nigeria</option>
+        <option value="+224" data-country="GN">🇬🇳 +224 Guinée</option><option value="+220" data-country="GM">🇬🇲 +220 Gambie</option>
+        <option value="+232" data-country="SL">🇸🇱 +232 Sierra Leone</option><option value="+231" data-country="LR">🇱🇷 +231 Liberia</option>
+        <option value="+237" data-country="CM">🇨🇲 +237 Cameroun</option><option value="+33" data-country="FR">🇫🇷 +33 France</option>
+        <option value="+1" data-country="US">🇺🇸 +1 États-Unis / Canada</option>
+      </select><input id="phone" type="tel" autocomplete="tel-national" inputmode="tel" placeholder="07 00 00 00 00" required></span>
+      <small>Choisissez le pays puis saisissez votre numéro sans répéter l’indicatif.</small>
+    </label>
     <label>Mot de passe
       <span class="pw"><input id="password" type="password" autocomplete="current-password" required><button type="button" class="eye" data-eye="password" aria-label="Afficher le mot de passe">Afficher</button></span>
       <small id="pwHelp" hidden>8 caractères minimum.</small>
@@ -52,7 +65,7 @@
   <h1 id="accTitle">Mon compte</h1>
   <dl class="profile">
     <div><dt>Nom</dt><dd id="accName">—</dd></div>
-    <div><dt>Adresse e-mail</dt><dd id="accEmail">—</dd></div>
+    <div><dt>Téléphone</dt><dd id="accPhone">—</dd></div>
   </dl>
   <p class="notice" id="ownerNotice" hidden>Vous êtes <b>propriétaire de la plateforme</b> : vous gérez toute l'infrastructure ZUMUYA GROUP depuis l'espace propriétaire.</p>
   <div class="services">

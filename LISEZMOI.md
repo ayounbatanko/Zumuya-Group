@@ -56,7 +56,7 @@ Voir `COORDINATION-POLES.md` pour le fonctionnement commun des pôles 01, 02 et 
 Nouveaux fichiers : `zsession.js`, `zservice.css`, `restauration.html`, `hotel.html`, `livraison.html`.
 
 ## Limites à connaître
-- Les comptes du portail (e-mail, Supabase Auth) et ceux du Service (téléphone, base `rg_users`) sont encore deux systèmes séparés : un utilisateur du portail doit aussi avoir un compte Service pour commander.
+- Le portail utilise Supabase Auth avec téléphone + mot de passe. Le code historique RestoGest conserve encore son stockage `rg_users` : il n’est pas possible de fusionner ces identités existantes sans migration de données et des règles RLS adaptées. Ne pas exposer l’ancien stockage en production.
 - La réservation aux hôtels est appliquée côté navigateur ; une vraie protection demande les règles RLS (`resto-sql-v2_securite_rls.sql`) après migration des comptes.
 - `rg_users` contient des mots de passe en clair lisibles avec la clé publique : à migrer vers Supabase Auth en priorité.
 
@@ -65,6 +65,30 @@ Nouveaux fichiers : `zsession.js`, `zservice.css`, `restauration.html`, `hotel.h
 - `agro.html`, `agro.css`, `agro.js` : espace professionnel partagé des restaurants partenaires, producteurs et commerçants agricoles.
 - `zumuya-agro.sql` : tables, index et politiques RLS pour les profils géolocalisés, les catalogues de produits et les demandes d'approvisionnement.
 - À exécuter dans Supabase après `sql-portail.sql`.
-- À la création du compte portail, choisissez le type de compte : restaurant partenaire, producteur agricole ou commerçant agricole. Après connexion, le navigateur ouvre automatiquement l'espace ZUMUYA Agro.
+- À la création du compte portail, choisissez le type de compte : restaurant partenaire, producteur agricole, commerçant agricole, client, hôtel ou livreur. L’identifiant de connexion est un numéro de téléphone international (indicatif pays + numéro) et un mot de passe, sans e-mail obligatoire. Après connexion, le navigateur ouvre automatiquement l'espace ZUMUYA Agro.
 - Le profil professionnel ne peut pas être enregistré sans position GPS. Les produits sont classés par distance chez les restaurants ; ces derniers peuvent envoyer des demandes d'approvisionnement aux fournisseurs.
 - Les comptes déjà existants sans `account_type` doivent être recréés avec le bon type ou leur métadonnée `account_type` doit être renseignée dans Supabase Auth.
+
+## Connexion par téléphone (mise à jour)
+
+- Le formulaire de compte utilise un sélecteur d’indicatif international et un numéro de téléphone. L’adresse e-mail n’est pas demandée.
+- Création : Supabase Auth `signUp({ phone, password, options: { data } })`. Connexion : `signInWithPassword({ phone, password })`.
+- La confirmation SMS doit être activée dans Supabase Authentication et un fournisseur SMS doit être configuré. Le code de récupération du mot de passe passe également par SMS OTP.
+- Le mot de passe doit contenir au moins 8 caractères. Le compte conserve son type dans `user_metadata.account_type`, utilisé pour ouvrir le bon espace.
+- Les comptes historiques de RestoGest (`rg_users`) ne sont pas convertis automatiquement : une migration contrôlée vers Supabase Auth est indispensable pour obtenir une identité réellement unique sans perdre les historiques.
+
+
+## Correctifs interface publique et comptes (novembre 2026)
+- La page d'accueil affiche maintenant un catalogue public des restaurants, des plats, des descriptions et des prix. Les frais affichés sont estimés par distance × tarif kilométrique défini dans le profil restaurant.
+- La localisation du visiteur est facultative pour consulter les catalogues, mais nécessaire pour estimer les frais de livraison.
+- L'inscription client reste basée sur téléphone international + mot de passe, sans champ e-mail. Pour une connexion immédiate sans OTP, désactiver la confirmation téléphonique obligatoire dans Supabase Auth > Providers > Phone.
+- Les espaces professionnels sont routés selon `account_type` ; les demandes d'adhésion avec statut en attente ne sont plus présentées dans le tableau de bord du compte.
+- ZUMUYA Agro permet maintenant d'ajouter une photo à chaque produit. Le script `zumuya-agro.sql` ajoute la colonne `image_url` et le bucket public `agro-products` avec règles d'accès.
+
+## À exécuter dans Supabase
+1. Exécuter `sql-portail.sql` si ce n'est pas déjà fait.
+2. Exécuter `zumuya-agro.sql` mis à jour pour les photos et droits de lecture des produits.
+3. Vérifier `config.js` (URL et clé anon Supabase).
+4. Dans Supabase Auth, désactiver l'exigence de confirmation téléphonique si l'inscription doit donner immédiatement une session sans SMS.
+
+Note : l'accès aux données et l'activation réelle dépendent de la configuration Supabase et des politiques RLS du projet. Les données RestoGest historiques dans `rg_rests` restent dans leur schéma actuel ; cette livraison n'effectue pas une migration de comptes locaux RestoGest vers les UUID Supabase.

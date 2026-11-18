@@ -27,22 +27,33 @@ function updateMatch(){
 }
 function showAccount(user){
   const accountType=(user.user_metadata&&user.user_metadata.account_type)||'';
-  if(['restaurant','agro_producer','agro_trader'].includes(accountType)){location.replace('agro.html');return}
-  if(accountType==='customer'){location.replace('restauration.html');return}
+  if(accountType==='restaurant'){location.replace('resto-index.html');return}
+  if(['agro_producer','agro_trader'].includes(accountType)){location.replace('agro.html');return}
+  if(accountType==='customer'){location.replace('index.html#catalogue-restaurants');return}
+  if(accountType==='hotel'){location.replace('hotel.html');return}
+  if(accountType==='delivery'){location.replace('livraison.html');return}
   $('#auth').hidden=true;$('#account').hidden=false;
   $('#agroLink').hidden=!['restaurant','agro_producer','agro_trader'].includes(accountType);
-  $('#accEmail').textContent=user.email||'—';
+  $('#accPhone').textContent=user.phone||user.user_metadata?.phone_e164||'—';
   $('#accName').textContent=(user.user_metadata&&user.user_metadata.name)||'—';
   $('#recovery').hidden=true;
   checkOwner();
+  $('#partnerPanel').hidden=true; // Les comptes professionnels sont activés dès leur inscription, sans demande d'approbation.
   initPartner(user);
 }
 function showAuth(){$('#account').hidden=true;$('#recovery').hidden=true;$('#auth').hidden=false}
 
+function fullPhone(){
+  const dial=$('#dialCode').value,raw=$('#phone').value.trim();
+  let digits=raw.replace(/\D/g,'');
+  if(digits.startsWith('0'))digits=digits.slice(1);
+  if(!dial||digits.length<6||digits.length>14)return '';
+  return dial+digits;
+}
 async function submit(e){
   e.preventDefault();showMsg('');
-  const email=$('#email').value.trim(),password=$('#password').value,name=$('#displayName').value.trim(),confirm=$('#passwordConfirm').value;
-  if(!email||!/^\S+@\S+\.\S+$/.test(email))return showMsg('Saisissez une adresse e-mail valide.');
+  const phone=fullPhone(),password=$('#password').value,name=$('#displayName').value.trim(),confirm=$('#passwordConfirm').value;
+  if(!phone)return showMsg('Saisissez un numéro de téléphone valide avec son indicatif pays.');
   if(mode==='up'){
     if(!name)return showMsg('Saisissez votre nom complet.');
     if(!$('#accountType').value)return showMsg('Choisissez votre type de compte.');
@@ -53,14 +64,14 @@ async function submit(e){
   const btn=$('#submitBtn');btn.disabled=true;
   try{
     if(mode==='up'){
-      const {data,error}=await sb.auth.signUp({email,password,options:{data:{name,account_type:$('#accountType').value},emailRedirectTo:location.origin+location.pathname}});
+      const accountType=$('#accountType').value;
+      const {data,error}=await sb.auth.signUp({phone,password,options:{data:{name,account_type:accountType,phone_e164:phone,country_dial_code:$('#dialCode').value}}});
       if(error)throw error;
-      if(data.user&&Array.isArray(data.user.identities)&&data.user.identities.length===0)throw new Error('Un compte existe déjà avec cette adresse e-mail. Connectez-vous.');
+      if(data.user&&Array.isArray(data.user.identities)&&data.user.identities.length===0)throw new Error('Un compte existe déjà avec ce numéro. Connectez-vous.');
       if(data.session){showAccount(data.session.user);return}
-      $('#password').value='';$('#passwordConfirm').value='';updateMatch();
-      showMsg('Compte créé. Un e-mail de confirmation vous a été envoyé : cliquez sur le lien qu’il contient, puis connectez-vous.','success');
+      showMsg('Compte enregistré. Pour permettre une connexion immédiate par téléphone et mot de passe sans code SMS, désactivez la confirmation téléphonique obligatoire dans Supabase Auth > Providers > Phone. Puis reconnectez-vous.','success');
     }else{
-      const {data,error}=await sb.auth.signInWithPassword({email,password});
+      const {data,error}=await sb.auth.signInWithPassword({phone,password});
       if(error)throw error;
       showAccount(data.user);
     }
@@ -69,9 +80,9 @@ async function submit(e){
 }
 function translate(err){
   const m=(err&&err.message)||'';
-  if(/Invalid login credentials/i.test(m))return 'E-mail ou mot de passe incorrect.';
-  if(/Email not confirmed/i.test(m))return 'Votre adresse e-mail n’est pas encore confirmée. Ouvrez le lien reçu par e-mail.';
-  if(/already registered|already been registered/i.test(m))return 'Un compte existe déjà avec cette adresse e-mail. Connectez-vous.';
+  if(/Invalid login credentials/i.test(m))return 'Numéro de téléphone ou mot de passe incorrect.';
+  if(/Phone not confirmed/i.test(m))return 'Votre numéro n’est pas encore confirmé. Vérifiez le code reçu par SMS.';
+  if(/already registered|already been registered/i.test(m))return 'Un compte existe déjà avec ce numéro de téléphone. Connectez-vous.';
   if(/rate limit|too many/i.test(m))return 'Trop de tentatives. Patientez quelques minutes puis réessayez.';
   if(/Password should be|weak/i.test(m))return 'Mot de passe trop faible. Utilisez au moins 8 caractères.';
   if(/fetch|network/i.test(m))return 'Connexion impossible. Vérifiez votre accès Internet.';
@@ -156,7 +167,7 @@ async function submitPartner(e){
   try{
     const {error}=await sb.from('rg_partner_applications').insert({
       category:currentCat.id,country_code:fd.country_code,city:fd.city.trim(),organization_name:fd.organization_name.trim(),
-      contact_phone:fd.contact_phone.trim(),contact_email:currentUser.email||null,message:fd.message.trim(),details,status:'pending'});
+      contact_phone:fd.contact_phone.trim(),contact_email:null,message:fd.message.trim(),details,status:'pending'});
     if(error)throw error;
     closeFlow();await loadApps();
   }catch(err){
@@ -176,11 +187,14 @@ async function checkOwner(){
 }
 function pwMsg(id,t,type='error'){const m=$(id);m.textContent=t;m.className='msg '+type;m.hidden=!t}
 $('#forgotBtn').addEventListener('click',async()=>{
-  const email=$('#email').value.trim();
-  if(!/^\S+@\S+\.\S+$/.test(email))return showMsg('Saisissez votre adresse e-mail ci-dessus, puis cliquez sur « Mot de passe oublié ».');
+  const phone=fullPhone();
+  if(!phone)return showMsg('Saisissez votre numéro avec son indicatif pays avant de demander la réinitialisation.');
   if(!sb)return;
-  try{const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname});if(error)throw error;
-    showMsg('Si un compte existe avec cette adresse, un e-mail de réinitialisation vient d’être envoyé.','success')}
+  try{const {error}=await sb.auth.signInWithOtp({phone,options:{shouldCreateUser:false}});if(error)throw error;
+    const token=prompt('Saisissez le code reçu par SMS :');if(!token)return;
+    const {data,error:verifyError}=await sb.auth.verifyOtp({phone,token:token.trim(),type:'sms'});if(verifyError)throw verifyError;
+    $('#auth').hidden=true;$('#recovery').hidden=false;currentUser=data.user;
+    showMsg('Code vérifié. Définissez votre nouveau mot de passe ci-dessous.','success')}
   catch(err){showMsg(translate(err))}
 });
 $('#recForm').addEventListener('submit',async e=>{
@@ -205,8 +219,8 @@ $('#pwForm').addEventListener('submit',async e=>{
   if(a===o)return pwMsg('#pwMsg','Le nouveau mot de passe doit être différent de l’actuel.');
   $('#pwBtn').disabled=true;
   try{
-    const email=currentUser&&currentUser.email;
-    const r=await sb.auth.signInWithPassword({email,password:o});
+    const phone=currentUser&&currentUser.phone;
+    const r=await sb.auth.signInWithPassword({phone,password:o});
     if(r.error)throw new Error('Mot de passe actuel incorrect.');
     const {error}=await sb.auth.updateUser({password:a});if(error)throw error;
     $('#pwForm').reset();pwMsg('#pwMsg','Mot de passe modifié avec succès.','success');

@@ -28,6 +28,7 @@ create table if not exists public.rg_agro_products (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+alter table public.rg_agro_products add column if not exists image_url text;
 create index if not exists rg_agro_products_owner_idx on public.rg_agro_products(owner_id);
 create index if not exists rg_agro_products_category_idx on public.rg_agro_products(category);
 
@@ -58,7 +59,7 @@ drop policy if exists agro_profiles_update on public.rg_agro_profiles;
 create policy agro_profiles_update on public.rg_agro_profiles for update to authenticated using (user_id = auth.uid()) with check (user_id = auth.uid() and role = (auth.jwt()->'user_metadata'->>'account_type'));
 
 drop policy if exists agro_products_read on public.rg_agro_products;
-create policy agro_products_read on public.rg_agro_products for select to authenticated using (true);
+create policy agro_products_read on public.rg_agro_products for select to anon, authenticated using (true);
 drop policy if exists agro_products_insert on public.rg_agro_products;
 create policy agro_products_insert on public.rg_agro_products for insert to authenticated with check (owner_id = auth.uid() and exists(select 1 from public.rg_agro_profiles p where p.user_id=auth.uid() and p.role in ('agro_producer','agro_trader')));
 drop policy if exists agro_products_update on public.rg_agro_products;
@@ -78,7 +79,17 @@ drop policy if exists agro_requests_update on public.rg_agro_requests;
 create policy agro_requests_update on public.rg_agro_requests for update to authenticated using (supplier_id = auth.uid()) with check (supplier_id = auth.uid());
 
 grant select,insert,update on public.rg_agro_profiles to authenticated;
-grant select,insert,update,delete on public.rg_agro_products to authenticated;
+grant select on public.rg_agro_products to anon, authenticated;
+grant insert,update,delete on public.rg_agro_products to authenticated;
+
+-- Stockage public des photos des produits agricoles
+insert into storage.buckets (id,name,public,file_size_limit,allowed_mime_types) values ('agro-products','agro-products',true,5242880,array['image/jpeg','image/png','image/webp']) on conflict (id) do update set public=true,file_size_limit=5242880,allowed_mime_types=array['image/jpeg','image/png','image/webp'];
+drop policy if exists agro_product_photos_public_read on storage.objects;
+create policy agro_product_photos_public_read on storage.objects for select to anon,authenticated using (bucket_id='agro-products');
+drop policy if exists agro_product_photos_owner_insert on storage.objects;
+create policy agro_product_photos_owner_insert on storage.objects for insert to authenticated with check (bucket_id='agro-products' and (storage.foldername(name))[1]=auth.uid()::text);
+drop policy if exists agro_product_photos_owner_delete on storage.objects;
+create policy agro_product_photos_owner_delete on storage.objects for delete to authenticated using (bucket_id='agro-products' and (storage.foldername(name))[1]=auth.uid()::text);
 grant select,insert,update on public.rg_agro_requests to authenticated;
 -- Activer les mises à jour en direct si la publication Realtime existe.
 do $$ begin

@@ -18,7 +18,7 @@ const who=ZS.who();
 if(who){const a=$('#who');a.textContent='Connecté';a.className='zpill';a.href=who.kind==='resto'?'resto-index.html':'compte.html'}
 function chips(){const c=[];c.push('<span class="zchip">● '+(rests.length)+' restaurant'+(rests.length>1?'s':'')+' partenaire'+(rests.length>1?'s':'')+'</span>');
  c.push(pos?'<span class="zchip">📍 Position active</span>':'<span class="zchip warn">📍 Localisation requise</span>');$('#chips').innerHTML=c.join('')}
-function lock(){$('#app').innerHTML='<div class="card lock"><span class="eyebrow" style="color:#0b7d6f">ACCÈS CONNECTÉ</span><h2>Connectez-vous pour voir les restaurants proches</h2><p>Les catalogues, les prix et les frais de livraison s’affichent selon la position de l’utilisateur connecté.</p><a class="btn btn-gold" href="compte.html">Se connecter</a><a class="btn btn-line" href="compte.html?mode=signup">Créer un compte</a></div>'}
+function lock(){$('#app').innerHTML='<div class="card lock"><span class="eyebrow" style="color:#0b7d6f">ACCÈS CONNECTÉ</span><h2>Consultez les restaurants partenaires</h2><p>Les catalogues et les prix sont accessibles à tous. La localisation permet de calculer les frais de livraison.</p><a class="btn btn-gold" href="compte.html">Se connecter</a><a class="btn btn-line" href="compte.html?mode=signup">Créer un compte</a></div>'}
 function dishCard(r,p,fee){const img=p.imgs&&p.imgs[0]?'<img loading="lazy" src="'+esc(p.imgs[0])+'" alt="">':'<div class="ph">🍽️</div>';
  return '<div class="dish">'+img+'<div class="in"><b>'+esc(p.n)+'</b><span class="d">'+esc(p.desc||'')+'</span><span class="pr">'+ZS.money(p.p,r.currency)+'</span>'+
   (fee!=null?'<span class="dl">🛵 + livraison '+ZS.money(fee,r.currency)+' · total '+ZS.money((+p.p||0)+fee,r.currency)+'</span>':'<span class="dl">🛵 livraison : '+(pos?'tarif à confirmer':'activez la localisation')+'</span>')+'</div></div>'}
@@ -30,7 +30,7 @@ function card(x){const r=x.r,d=x.d,fee=ZS.fee(r,d),ql=q.toLowerCase();
   (d!=null?'<span class="badge">📍 '+ZS.dist(d)+'</span>':'<span class="badge grey">distance inconnue</span>')+
   (fee!=null?'<span class="badge gold">🛵 livraison '+ZS.money(fee,r.currency)+'</span>':(+r.kmPrice>0?'<span class="badge grey">🛵 '+ZS.money(r.kmPrice,r.currency)+' / km</span>':'<span class="badge grey">🛵 tarif non défini</span>'))+
   '<span class="badge grey">'+(r.menu||[]).length+' plat'+((r.menu||[]).length>1?'s':'')+'</span></div></div>'+
-  '<a class="btn btn-navy" href="resto-index.html?resto='+encodeURIComponent(r.slug)+'">Commander</a></div>'+
+  '<a class="btn btn-navy" href="compte.html?mode=signup&resto='+encodeURIComponent(r.slug)+'">Commander</a></div>'+
   (show.length?'<div class="dishes">'+show.map(p=>dishCard(r,p,fee)).join('')+'</div>':'<p class="mut" style="padding:16px 18px">'+(ql?'Aucun plat ne correspond.':'Catalogue bientôt disponible.')+'</p>')+
   (!all&&menu.length>6?'<button class="btn btn-line more" data-open="'+esc(r.id)+'">Voir tout le catalogue ('+menu.length+' plats)</button>':'')+'</article>'}
 function draw(){chips();
@@ -45,6 +45,6 @@ function draw(){chips();
 $('#app').addEventListener('click',e=>{const b=e.target.closest('[data-open]');if(b){open[b.dataset.open]=1;draw()}});
 async function locate(){try{pos=await ZS.locate();err=''}catch(e){err='Position indisponible : autorisez la localisation dans votre navigateur pour trier les restaurants et calculer les frais de livraison.'}draw()}
 async function load(){try{const a=await ZS.rests();rests=a.filter(r=>ZS.subOk(r)&&!ZS.isHotel(r))}catch(e){err='Impossible de charger les restaurants. Vérifiez votre connexion.'}draw()}
-if(!who){lock();chips()}else{draw();load();locate();setInterval(load,60000)}
+draw();load();locate();setInterval(load,60000);
 })();
 </script></body></html>
