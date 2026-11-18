@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#102b45">
+<title>Mon compte — ZUMUYA GROUP</title>
+<link rel="icon" href="logo.svg" type="image/svg+xml">
+<link rel="stylesheet" href="compte.css?v=3">
+</head>
+<body>
+<header class="bar"><a class="brand" href="index.html"><img src="logo.svg" alt=""><span>ZUMUYA <b>GROUP</b></span></a><a class="back" href="index.html">← Retour au site</a></header>
+<main>
+<section id="auth" class="card" aria-labelledby="authTitle">
+  <h1 id="authTitle">Bienvenue</h1>
+  <p class="lead" id="authLead">Connectez-vous à votre compte ZUMUYA GROUP.</p>
+  <div class="tabs" role="tablist">
+    <button type="button" role="tab" class="active" id="tabIn" data-mode="in" aria-selected="true">Connexion</button>
+    <button type="button" role="tab" id="tabUp" data-mode="up" aria-selected="false">Créer un compte</button>
+  </div>
+  <form id="authForm" novalidate>
+    <label id="nameWrap" hidden>Nom complet<input id="displayName" type="text" autocomplete="name" placeholder="Ex. Aïssata Moussa"></label>
+    <label>Adresse e-mail<input id="email" type="email" autocomplete="email" inputmode="email" placeholder="vous@exemple.com" required></label>
+    <label>Mot de passe
+      <span class="pw"><input id="password" type="password" autocomplete="current-password" required><button type="button" class="eye" data-eye="password" aria-label="Afficher le mot de passe">Afficher</button></span>
+      <small id="pwHelp" hidden>8 caractères minimum.</small>
+    </label>
+    <label id="confirmWrap" hidden>Confirmer le mot de passe
+      <span class="pw"><input id="passwordConfirm" type="password" autocomplete="new-password"><button type="button" class="eye" data-eye="passwordConfirm" aria-label="Afficher la confirmation">Afficher</button></span>
+      <small id="matchHelp" aria-live="polite"></small>
+    </label>
+    <p class="msg" id="msg" role="alert" hidden></p>
+    <button class="btn" type="submit" id="submitBtn">Se connecter</button>
+  </form>
+  <p class="switch" id="switchText">Pas encore de compte ? <button type="button" class="link" data-mode="up">Créer un compte</button></p>
+</section>
+
+<section id="account" class="card wide" hidden aria-labelledby="accTitle">
+  <h1 id="accTitle">Mon compte</h1>
+  <dl class="profile">
+    <div><dt>Nom</dt><dd id="accName">—</dd></div>
+    <div><dt>Adresse e-mail</dt><dd id="accEmail">—</dd></div>
+  </dl>
+  <p class="notice">Votre compte est actif. Les services ZUMUYA GROUP y seront ajoutés au fur et à mesure de leur ouverture.</p>
+
+  <div class="partner" id="partnerPanel">
+    <div class="phead"><div><h2>Devenir partenaire</h2><p class="lead">Déposez une demande d'adhésion pour votre activité. Notre équipe l'examine et vous informe ici du résultat.</p></div><button class="btn small" type="button" id="startPartner">Faire une demande</button></div>
+
+    <div id="partnerFlow" hidden>
+      <div id="stepCat">
+        <h3>1. Choisissez votre catégorie</h3>
+        <div class="cats" id="catGrid"></div>
+      </div>
+      <form id="partnerForm" novalidate hidden>
+        <button type="button" class="link back-cat" id="backCat">← Changer de catégorie</button>
+        <h3 id="formTitle"></h3>
+        <div id="formFields" class="fields"></div>
+        <p class="msg" id="pMsg" role="alert" hidden></p>
+        <div class="row"><button class="btn" type="submit" id="pSubmit">Envoyer ma demande</button><button class="btn ghost" type="button" id="pCancel">Annuler</button></div>
+      </form>
+    </div>
+
+    <h3 class="list-title">Mes demandes</h3>
+    <div id="appList" class="apps"><p class="empty">Chargement…</p></div>
+  </div>
+
+  <button class="btn ghost" type="button" id="logout">Se déconnecter</button>
+</section>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="compte.js?v=3"></script>
+</body>
+</html>
