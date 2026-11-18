@@ -62,3 +62,6 @@ select:focus,textarea:focus{outline:3px solid #e4ad4c66;border-color:var(--gold)
 .empty{margin:0;padding:18px;text-align:center;color:var(--muted);background:#f7f9fa;border-radius:10px;font-size:14px}
 @media(max-width:560px){.cats,.fields{grid-template-columns:1fr}.app{flex-direction:column}}
 #logout{margin-top:22px}.back-cat{display:block;text-align:left}
+
+.services{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 6px}.services .btn{display:inline-flex;align-items:center;text-decoration:none}
+#pwForm{margin-top:14px}#forgotBtn{justify-self:center;font-size:14px}

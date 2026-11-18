@@ -4,7 +4,7 @@ let sb=null,mode='in';
 const MIN=8;
 
 function showMsg(text,type='error'){const m=$('#msg');m.textContent=text;m.className='msg '+type;m.hidden=!text}
-function setMode(m){
+function setMode(m,init){
   mode=m;const up=m==='up';
   $('#tabIn').classList.toggle('active',!up);$('#tabUp').classList.toggle('active',up);
   $('#tabIn').setAttribute('aria-selected',String(!up));$('#tabUp').setAttribute('aria-selected',String(up));
@@ -16,7 +16,7 @@ function setMode(m){
   $('#authLead').textContent=up?'Renseignez vos informations pour rejoindre ZUMUYA GROUP.':'Connectez-vous à votre compte ZUMUYA GROUP.';
   $('#switchText').innerHTML=up?'Vous avez déjà un compte ? <button type="button" class="link" data-mode="in">Se connecter</button>':'Pas encore de compte ? <button type="button" class="link" data-mode="up">Créer un compte</button>';
   $('#password').value='';$('#passwordConfirm').value='';updateMatch();showMsg('');
-  history.replaceState(null,'',up?'?mode=signup':location.pathname);
+  if(!init)history.replaceState(null,'',up?'?mode=signup':location.pathname);
 }
 function updateMatch(){
   const h=$('#matchHelp'),a=$('#password').value,b=$('#passwordConfirm').value;
@@ -29,9 +29,11 @@ function showAccount(user){
   $('#auth').hidden=true;$('#account').hidden=false;
   $('#accEmail').textContent=user.email||'—';
   $('#accName').textContent=(user.user_metadata&&user.user_metadata.name)||'—';
+  $('#recovery').hidden=true;
+  checkOwner();
   initPartner(user);
 }
-function showAuth(){$('#account').hidden=true;$('#auth').hidden=false}
+function showAuth(){$('#account').hidden=true;$('#recovery').hidden=true;$('#auth').hidden=false}
 
 async function submit(e){
   e.preventDefault();showMsg('');
@@ -162,6 +164,51 @@ $('#backCat').addEventListener('click',()=>{$('#partnerForm').hidden=true;$('#st
 $('#pCancel').addEventListener('click',closeFlow);
 $('#partnerForm').addEventListener('submit',submitPartner);
 
+/* ===== Propriétaire, mot de passe ===== */
+async function checkOwner(){
+  $('#ownerLink').hidden=true;$('#ownerNotice').hidden=true;
+  try{const {data}=await sb.rpc('rg_is_platform_owner');if(data===true){$('#ownerLink').hidden=false;$('#ownerNotice').hidden=false}}catch(e){}
+}
+function pwMsg(id,t,type='error'){const m=$(id);m.textContent=t;m.className='msg '+type;m.hidden=!t}
+$('#forgotBtn').addEventListener('click',async()=>{
+  const email=$('#email').value.trim();
+  if(!/^\S+@\S+\.\S+$/.test(email))return showMsg('Saisissez votre adresse e-mail ci-dessus, puis cliquez sur « Mot de passe oublié ».');
+  if(!sb)return;
+  try{const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname});if(error)throw error;
+    showMsg('Si un compte existe avec cette adresse, un e-mail de réinitialisation vient d’être envoyé.','success')}
+  catch(err){showMsg(translate(err))}
+});
+$('#recForm').addEventListener('submit',async e=>{
+  e.preventDefault();pwMsg('#recMsg','');
+  const a=$('#recPw').value,b=$('#recPw2').value;
+  if(a.length<MIN)return pwMsg('#recMsg','Le mot de passe doit contenir au moins '+MIN+' caractères.');
+  if(a!==b)return pwMsg('#recMsg','Les deux mots de passe ne sont pas identiques.');
+  $('#recBtn').disabled=true;
+  try{const {data,error}=await sb.auth.updateUser({password:a});if(error)throw error;
+    history.replaceState(null,'',location.pathname);showAccount(data.user);
+  }catch(err){pwMsg('#recMsg',translate(err))}
+  finally{$('#recBtn').disabled=false}
+});
+$('#togglePw').addEventListener('click',()=>{$('#pwForm').hidden=false;$('#togglePw').hidden=true});
+$('#pwCancel').addEventListener('click',()=>{$('#pwForm').hidden=true;$('#togglePw').hidden=false;$('#pwForm').reset();pwMsg('#pwMsg','')});
+$('#pwForm').addEventListener('submit',async e=>{
+  e.preventDefault();pwMsg('#pwMsg','');
+  const o=$('#pwOld').value,a=$('#pwNew').value,b=$('#pwNew2').value;
+  if(!o)return pwMsg('#pwMsg','Saisissez votre mot de passe actuel.');
+  if(a.length<MIN)return pwMsg('#pwMsg','Le nouveau mot de passe doit contenir au moins '+MIN+' caractères.');
+  if(a!==b)return pwMsg('#pwMsg','Les deux nouveaux mots de passe ne sont pas identiques.');
+  if(a===o)return pwMsg('#pwMsg','Le nouveau mot de passe doit être différent de l’actuel.');
+  $('#pwBtn').disabled=true;
+  try{
+    const email=currentUser&&currentUser.email;
+    const r=await sb.auth.signInWithPassword({email,password:o});
+    if(r.error)throw new Error('Mot de passe actuel incorrect.');
+    const {error}=await sb.auth.updateUser({password:a});if(error)throw error;
+    $('#pwForm').reset();pwMsg('#pwMsg','Mot de passe modifié avec succès.','success');
+  }catch(err){pwMsg('#pwMsg',translate(err))}
+  finally{$('#pwBtn').disabled=false}
+});
+
 document.addEventListener('click',e=>{
   const t=e.target.closest('[data-mode]');if(t){setMode(t.dataset.mode);return}
   const eye=e.target.closest('[data-eye]');
@@ -173,13 +220,14 @@ $('#passwordConfirm').addEventListener('input',updateMatch);
 $('#logout').addEventListener('click',async()=>{if(sb)await sb.auth.signOut();showAuth();setMode('in')});
 
 (async()=>{
-  setMode(new URLSearchParams(location.search).get('mode')==='signup'?'up':'in');
+  setMode(new URLSearchParams(location.search).get('mode')==='signup'?'up':'in',true);
   try{
     const c=window.ZUMAYA_CONFIG;
     if(!c||!c.SUPABASE_URL||c.SUPABASE_URL.includes('VOTRE-PROJET'))throw new Error('config');
     sb=window.supabase.createClient(c.SUPABASE_URL,c.SUPABASE_ANON_KEY);
+    sb.auth.onAuthStateChange((ev,session)=>{if(ev==='PASSWORD_RECOVERY'){$('#auth').hidden=true;$('#account').hidden=true;$('#recovery').hidden=false}});
     const {data:{session}}=await sb.auth.getSession();
-    if(session)showAccount(session.user);
+    if(session&&!/type=recovery/.test(location.hash))showAccount(session.user);
   }catch(e){showMsg('Le service de connexion n’est pas disponible pour le moment.')}
 })();
 })();

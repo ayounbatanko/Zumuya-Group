@@ -1,0 +1,98 @@
+{
+  "name": "Service de Restauration",
+  "short_name": "Restauration",
+  "description": "Gestion de restaurant, commandes et livraisons",
+  "start_url": "./resto-index.html",
+  "display": "standalone",
+  "background_color": "#14213d",
+  "theme_color": "#14213d",
+  "lang": "fr",
+  "icons": [
+    {
+      "src": "resto-icon-192.png?v=3",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "resto-icon-512.png?v=3",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "resto-icon-maskable-192.png?v=3",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "resto-icon-maskable-512.png?v=3",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "id": "./resto-index.html",
+  "scope": "./",
+  "orientation": "portrait",
+  "dir": "ltr",
+  "categories": [
+    "food",
+    "business",
+    "productivity"
+  ],
+  "display_override": [
+    "standalone",
+    "minimal-ui"
+  ],
+  "shortcuts": [
+    {
+      "name": "Espace restaurant",
+      "short_name": "Restaurant",
+      "url": "./resto-restaurant.html",
+      "icons": [
+        {
+          "src": "resto-icon-192.png?v=3",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Commander (client)",
+      "short_name": "Client",
+      "url": "./resto-client.html",
+      "icons": [
+        {
+          "src": "resto-icon-192.png?v=3",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "resto-screenshot-s1-connexion.png",
+      "sizes": "720x1280",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Connexion"
+    },
+    {
+      "src": "resto-screenshot-s2-restaurant.png",
+      "sizes": "720x1280",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Espace restaurant"
+    },
+    {
+      "src": "resto-screenshot-s3-client.png",
+      "sizes": "720x1280",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Commande client"
+    }
+  ]
+}

@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#102b45">
 <title>Mon compte — ZUMUYA GROUP</title>
 <link rel="icon" href="logo.svg" type="image/svg+xml">
-<link rel="stylesheet" href="compte.css?v=3">
+<link rel="stylesheet" href="compte.css?v=4">
 </head>
 <body>
 <header class="bar"><a class="brand" href="index.html"><img src="logo.svg" alt=""><span>ZUMUYA <b>GROUP</b></span></a><a class="back" href="index.html">← Retour au site</a></header>
@@ -31,8 +31,20 @@
     </label>
     <p class="msg" id="msg" role="alert" hidden></p>
     <button class="btn" type="submit" id="submitBtn">Se connecter</button>
+    <button type="button" class="link" id="forgotBtn">Mot de passe oublié ?</button>
   </form>
   <p class="switch" id="switchText">Pas encore de compte ? <button type="button" class="link" data-mode="up">Créer un compte</button></p>
+</section>
+
+<section id="recovery" class="card" hidden aria-labelledby="recTitle">
+  <h1 id="recTitle">Nouveau mot de passe</h1>
+  <p class="lead">Choisissez un nouveau mot de passe pour votre compte.</p>
+  <form id="recForm" novalidate>
+    <label>Nouveau mot de passe<span class="pw"><input id="recPw" type="password" autocomplete="new-password" required><button type="button" class="eye" data-eye="recPw">Afficher</button></span><small>8 caractères minimum.</small></label>
+    <label>Confirmer le mot de passe<span class="pw"><input id="recPw2" type="password" autocomplete="new-password" required><button type="button" class="eye" data-eye="recPw2">Afficher</button></span></label>
+    <p class="msg" id="recMsg" role="alert" hidden></p>
+    <button class="btn" type="submit" id="recBtn">Enregistrer le mot de passe</button>
+  </form>
 </section>
 
 <section id="account" class="card wide" hidden aria-labelledby="accTitle">
@@ -41,7 +53,26 @@
     <div><dt>Nom</dt><dd id="accName">—</dd></div>
     <div><dt>Adresse e-mail</dt><dd id="accEmail">—</dd></div>
   </dl>
-  <p class="notice">Votre compte est actif. Les services ZUMUYA GROUP y seront ajoutés au fur et à mesure de leur ouverture.</p>
+  <p class="notice" id="ownerNotice" hidden>Vous êtes <b>propriétaire de la plateforme</b> : vous gérez toute l'infrastructure ZUMUYA GROUP depuis l'espace propriétaire.</p>
+  <div class="services">
+    <a class="btn small" id="ownerLink" href="proprietaire.html" hidden>⚙️ Espace propriétaire</a>
+    <a class="btn small" href="resto-index.html">🍽️ Service de Restauration</a>
+    <a class="btn small" href="resto-client.html">🔍 Rechercher restaurants et commander</a>
+    <a class="btn small" href="resto-index.html">🏨 ZUMUYA Hôtel (service en chambre)</a>
+    <a class="btn small" href="resto-driver.html">📦 ZUMUYA Livraison (suivi courses)</a>
+  </div>
+  <p class="lead" style="margin-top:12px">En tant que client, vous pouvez rechercher les restaurants proches, consulter leurs catalogues (menus) et passer commande directement depuis le Service de Restauration.</p>
+
+  <div class="partner" id="pwPanel">
+    <div class="phead"><div><h2>Mot de passe</h2><p class="lead">Vous pouvez le modifier à tout moment.</p></div><button class="btn small" type="button" id="togglePw">Changer</button></div>
+    <form id="pwForm" novalidate hidden>
+      <label>Mot de passe actuel<span class="pw"><input id="pwOld" type="password" autocomplete="current-password" required><button type="button" class="eye" data-eye="pwOld">Afficher</button></span></label>
+      <label>Nouveau mot de passe<span class="pw"><input id="pwNew" type="password" autocomplete="new-password" required><button type="button" class="eye" data-eye="pwNew">Afficher</button></span><small>8 caractères minimum.</small></label>
+      <label>Confirmer le nouveau mot de passe<span class="pw"><input id="pwNew2" type="password" autocomplete="new-password" required><button type="button" class="eye" data-eye="pwNew2">Afficher</button></span></label>
+      <p class="msg" id="pwMsg" role="alert" hidden></p>
+      <div class="row"><button class="btn" type="submit" id="pwBtn">Modifier le mot de passe</button><button class="btn ghost" type="button" id="pwCancel">Annuler</button></div>
+    </form>
+  </div>
 
   <div class="partner" id="partnerPanel">
     <div class="phead"><div><h2>Devenir partenaire</h2><p class="lead">Déposez une demande d'adhésion pour votre activité. Notre équipe l'examine et vous informe ici du résultat.</p></div><button class="btn small" type="button" id="startPartner">Faire une demande</button></div>
@@ -69,6 +100,6 @@
 </main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
-<script src="compte.js?v=3"></script>
+<script src="compte.js?v=4"></script>
 </body>
 </html>

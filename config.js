@@ -1,6 +1,4 @@
-/* Clé publique anon existante du projet Supabase RestoGest/ZUMUYA.
-   RLS obligatoire. Ne jamais ajouter de service_role ici. */
 window.ZUMAYA_CONFIG = {
-  SUPABASE_URL: 'https://azfunhfjmybekzakhtbu.supabase.co',
-  SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF6ZnVuaGZqbXliZWt6YWtodGJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ0Njg1MTYsImV4cCI6MjExMDA0NDUxNn0.Dz_8eSYVUfSqZQ3rA93FPclg1_zc8kdlyUxNkcDJ_0I'
+  SUPABASE_URL: 'https://dusznqvwhrklcqhmbylu.supabase.co',
+  SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR1c3pucXZ3aHJrbGNxaG1ieWx1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM5MTMxODUsImV4cCI6MjEwOTQ4OTE4NX0.K_xKjAzdQi0UyZlc4OoogCBVHCd9Ooc2dVupr7KyjYI'
 };
