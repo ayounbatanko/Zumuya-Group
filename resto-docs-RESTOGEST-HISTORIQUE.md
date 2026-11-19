@@ -7,7 +7,7 @@ Cette archive est conçue pour remplacer les fichiers publiés dans le dépôt G
 2. Dans GitHub, ouvrez le dépôt `Application-du-restaurant-`.
 3. Remplacez les fichiers du dépôt par **tout le contenu** de ce dossier (pas le dossier parent).
 4. Faites `Commit changes` sur la branche utilisée par GitHub Pages.
-5. Attendez 1 à 3 minutes, puis ouvrez https://ayounbatanko.github.io/Restaurant-gestion-multiples/
+5. Attendez 1 à 3 minutes, puis ouvrez l'adresse du site ZUMUYA GROUP (l'ancien site RestoGest est désormais une simple redirection)
 6. Sur Android/Chrome, rechargez le site. Si l'ancienne version reste affichée, effacez les données du site ou rechargez après quelques instants.
 
 ## Compte propriétaire

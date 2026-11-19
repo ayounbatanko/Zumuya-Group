@@ -41,7 +41,7 @@ Voir `COORDINATION-POLES.md` pour le fonctionnement commun des pôles 01, 02 et 
 ## Points à connaître
 
 - Le portail et le Service de Restauration utilisent maintenant **un seul projet Supabase** (`config.js`). Les données de l'ancien projet de restauration ne sont pas reprises automatiquement.
-- Les images de partage (`og:image`) pointent encore vers l'ancien dépôt `ayounbatanko.github.io/Restaurant-gestion-multiples/`. À remplacer par l'adresse du nouveau site quand elle sera connue (l'image est `resto-apercu-facebook.jpg`).
+- Les images de partage (`og:image`) pointent maintenant vers `resto-apercu-facebook.jpg` de ce dépôt (plus de lien vers l'ancien dépôt RestoGest).
 
 ## Retouches de novembre 2026
 
@@ -59,3 +59,6 @@ Nouveaux fichiers : `zsession.js`, `zservice.css`, `restauration.html`, `hotel.h
 - Les comptes du portail (e-mail, Supabase Auth) et ceux du Service (téléphone, base `rg_users`) sont encore deux systèmes séparés : un utilisateur du portail doit aussi avoir un compte Service pour commander.
 - La réservation aux hôtels est appliquée côté navigateur ; une vraie protection demande les règles RLS (`resto-sql-v2_securite_rls.sql`) après migration des comptes.
 - `rg_users` contient des mots de passe en clair lisibles avec la clé publique : à migrer vers Supabase Auth en priorité.
+
+## RestoGest : fonctionnalités uniquement sur zumuya
+Toutes les fonctionnalités RestoGest (restaurant, client, livreur, propriétaire, carte de visite, extensions) vivent uniquement dans ce dépôt (`resto-*`). L'ancien dépôt RestoGest doit être remplacé par le kit `kit-RestoGest-ancien-depot.zip` (redirection + auto-suppression de l'ancien service worker). Voir `LISEZMOI-RESTOGEST.md` dans le kit.
