@@ -21,22 +21,22 @@
   <form id="authForm" novalidate>
     <label>Catégorie du compte
       <select id="accountCategory" required>
-        <option value="customer">Client — achat en ligne (téléphone)</option>
-        <option value="restaurant">Restaurant partenaire (e-mail)</option>
-        <option value="hotel">Hôtel / hébergement (e-mail)</option>
-        <option value="delivery">Livreur (e-mail)</option>
-        <option value="agro_producer">Producteur agricole (e-mail)</option>
-        <option value="agro_trader">Commerçant agricole (e-mail)</option>
-        <option value="commerce">Commerce / boutique (e-mail)</option>
-        <option value="business">Entreprise / autre partenaire (e-mail)</option>
+        <option value="customer">Client — achat en ligne</option>
+        <option value="restaurant">Restaurant partenaire</option>
+        <option value="hotel">Hôtel / hébergement</option>
+        <option value="delivery">Livreur</option>
+        <option value="agro_producer">Producteur agricole</option>
+        <option value="agro_trader">Commerçant agricole</option>
+        <option value="commerce">Commerce / boutique</option>
+        <option value="business">Entreprise / autre partenaire</option>
       </select>
-      <small id="categoryHelp">Les clients utilisent leur numéro de téléphone. Les autres profils utilisent leur adresse e-mail.</small>
+      <small id="categoryHelp">Pour tous les types de compte : inscription et connexion avec votre adresse e-mail.</small>
     </label>
     <label id="nameWrap" hidden>Nom complet<input id="displayName" type="text" autocomplete="name" placeholder="Ex. Aïssata Moussa"></label>
-    <label id="phoneWrap">Numéro de téléphone
+    <label id="phoneWrap" hidden>Numéro de téléphone
       <div class="phone-row"><select id="dialCode" aria-label="Indicatif du pays"><option value="+225">Côte d’Ivoire (+225)</option><option value="+227">Niger (+227)</option><option value="+221">Sénégal (+221)</option><option value="+229">Bénin (+229)</option><option value="+228">Togo (+228)</option><option value="+226">Burkina Faso (+226)</option><option value="+223">Mali (+223)</option><option value="+233">Ghana (+233)</option><option value="+234">Nigeria (+234)</option><option value="+33">France (+33)</option></select><input id="phone" type="tel" autocomplete="tel-national" inputmode="tel" placeholder="07 00 00 00 00"></div>
     </label>
-    <label id="emailWrap" hidden>Adresse e-mail<input id="email" type="email" autocomplete="email" placeholder="vous@exemple.com"></label>
+    <label id="emailWrap">Adresse e-mail<input id="email" type="email" autocomplete="email" placeholder="vous@exemple.com"></label>
     <label>Mot de passe
       <span class="pw"><input id="password" type="password" autocomplete="current-password" required><button type="button" class="eye" data-eye="password" aria-label="Afficher le mot de passe">Afficher</button></span>
       <small id="pwHelp" hidden>8 caractères minimum.</small>
@@ -47,6 +47,7 @@
     </label>
     <p class="msg" id="msg" role="alert" hidden></p>
     <button class="btn" type="submit" id="submitBtn">Se connecter</button>
+    <button type="button" class="link" id="legacyPhoneBtn" hidden>Mon compte client a été créé avec un numéro de téléphone</button>
     <button type="button" class="link" id="forgotBtn">Mot de passe oublié ?</button>
   </form>
   <p class="switch" id="switchText">Pas encore de compte ? <button type="button" class="link" data-mode="up">Créer un compte</button></p>
@@ -116,6 +117,6 @@
 </main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
-<script src="compte.js?v=5"></script>
+<script src="compte.js?v=6"></script>
 </body>
 </html>

@@ -118,7 +118,7 @@ nav:empty{display:none;padding:0;border:0;height:0;overflow:hidden}
 <h2 class="brand" style="font-size:23px;line-height:1.25">🍽️ Service de<br><span>Restauration</span></h2><div class="mut">Gérez votre restaurant, même sans connexion.</div>
 <div class="row" id="tabs"></div><div id="f" class="col"></div><div id="msg" style="color:var(--bad)"></div>
 </div><div id="supSlot" style="max-width:420px;margin:0 auto 30px"></div></main>
-<script src="config.js"></script><script src="resto-db.js"></script><script src="resto-notif.js"></script>
+<script src="config.js"></script><script src="resto-db.js"></script><script src="resto-portal-bridge.js?v=1"></script><script src="resto-notif.js"></script>
 <script>let SH=window;try{if(window.parent!==window&&window.parent.nav)SH=window.parent}catch(e){}
 SH.__m=SH.__m||{l:{},s:{}};
 const store={g(w,k){try{const v=(w=='l'?localStorage:sessionStorage).getItem(k);if(v!==null)return v}catch(e){}return SH.__m[w][k]??null},
@@ -288,6 +288,7 @@ async function signup(){const d=D.get(),ph=tel.value.trim(),pw=pwd.value;
  if(qp.get('type')==='hotel'){view='s';kind='r';accountType='hotel'}
  const labels={owner:'Propriétaire',restaurant:'Restaurant / Hôtel',client:'Client',driver:'Livreur'};
  const cu=me();draw();
+ if(cu&&window.ZBRIDGE&&ZBRIDGE.fresh&&!isOwnerAccount(cu))navTo(go[cu.role]);
  if(cu){
   const box=document.createElement('div');box.className='card col';box.style.cssText='margin:0 0 12px;border-inline-start:6px solid var(--ok,#12a36b)';
   box.innerHTML='<b>✅ Session ouverte</b><div class="mut">Connecté en tant que <b>'+esc(cu.name||'')+'</b> ('+esc(labels[cu.role]||cu.role)+').</div><button type="button" id="goSpace">Continuer vers mon espace</button><button type="button" class="sec" id="switchAcc">Changer de compte</button>';

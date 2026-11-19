@@ -1,16 +1,18 @@
-# Authentification ZUMUYA GROUP : client téléphone, professionnels e-mail
+# Authentification ZUMUYA GROUP : e-mail pour tout le monde
 
-La page unique `compte.html` propose un sélecteur de catégorie. Le mode d'identification dépend de la catégorie choisie :
+La page unique `compte.html` propose un sélecteur de catégorie (client, restaurant, hôtel, livreur, producteur, commerçant, commerce, entreprise). **Toutes les catégories se connectent et s'inscrivent avec adresse e-mail + mot de passe** (mot de passe saisi deux fois à l'inscription). Les libellés ne répètent plus « (e-mail) ».
 
-- **Client** : numéro avec indicatif international + mot de passe. À l'inscription, le mot de passe doit être saisi deux fois. Le numéro doit être confirmé par SMS si la confirmation téléphone est activée dans Supabase.
-- **Restaurant, hôtel, livreur, producteur, commerçant, commerce et entreprise** : adresse e-mail + mot de passe. À l'inscription, le mot de passe doit être saisi deux fois. Supabase peut envoyer un e-mail de confirmation selon le réglage « Confirm email ».
+Seule exception : un ancien compte client créé avec un numéro de téléphone peut encore se connecter grâce au lien « Mon compte client a été créé avec un numéro de téléphone » (connexion uniquement).
+
+## Restaurants partenaires : plus de seconde connexion
+
+Après connexion e-mail, un restaurant ayant sa fiche partenaire arrive directement sur son espace (`resto-restaurant.html`, tableau de bord RestoGest). Le fichier `resto-portal-bridge.js` (chargé par `resto-restaurant.html` et `resto-index.html`) reconnaît la session du portail, retrouve ou crée le compte local et la fiche restaurant, puis ouvre la session. L'écran « Gestion Multiples de Restaurant » ne redemande plus d'identifiants dans ce parcours. « Changer de compte » et « Déconnexion » dans le Service restent possibles.
 
 ## Configuration Supabase Auth
 
 Dans Authentication > Providers :
-1. Activez **Phone** et configurez un fournisseur SMS pour les comptes clients.
-2. Activez **Email** pour les comptes professionnels.
-3. Choisissez les règles de confirmation adaptées à votre exploitation. La confirmation par SMS nécessite un fournisseur SMS configuré ; la confirmation e-mail nécessite le service e-mail Supabase ou un SMTP personnalisé.
+1. Activez **Email** pour tous les comptes. (**Phone** n'est utile que pour les anciens comptes clients.)
+2. Choisissez les règles de confirmation adaptées à votre exploitation. La confirmation par SMS nécessite un fournisseur SMS configuré ; la confirmation e-mail nécessite le service e-mail Supabase ou un SMTP personnalisé.
 
 ## SQL
 
@@ -18,4 +20,4 @@ Après le schéma principal, exécutez `04_auth_phone_email_profile.sql` dans SQ
 
 ## Connexion
 
-L'utilisateur doit choisir sa catégorie sur l'écran de connexion pour afficher le bon identifiant : téléphone pour Client, e-mail pour les autres catégories. Il doit sélectionner la même catégorie qu'à l'inscription. Les professionnels complètent ensuite leur fiche d'organisation depuis « Devenir partenaire » si elle n'a pas encore été créée.
+Le champ identifiant est toujours l'adresse e-mail. Choisissez la même catégorie qu'à l'inscription. Les professionnels complètent ensuite leur fiche d'organisation depuis « Devenir partenaire » si elle n'a pas encore été créée.
