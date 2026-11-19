@@ -1,22 +1,21 @@
 (()=>{'use strict';
 const $=s=>document.querySelector(s);
-const MIN=8,PHONE_RE=/^\+[1-9]\d{7,14}$/;
-const CAT={customer:'Client',restaurant:'Restaurant partenaire',hotel:'Hôtel / hébergement',delivery:'Livreur',agro_producer:'Producteur agricole',agro_trader:'Commerçant agricole',commerce:'Commerce / boutique',business:'Entreprise / partenaire'};
+const MIN=8,EMAIL_RE=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const CAT={customer:'Client',restaurant:'Restaurant partenaire',hotel:'Hôtel / hébergement',delivery:'Livreur',agro_producer:'Producteur agricole',agro_trader:'Commerçant agricole'};
 const SPACE={customer:'client-espace.html',restaurant:'resto-restaurant.html',hotel:'resto-restaurant.html',delivery:'resto-driver.html',agro_producer:'agro.html',agro_trader:'agro.html'};
 let sb=null,user=null;
 function msg(id,t,type='error'){const m=$(id);m.textContent=t;m.className='msg '+type;m.hidden=!t}
-function fmt(p){p=String(p||'');return p&&!p.startsWith('+')&&/^\d{8,15}$/.test(p)?'+'+p:p}
 function tr(err){const m=(err&&err.message)||'';
   if(/Invalid login/i.test(m))return 'Mot de passe incorrect.';
   if(/rate limit|too many/i.test(m))return 'Trop de tentatives. Patientez quelques minutes.';
-  if(/already|registered/i.test(m))return 'Ce numéro est déjà utilisé par un autre compte.';
+  if(/already|registered/i.test(m))return 'Cette adresse e-mail est déjà utilisée par un autre compte.';
   if(/Token has expired|invalid/i.test(m))return 'Code invalide ou expiré.';
   return m||'Une erreur est survenue. Réessayez.'}
-async function verifyPw(pw){const r=await sb.auth.signInWithPassword({phone:user.phone,password:pw});if(r.error)throw new Error('Mot de passe incorrect.')}
+async function verifyPw(pw){const r=await sb.auth.signInWithPassword({email:user.email,password:pw});if(r.error)throw new Error('Mot de passe incorrect.')}
 
 function fill(){
   const md=user.user_metadata||{},type=md.account_type;
-  $('#pCat').textContent=CAT[type]||'—';$('#pPhone').textContent=fmt(user.phone||md.phone_display)||'—';
+  $('#pCat').textContent=CAT[type]||'—';$('#pPhone').textContent=user.email||'—';
   $('#pSince').textContent=user.created_at?new Date(user.created_at).toLocaleDateString('fr-FR'):'—';
   $('#pName').value=md.name||'';
   const sp=$('#spaceLink');if(SPACE[type]&&(type==='customer'||md.organization_id)){sp.hidden=false;sp.href=SPACE[type]}
@@ -34,21 +33,12 @@ $('#nameForm').addEventListener('submit',async e=>{e.preventDefault();msg('#name
     try{await sb.from('rg_profiles').update({display_name:n}).eq('user_id',user.id)}catch(_){}
     msg('#nameMsg','Nom enregistré.','success')}catch(err){msg('#nameMsg',tr(err))}});
 
-let phoneStep=0,pendingPhone='';
-$('#phoneForm').addEventListener('submit',async e=>{e.preventDefault();msg('#phoneMsg','');const btn=$('#phoneBtn');btn.disabled=true;
-  try{
-    if(phoneStep===0){
-      const p=$('#newPhone').value.trim().replace(/[\s().-]/g,'');if(!PHONE_RE.test(p))throw new Error('Saisissez un numéro valide avec indicatif (ex. +22790000000).');
-      const {error}=await sb.auth.updateUser({phone:p});if(error)throw error;
-      pendingPhone=p;phoneStep=1;$('#otpWrap').hidden=false;btn.textContent='Confirmer le code';msg('#phoneMsg','Un code SMS a été envoyé à ce numéro.','success');
-    }else{
-      const t=$('#otp').value.trim();if(!t)throw new Error('Saisissez le code reçu par SMS.');
-      const {data,error}=await sb.auth.verifyOtp({phone:pendingPhone,token:t,type:'phone_change'});if(error)throw error;
-      user=data.user||user;await sb.auth.updateUser({data:{phone_display:pendingPhone}});
-      phoneStep=0;$('#otpWrap').hidden=true;$('#otp').value='';$('#newPhone').value='';btn.textContent='Changer de numéro';
-      $('#pPhone').textContent=pendingPhone;msg('#phoneMsg','Numéro modifié. Utilisez-le pour vos prochaines connexions.','success');
-    }
-  }catch(err){msg('#phoneMsg',tr(err))}finally{btn.disabled=false}});
+$('#emailForm').addEventListener('submit',async e=>{e.preventDefault();msg('#emailMsg','');
+  const em=$('#newEmail').value.trim().toLowerCase();
+  if(!EMAIL_RE.test(em))return msg('#emailMsg','Saisissez une adresse e-mail valide.');
+  if(em===(user.email||'').toLowerCase())return msg('#emailMsg','C’est déjà votre adresse actuelle.');
+  try{const {error}=await sb.auth.updateUser({email:em},{emailRedirectTo:location.origin+location.pathname});if(error)throw error;
+    $('#newEmail').value='';msg('#emailMsg','Un lien de confirmation a été envoyé. Votre adresse changera après confirmation.','success')}catch(err){msg('#emailMsg',tr(err))}});
 
 $('#pwForm').addEventListener('submit',async e=>{e.preventDefault();msg('#pwMsg','');
   const o=$('#pwOld').value,a=$('#pwNew').value,b=$('#pwNew2').value;
@@ -66,7 +56,7 @@ $('#logoutAll').addEventListener('click',async()=>{try{await sb.auth.signOut({sc
 
 $('#exportBtn').addEventListener('click',async()=>{msg('#secMsg','');
   try{
-    const out={exporte_le:new Date().toISOString(),compte:{id:user.id,telephone:user.phone,cree_le:user.created_at,profil:user.user_metadata||{}}};
+    const out={exporte_le:new Date().toISOString(),compte:{id:user.id,email:user.email,cree_le:user.created_at,profil:user.user_metadata||{}}};
     try{const a=await sb.from('rg_partner_applications').select('*');out.demandes_partenaire=a.data||[]}catch(_){}
     try{const o=await sb.from('rg_organizations').select('*').eq('owner_id',user.id);out.organisations=o.data||[]}catch(_){}
     const blob=new Blob([JSON.stringify(out,null,2)],{type:'application/json'}),u=URL.createObjectURL(blob),a=document.createElement('a');

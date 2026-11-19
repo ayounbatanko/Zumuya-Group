@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="manifest" href="resto-manifest.webmanifest"><meta name="theme-color" content="#14213d"><link rel="icon" type="image/png" href="resto-icon-192.png?v=3"><link rel="apple-touch-icon" href="resto-icon-192.png?v=3"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Restauration"><meta property="og:type" content="website">
+<!DOCTYPE html><html lang="fr"><head><script src="config.js"></script><script src="zguard.js" data-roles="owner"></script><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="manifest" href="resto-manifest.webmanifest"><meta name="theme-color" content="#14213d"><link rel="icon" type="image/png" href="resto-icon-192.png?v=3"><link rel="apple-touch-icon" href="resto-icon-192.png?v=3"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Restauration"><meta property="og:type" content="website">
 <meta property="og:locale" content="fr_FR">
 <meta property="og:site_name" content="Service de Restauration">
 <meta property="og:title" content="Service de Restauration - Gestion intelligente du restaurant">
@@ -142,7 +142,7 @@ const navTo=u=>inShell?parent.nav(u):(location=u.replace(/\.html$/,'')+'.html');
 const cardUrl=s=>inShell?'#card/'+s:'resto-card.html?r='+s;
 const cardSlug=()=>inShell?SH.location.hash.split('/')[1]:new URLSearchParams(location.search).get('r');
 const OWNER_ACCOUNT_NAME='Ayouba Tanko';
-const isOwnerAccount=u=>!!u&&String(u.name||'').trim().toLocaleLowerCase('fr')===OWNER_ACCOUNT_NAME.toLocaleLowerCase('fr');
+const isOwnerAccount=u=>false;/* le propriétaire est désigné côté Supabase (rg_platform_owners), jamais par un nom */
 function guard(role){const u=me();const allowed=role==='owner'?(u&&(u.role==='owner'||(u.role==='restaurant'&&isOwnerAccount(u)))):(u&&u.role===role);if(!allowed){navTo('index');return null}return u}
 function logout(){store.clr();try{Object.keys(localStorage).filter(function(k){return /^sb-.*-auth-token$/.test(k)}).forEach(function(k){localStorage.removeItem(k)})}catch(e){}navTo('compte.html')}
 async function pwHash(v){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode('rg-pw:'+v));return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('')}

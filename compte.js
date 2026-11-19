@@ -3,10 +3,10 @@ const $=s=>document.querySelector(s);
 let sb=null,mode='in';
 const ROLE_TYPES=['restaurant','hotel','delivery','agro_producer','agro_trader','commerce','business'];
 const roleToPartner={restaurant:'restaurant',hotel:'hotel',delivery:'delivery',agro_producer:'agro',agro_trader:'agro_trader',commerce:'commerce',business:'business'};
-/* Téléphone UNIQUEMENT, pour toutes les catégories (plus d'e-mail). */
-function readPhone(){const raw=$('#phone').value.trim().replace(/[\s().-]/g,''),dial=$('#dialCode').value;return raw.startsWith('+')?raw:dial+raw.replace(/^0/,'')}
-const PHONE_RE=/^\+[1-9]\d{7,14}$/;
-function updateIdentityFields(){$('#phone').required=true;$('#categoryHelp').textContent='Pour tous les types de compte : inscription et connexion avec votre numéro de téléphone et votre mot de passe.'}
+/* E-mail UNIQUEMENT pour toutes les catégories. */
+const EMAIL_RE=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const LABEL={customer:'Client',restaurant:'Restaurant partenaire',hotel:'Hôtel / hébergement',delivery:'Livreur',agro_producer:'Producteur agricole',agro_trader:'Commerçant agricole'};
+function updateIdentityFields(){$('#email').required=true}
 const MIN=8;
 
 function showMsg(text,type='error'){const m=$('#msg');m.textContent=text;m.className='msg '+type;m.hidden=!text}
@@ -32,62 +32,66 @@ function updateMatch(){
   if(a===b){h.textContent='Les mots de passe correspondent.';h.className='good'}
   else{h.textContent='Les deux mots de passe ne sont pas identiques.';h.className='bad';$('#passwordConfirm').setAttribute('aria-invalid','true')}
 }
-function showAccount(user){
+async function showAccount(user){
   const type=user.user_metadata?.account_type;
   const routes={customer:'client-espace.html',restaurant:'resto-restaurant.html',hotel:'resto-restaurant.html',delivery:'resto-driver.html',agro_producer:'agro.html',agro_trader:'agro.html'};
-  if(type&&routes[type]&&!/parametres|stay/.test(location.hash)&&(type==='customer'||user.user_metadata?.organization_id)&&!sessionStorage.getItem('zumuya_redirected')){sessionStorage.setItem('zumuya_redirected','1');if(type==='restaurant'||type==='hotel')sessionStorage.setItem('zmy_portal','1');location.replace(routes[type]);return}
+  const stay=/parametres|stay/.test(location.hash);
+  let owner=false;try{const {data}=await sb.rpc('rg_is_platform_owner');owner=data===true}catch(e){}
+  if(owner&&!stay&&!sessionStorage.getItem('zumuya_redirected')){sessionStorage.setItem('zumuya_redirected','1');location.replace('proprietaire.html');return}
+  if(!owner&&type&&routes[type]&&!stay&&(type==='customer'||user.user_metadata?.organization_id)&&!sessionStorage.getItem('zumuya_redirected')){sessionStorage.setItem('zumuya_redirected','1');if(type==='restaurant'||type==='hotel')sessionStorage.setItem('zmy_portal','1');location.replace(routes[type]);return}
   sessionStorage.removeItem('zumuya_redirected');
-  $('#auth').hidden=true;$('#account').hidden=false;
-  $('#accPhone').textContent=fmtPhone(user.phone||user.user_metadata?.phone_display||'')||'—';
-  const sp=$('#mySpace'),rt=routes[type];if(sp){sp.hidden=!rt;if(rt)sp.href=rt}
+  $('#auth').hidden=true;$('#account').hidden=false;$('#recovery').hidden=true;
+  $('#accPhone').textContent=user.email||'—';
   $('#accName').textContent=(user.user_metadata&&user.user_metadata.name)||'—';
-  $('#recovery').hidden=true;
-  checkOwner();
+  const rt=routes[type],ready=rt&&(type==='customer'||user.user_metadata?.organization_id);
+  const sp=$('#mySpace');sp.hidden=owner||!ready;if(ready)sp.href=rt;
+  $('#clientOrder').hidden=owner||type!=='customer';
+  $('#ownerLink').hidden=!owner;$('#ownerResto').hidden=!owner;$('#ownerNotice').hidden=!owner;
+  const lead=$('#roleLead');
+  if(owner){lead.hidden=true}
+  else if(type==='customer'){lead.hidden=false;lead.textContent='Compte client : consultez les restaurants proches, leurs menus, et passez commande depuis votre espace.'}
+  else if(type&&!ready){lead.hidden=false;lead.textContent='Compte '+(LABEL[type]||'professionnel')+' : complétez la fiche de votre activité ci-dessous (« Devenir partenaire ») pour ouvrir votre espace.'}
+  else{lead.hidden=true}
+  $('#partnerPanel').hidden=owner;
   initPartner(user);
 }
-function fmtPhone(p){p=String(p||'');return p&&!p.startsWith('+')&&/^\d{8,15}$/.test(p)?'+'+p:p}
 function showAuth(){$('#account').hidden=true;$('#recovery').hidden=true;$('#auth').hidden=false}
 
 async function submit(e){
   e.preventDefault();showMsg('');
   const password=$('#password').value,name=$('#displayName').value.trim(),confirm=$('#passwordConfirm').value;
-  const phone=readPhone(),accountType=$('#accountCategory').value;
+  const email=$('#email').value.trim().toLowerCase(),accountType=$('#accountCategory').value;
+  if(!EMAIL_RE.test(email))return showMsg('Saisissez une adresse e-mail valide.');
   if(mode==='up'){
     if(!name)return showMsg('Saisissez votre nom complet.');
-    if(!PHONE_RE.test(phone))return showMsg('Saisissez un numéro valide (indicatif du pays + numéro).');
     if(password.length<MIN)return showMsg('Le mot de passe doit contenir au moins '+MIN+' caractères.');
     if(password!==confirm){updateMatch();return showMsg('Les deux saisies du mot de passe ne sont pas identiques.')}
-  }else{
-    if(!PHONE_RE.test(phone))return showMsg('Saisissez votre numéro de téléphone avec son indicatif.');
-    if(!password)return showMsg('Saisissez votre mot de passe.');
-  }
+  }else if(!password)return showMsg('Saisissez votre mot de passe.');
   if(!sb)return showMsg('Le service de connexion n’est pas configuré. Vérifiez le fichier config.js.');
   const btn=$('#submitBtn');btn.disabled=true;
   try{
     if(mode==='up'){
-      const metadata={name,account_type:accountType,requested_account_type:accountType,phone_display:phone};
-      const {data,error}=await sb.auth.signUp({phone,password,options:{data:metadata}});
+      const {data,error}=await sb.auth.signUp({email,password,options:{data:{name,account_type:accountType,requested_account_type:accountType},emailRedirectTo:location.origin+location.pathname}});
       if(error)throw error;
-      if(data.user&&Array.isArray(data.user.identities)&&data.user.identities.length===0)throw new Error('Un compte existe déjà avec ce numéro. Connectez-vous.');
+      if(data.user&&Array.isArray(data.user.identities)&&data.user.identities.length===0)throw new Error('Un compte existe déjà avec cette adresse e-mail. Connectez-vous.');
       $('#password').value='';$('#passwordConfirm').value='';updateMatch();
-      if(data.session){showAccount(data.session.user);return}
-      showMsg('Compte créé. Si la confirmation par SMS est activée, confirmez votre numéro avant la première connexion.','success');
+      if(data.session){await showAccount(data.session.user);return}
+      showMsg('Compte créé. Ouvrez le lien de confirmation reçu par e-mail (pensez aux courriers indésirables), puis connectez-vous.','success');
     }else{
-      const {data,error}=await sb.auth.signInWithPassword({phone,password});
+      const {data,error}=await sb.auth.signInWithPassword({email,password});
       if(error)throw error;
-      showAccount(data.user);
+      await showAccount(data.user);
     }
   }catch(err){showMsg(translate(err))}
   finally{btn.disabled=false}
 }
 function translate(err){
   const m=(err&&err.message)||'';
-  if(/Invalid login credentials/i.test(m))return 'Numéro de téléphone ou mot de passe incorrect.';
-  if(/Phone not confirmed/i.test(m))return 'Ce numéro n’est pas encore confirmé. Saisissez le code reçu par SMS ou contactez le support.';
-  if(/already registered|already been registered/i.test(m))return 'Un compte existe déjà avec ce numéro. Connectez-vous.';
-  if(/rate limit|too many/i.test(m))return 'Trop de tentatives. Patientez quelques minutes puis réessayez.';
+  if(/Invalid login credentials/i.test(m))return 'Adresse e-mail ou mot de passe incorrect.';
+  if(/Email not confirmed/i.test(m))return 'Confirmez d’abord votre adresse e-mail grâce au lien reçu dans votre boîte de réception.';
+  if(/already registered|already been registered/i.test(m))return 'Un compte existe déjà avec cette adresse e-mail. Connectez-vous.';
+  if(/rate limit|too many|security purposes/i.test(m))return 'Trop de tentatives ou d’e-mails envoyés. Patientez quelques minutes puis réessayez.';
   if(/Password should be|weak/i.test(m))return 'Mot de passe trop faible. Utilisez au moins 8 caractères.';
-  if(/Phone signups are disabled|phone provider/i.test(m))return 'L’inscription par téléphone n’est pas activée (Supabase > Authentication > Providers > Phone).';
   if(/fetch|network/i.test(m))return 'Connexion impossible. Vérifiez votre accès Internet.';
   return m||'Une erreur est survenue. Réessayez.';
 }
@@ -109,6 +113,8 @@ const CATS=[
  {id:'travel',icon:'🧭',label:'Tourisme & voyages',desc:'Agences, guides, hébergements touristiques',fields:[F('organization_name','Nom de l’agence ou du guide'),F('city','Ville'),F('offer_type','Type d’offre','select',true,['Agence de voyages','Guide','Hébergement touristique','Excursions']),F('destinations','Destinations proposées')]},
  {id:'business',icon:'📊',label:'Entreprise / institution',desc:'Entreprises, institutions, partenaires techniques',fields:[F('organization_name','Nom de l’entreprise ou de l’institution'),F('city','Ville'),F('partner_kind','Type de partenariat','select',true,['Commercial','Institutionnel','Technique','Paiement']),F('website','Site web','url',false)]}
 ];
+const LIVE=['restaurant','hotel','delivery','agro','agro_trader'];
+CATS.splice(0,CATS.length,...CATS.filter(c=>LIVE.includes(c.id)));
 const COLS=['organization_name','city'];
 const STATUS={pending:'En attente',approved:'Acceptée',rejected:'Refusée'};
 let apps=[],countries=[['NE','Niger']],currentCat=null,currentUser=null;
@@ -212,12 +218,10 @@ function pwMsg(id,t,type='error'){const m=$(id);m.textContent=t;m.className='msg
 $('#forgotBtn').addEventListener('click',async()=>{
   if(!sb)return;
   try{
-    const phone=readPhone();
-    if(!PHONE_RE.test(phone))return showMsg('Saisissez votre numéro avec indicatif pour recevoir un code SMS.');
-    const {error}=await sb.auth.signInWithOtp({phone,options:{shouldCreateUser:false}});if(error)throw error;
-    const token=prompt('Saisissez le code reçu par SMS :');if(!token)return;
-    const verified=await sb.auth.verifyOtp({phone,token:token.trim(),type:'sms'});if(verified.error)throw verified.error;
-    $('#auth').hidden=true;$('#recovery').hidden=false;showMsg('');
+    const email=$('#email').value.trim().toLowerCase();
+    if(!EMAIL_RE.test(email))return showMsg('Saisissez votre adresse e-mail pour recevoir le lien de réinitialisation.');
+    const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname});if(error)throw error;
+    showMsg('Un lien de réinitialisation a été envoyé à votre adresse e-mail.','success');
   }catch(err){showMsg(translate(err))}
 });
 $('#recForm').addEventListener('submit',async e=>{
@@ -227,7 +231,7 @@ $('#recForm').addEventListener('submit',async e=>{
   if(a!==b)return pwMsg('#recMsg','Les deux mots de passe ne sont pas identiques.');
   $('#recBtn').disabled=true;
   try{const {data,error}=await sb.auth.updateUser({password:a});if(error)throw error;
-    history.replaceState(null,'',location.pathname);showAccount(data.user);
+    history.replaceState(null,'',location.pathname);await showAccount(data.user);
   }catch(err){pwMsg('#recMsg',translate(err))}
   finally{$('#recBtn').disabled=false}
 });
@@ -242,7 +246,7 @@ $('#pwForm').addEventListener('submit',async e=>{
   if(a===o)return pwMsg('#pwMsg','Le nouveau mot de passe doit être différent de l’actuel.');
   $('#pwBtn').disabled=true;
   try{
-    const identity=currentUser&&(currentUser.phone?{phone:currentUser.phone}:{email:currentUser.email});/* comptes téléphone */
+    const identity={email:currentUser.email};
     const r=await sb.auth.signInWithPassword({...identity,password:o});
     if(r.error)throw new Error('Mot de passe actuel incorrect.');
     const {error}=await sb.auth.updateUser({password:a});if(error)throw error;
@@ -269,7 +273,7 @@ $('#logout').addEventListener('click',async()=>{if(sb)await sb.auth.signOut();sh
     sb=window.supabase.createClient(c.SUPABASE_URL,c.SUPABASE_ANON_KEY);
     sb.auth.onAuthStateChange((ev,session)=>{if(ev==='PASSWORD_RECOVERY'){$('#auth').hidden=true;$('#account').hidden=true;$('#recovery').hidden=false}});
     const {data:{session}}=await sb.auth.getSession();
-    if(session&&!/type=recovery/.test(location.hash))showAccount(session.user);
+    if(session&&!/type=recovery/.test(location.hash))await showAccount(session.user);
   }catch(e){showMsg('Le service de connexion n’est pas disponible pour le moment.')}
 })();
 })();

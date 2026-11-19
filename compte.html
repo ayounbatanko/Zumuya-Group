@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#102b45">
 <title>Mon compte — ZUMUYA GROUP</title>
 <link rel="icon" href="logo.svg" type="image/svg+xml">
-<link rel="stylesheet" href="compte.css?v=5">
+<link rel="stylesheet" href="compte.css?v=6">
 </head>
 <body>
 <header class="bar"><a class="brand" href="index.html"><img src="logo.svg" alt=""><span>ZUMUYA <b>GROUP</b></span></a><a class="back" href="index.html">← Retour au site</a></header>
@@ -27,15 +27,11 @@
         <option value="delivery">Livreur</option>
         <option value="agro_producer">Producteur agricole</option>
         <option value="agro_trader">Commerçant agricole</option>
-        <option value="commerce">Commerce / boutique</option>
-        <option value="business">Entreprise / autre partenaire</option>
       </select>
-      <small id="categoryHelp">Pour tous les types de compte : inscription et connexion avec votre numéro de téléphone et votre mot de passe.</small>
+      <small id="categoryHelp">Chaque catégorie ouvre uniquement son propre espace. Inscription et connexion avec votre adresse e-mail.</small>
     </label>
     <label id="nameWrap" hidden>Nom complet<input id="displayName" type="text" autocomplete="name" placeholder="Ex. Aïssata Moussa"></label>
-    <label id="phoneWrap">Numéro de téléphone
-      <div class="phone-row"><select id="dialCode" aria-label="Indicatif du pays"><option value="+225">Côte d’Ivoire (+225)</option><option value="+227">Niger (+227)</option><option value="+221">Sénégal (+221)</option><option value="+229">Bénin (+229)</option><option value="+228">Togo (+228)</option><option value="+226">Burkina Faso (+226)</option><option value="+223">Mali (+223)</option><option value="+233">Ghana (+233)</option><option value="+234">Nigeria (+234)</option><option value="+33">France (+33)</option></select><input id="phone" type="tel" autocomplete="tel-national" inputmode="tel" placeholder="07 00 00 00 00"></div>
-    </label>
+    <label id="emailWrap">Adresse e-mail<input id="email" type="email" autocomplete="email" inputmode="email" placeholder="vous@exemple.com" required></label>
     <label>Mot de passe
       <span class="pw"><input id="password" type="password" autocomplete="current-password" required><button type="button" class="eye" data-eye="password" aria-label="Afficher le mot de passe">Afficher</button></span>
       <small id="pwHelp" hidden>8 caractères minimum.</small>
@@ -66,19 +62,17 @@
   <h1 id="accTitle">Mon compte</h1>
   <dl class="profile">
     <div><dt>Nom</dt><dd id="accName">—</dd></div>
-    <div><dt>Téléphone</dt><dd id="accPhone">—</dd></div>
+    <div><dt>Adresse e-mail</dt><dd id="accPhone">—</dd></div>
   </dl>
   <p class="notice" id="ownerNotice" hidden>Vous êtes <b>propriétaire de la plateforme</b> : vous gérez toute l'infrastructure ZUMUYA GROUP depuis l'espace propriétaire.</p>
   <div class="services">
     <a class="btn small" id="mySpace" href="client-espace.html" hidden>🏠 Ouvrir mon espace</a>
-    <a class="btn small" href="parametres.html">⚙️ Paramètres du compte</a>
+    <a class="btn small" id="clientOrder" href="resto-index.html" hidden>🍽️ Restaurants et commandes</a>
     <a class="btn small" id="ownerLink" href="proprietaire.html" hidden>⚙️ Espace propriétaire</a>
-    <a class="btn small" href="resto-index.html">🍽️ Service de Restauration</a>
-    <a class="btn small" href="resto-client.html">🔍 Espace client : restaurants et commandes</a>
-    <a class="btn small" href="resto-index.html">🏨 ZUMUYA Hôtel (service en chambre)</a>
-    <a class="btn small" href="resto-driver.html">📦 ZUMUYA Livraison (suivi courses)</a>
+    <a class="btn small" id="ownerResto" href="resto-index.html" hidden>💳 Abonnements Restauration</a>
+    <a class="btn small" href="parametres.html">⚙️ Paramètres du compte</a>
   </div>
-  <p class="lead" style="margin-top:12px">En tant que client, vous pouvez rechercher les restaurants proches, consulter leurs catalogues (menus) et passer commande directement depuis le Service de Restauration.</p>
+  <p class="lead" id="roleLead" style="margin-top:12px" hidden></p>
 
   <div class="partner" id="pwPanel">
     <div class="phead"><div><h2>Mot de passe</h2><p class="lead">Vous pouvez le modifier à tout moment.</p></div><button class="btn small" type="button" id="togglePw">Changer</button></div>
@@ -117,6 +111,6 @@
 </main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
-<script src="compte.js?v=7"></script>
+<script src="compte.js?v=8"></script>
 </body>
 </html>

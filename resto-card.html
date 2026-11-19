@@ -108,7 +108,7 @@ const navTo=u=>inShell?parent.nav(u):(location=u.replace(/\.html$/,'')+'.html');
 const cardUrl=s=>inShell?'#card/'+s:'resto-card.html?r='+s;
 const cardSlug=()=>inShell?SH.location.hash.split('/')[1]:new URLSearchParams(location.search).get('r');
 const OWNER_ACCOUNT_NAME='Ayouba Tanko';
-const isOwnerAccount=u=>!!u&&String(u.name||'').trim().toLocaleLowerCase('fr')===OWNER_ACCOUNT_NAME.toLocaleLowerCase('fr');
+const isOwnerAccount=u=>false;/* le propriétaire est désigné côté Supabase (rg_platform_owners), jamais par un nom */
 function guard(role){const u=me();const allowed=role==='owner'?(u&&(u.role==='owner'||(u.role==='restaurant'&&isOwnerAccount(u)))):(u&&u.role===role);if(!allowed){navTo('index');return null}return u}
 function logout(){store.clr();try{Object.keys(localStorage).filter(function(k){return /^sb-.*-auth-token$/.test(k)}).forEach(function(k){localStorage.removeItem(k)})}catch(e){}navTo('compte.html')}
 const slugify=s=>s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
