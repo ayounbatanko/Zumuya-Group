@@ -17,13 +17,13 @@ else hub(who.rest);
 async function hub(r){const h=r.hotel||{},sub=ZS.subOk(r);
  app.innerHTML='<div class="sec-title"><div><span class="eyebrow" style="color:#0b7d6f">'+esc(h.category||'HÔTEL')+'</span><h2>'+esc(h.name||r.name)+'</h2><div class="mut">'+esc(r.address||'')+' '+(h.hours?'· Restauration '+esc(h.hours):'')+'</div></div><span class="badge '+(sub?'':'red')+'">'+(sub?'Compte actif':'Abonnement à renouveler')+'</span></div>'+
  '<div class="kpis" id="k"></div><div class="flow">'+
- '<a class="card step" href="resto-restaurant.html" style="text-decoration:none"><i>01</i><b>🏨 Gérer mon hôtel</b><span>Paramètres, service en chambre, notes de chambre, caisse et catalogue.</span></a>'+
- '<a class="card step" href="resto-restaurant.html" style="text-decoration:none"><i>02</i><b>🍽️ Commandes en cours</b><span>Acceptation, préparation et remise en chambre.</span></a>'+
+ '<a class="card step" href="resto-restaurant.html#hotel" style="text-decoration:none"><i>01</i><b>🏨 Gérer mon hôtel</b><span>Paramètres, service en chambre, notes de chambre, caisse et catalogue.</span></a>'+
+ '<a class="card step" href="resto-restaurant.html#orders" style="text-decoration:none"><i>02</i><b>🍽️ Commandes en cours</b><span>Acceptation, préparation et remise en chambre.</span></a>'+
  '<a class="card step" href="livraison.html" style="text-decoration:none"><i>03</i><b>📦 Livraison coordonnée</b><span>Commandes à l’extérieur : livreur libre le plus proche, suivi en direct.</span></a></div>'+
  '<div class="sec-title"><h2>Dernières commandes de l’hôtel</h2></div><div class="card tw"><table class="table"><thead><tr><th>Réf.</th><th>Service</th><th>Chambre</th><th>Montant</th><th>Statut</th></tr></thead><tbody id="t"><tr><td colspan="5">Chargement…</td></tr></tbody></table></div>';
  try{const os=(await ZS.orders()).filter(o=>o.restId===r.id),day=t=>new Date(t).toDateString(),done=['terminée','refusée','annulée'];
   const act=os.filter(o=>!done.includes(o.status)),room=os.filter(o=>o.deliveryMode==='room'&&!done.includes(o.status)),tod=os.filter(o=>day(o.created||Date.now())===day(Date.now()));
-  $('#k').innerHTML=[['Commandes en cours',act.length],['En chambre',room.length],['Aujourd’hui',tod.length],['Chambres',h.rooms||'—']].map(x=>'<div class="card kpi"><small>'+x[0]+'</small><strong>'+x[1]+'</strong></div>').join('');
+  $('#k').innerHTML=[['Commandes en cours',act.length],['En chambre',room.length],['À remettre en chambre',room.filter(o=>o.status==='préparée').length],['Aujourd’hui',tod.length],['Chambres',h.rooms||'—']].map(x=>'<div class="card kpi"><small>'+x[0]+'</small><strong>'+x[1]+'</strong></div>').join('');
   $('#t').innerHTML=os.slice(0,12).map(o=>'<tr><td>#'+esc(o.id)+'</td><td>'+esc(o.serviceType||'—')+'</td><td>'+esc(o.buildingNumber?(o.buildingNumber+' · '+(o.roomNumber||'')):'—')+'</td><td>'+ZS.money(o.total,r.currency)+'</td><td><span class="badge grey">'+esc(o.status)+'</span></td></tr>').join('')||'<tr><td colspan="5">Aucune commande pour le moment.</td></tr>'}
  catch(e){$('#t').innerHTML='<tr><td colspan="5">Impossible de charger les commandes.</td></tr>'}}
 })();

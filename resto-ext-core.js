@@ -21,14 +21,9 @@ X.panel=function(id,title,html){
    Chaque module déclare son outil avec X.fab() ; tous sont réunis dans une seule tuile « Outils & options »
    (dans la grille du tableau de bord, ou dans la barre d'onglets du client). */
 var META={
- 'rgx-fab-rev':['⭐','Noter mes commandes','Donnez votre avis sur vos livraisons'],
- 'rgx-fab-promo':['🎟️','Codes promo','Créer et gérer vos offres'],
  'rgx-fab-kds':['👨‍🍳','Écran cuisine','Suivre les commandes à préparer'],
  'rgx-fab-folio':['🏨','Notes de chambre','Factures par chambre, export CSV'],
- 'rgx-fab-st':['📊','Statistiques','Ventes, heures de pointe, plats populaires'],
- 'rgx-fab-dark':['🌙','Mode sombre','Changer l\u2019apparence de l\u2019application'],
- 'rgx-fab-trk':['🛵','Suivre ma commande','Position du livreur en direct'],
- 'rgx-fab-push':['🔔','Notifications','Être alerté même application fermée']};
+ 'rgx-fab-trk':['🛵','Suivre ma commande','Position du livreur en direct']};
 X.fab=function(id,label,fn){
   var s=document.getElementById(id);
   if(!s){s=document.createElement('span');s.id=id;s.hidden=true;s.setAttribute('data-rgx-tool','1');document.body.appendChild(s)}

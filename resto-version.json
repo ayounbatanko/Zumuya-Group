@@ -1,6 +1,6 @@
 {
-  "version": "2.3.0",
-  "message": "Coordination des pôles Restauration, Hôtel et Livraison : attribution des courses côté serveur, commandes protégées contre les écrasements, remise en chambre.",
+  "version": "2.4.0",
+  "message": "Restauration, Hôtel et Livraison mieux coordonnés : remise en chambre, livreurs rattachés, retrait au restaurant. Modules inutiles retirés.",
   "notify": true,
-  "updatedAt": "2026-11-18T10:00:00Z"
+  "updatedAt": "2026-11-19T20:00:00Z"
 }

@@ -9,8 +9,6 @@ Tous les fichiers sont à la **racine** du dépôt. Aucun dossier à créer : on
 | `proprietaire/index.html`, `owner.css`, `owner.js` | `proprietaire.html`, `proprietaire.css`, `proprietaire.js` |
 | `restauration/xxx` | `resto-xxx` (ex. `resto-index.html`, `resto-client.html`) |
 | `restauration/ext/kds.js` | `resto-ext-kds.js` |
-| `restauration/sql/…`, `docs/…` | `resto-sql-…`, `resto-docs-…` |
-| `restauration/supabase/functions/push-notify/index.ts` | `resto-fn-push-notify.ts` |
 | `GMR_Restaurant.apk` | inchangé (racine) |
 
 Tous les liens internes (pages, scripts, icônes, manifestes, modules) ont été réécrits en conséquence.
@@ -34,7 +32,7 @@ Tous les liens internes (pages, scripts, icônes, manifestes, modules) ont été
 1. Dans Supabase > SQL Editor du projet de `config.js`, exécutez dans l'ordre : `sql-portail.sql`, puis `supabase-setup.sql` (tables du service, realtime, attribution des livreurs côté serveur, protection des commandes). Si un avertissement signale `pg_cron`, activez-le dans Database > Extensions et relancez.
 2. Créez votre compte sur `compte.html`, puis décommentez la dernière requête de `sql-portail.sql` (avec votre e-mail) pour devenir propriétaire.
 3. Pour changer de projet Supabase, modifiez seulement `config.js`.
-4. `resto-sql-v2_securite_rls.sql` : seulement après lecture de `resto-docs-RESTOGEST-EXTENSIONS-V2.md`.
+4. La sécurité RLS stricte (ancien `resto-sql-v2_securite_rls.sql`) a été retirée : elle cassait l'application tant que les comptes n'étaient pas migrés vers Supabase Auth. À refaire proprement à ce moment-là.
 
 Voir `COORDINATION-POLES.md` pour le fonctionnement commun des pôles 01, 02 et 03.
 
@@ -57,7 +55,7 @@ Nouveaux fichiers : `zsession.js`, `zservice.css`, `restauration.html`, `hotel.h
 
 ## Limites à connaître
 - Les comptes du portail (e-mail, Supabase Auth) et ceux du Service (téléphone, base `rg_users`) sont encore deux systèmes séparés : un utilisateur du portail doit aussi avoir un compte Service pour commander.
-- La réservation aux hôtels est appliquée côté navigateur ; une vraie protection demande les règles RLS (`resto-sql-v2_securite_rls.sql`) après migration des comptes.
+- La réservation aux hôtels est appliquée côté navigateur ; une vraie protection demande des règles RLS après migration des comptes.
 - `rg_users` contient des mots de passe en clair lisibles avec la clé publique : à migrer vers Supabase Auth en priorité.
 
 ## RestoGest : fonctionnalités uniquement sur zumuya
@@ -65,3 +63,6 @@ Toutes les fonctionnalités RestoGest (restaurant, client, livreur, propriétair
 
 ## Connexion : uniquement `compte.html`
 L'ancien écran « Service de Restauration » (téléphone / mot de passe, créer un compte, support connexion) est supprimé. Voir `LISEZMOI-AUTH.md`, section « Portail unique ».
+
+## Version 2.4.0 — Restauration · Hôtel · Livraison coordonnés
+Voir `resto-CHANGEMENTS-2.4.0.md` (corrections, fichiers retirés, tests).

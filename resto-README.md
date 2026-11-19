@@ -8,15 +8,14 @@ Tous les fichiers sont à la racine du dépôt ; ceux du Service de Restauration
 
 - `resto-index.html`, `resto-restaurant.html`, `resto-client.html`, `resto-driver.html`, `resto-card.html` : parcours principaux (accueil/connexion, restaurant, client, livreur, carte de visite).
 - `resto-owner.html` et `resto-owner-pro.js` : espace propriétaire historique du service.
-- `resto-ext-*.js` : modules d'extension (notes de chambre, suivi livraison, attribution des courses, stocks, promotions, etc.), chargés par `resto-ext-loader.js`.
-- `resto-sql-*.sql` : scripts SQL (table de messagerie, realtime/index, sécurité RLS).
-- `resto-fn-push-notify.ts` : fonction Edge Supabase des notifications push.
-- `resto-docs-*.md` : documentation historique et extensions.
+- `resto-ext-*.js` : modules conservés (attribution des courses, suivi en direct, écran cuisine, notes de chambre, temps réel), chargés par `resto-ext-loader.js`.
+- Base de données : `supabase-setup.sql` (tables du service, realtime, attribution des livreurs, notes de chambre).
+- `resto-CHANGEMENTS-2.4.0.md` : corrections et nettoyage de la version 2.4.0.
 - `sw.js` (racine) : service worker unique du portail et du Service de Restauration.
 
 ## Pôles intégrés
 
-- **Pôle 01 — Restauration** : menus, commandes, tables, caisse, stocks.
+- **Pôle 01 — Restauration** : menus, commandes, caisse, historique des ventes, rapport, livreurs, carte de visite.
 - **Pôle 02 — ZUMUYA Hôtel** : service en chambre et facturation sur note de chambre (`resto-ext-room-billing.js`).
 - **Pôle 03 — ZUMUYA Livraison** : suivi en direct (`resto-ext-tracking.js`) et attribution des courses (`resto-ext-dispatch.js`).
 

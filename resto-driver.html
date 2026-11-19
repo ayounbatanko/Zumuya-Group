@@ -143,32 +143,7 @@ const OWNER_ACCOUNT_NAME='Ayouba Tanko';
 const isOwnerAccount=u=>!!u&&String(u.name||'').trim().toLocaleLowerCase('fr')===OWNER_ACCOUNT_NAME.toLocaleLowerCase('fr');
 function guard(role){const u=me();const allowed=role==='owner'?(u&&(u.role==='owner'||(u.role==='restaurant'&&isOwnerAccount(u)))):(u&&u.role===role);if(!allowed){navTo('index');return null}return u}
 function logout(){store.clr();try{Object.keys(localStorage).filter(function(k){return /^sb-.*-auth-token$/.test(k)}).forEach(function(k){localStorage.removeItem(k)})}catch(e){}navTo('compte.html')}
-function changeMyPassword(oldId,newId,cfId){
-  const oldEl=document.getElementById(oldId||'oldpw'),nwEl=document.getElementById(newId||'newpw'),cfEl=document.getElementById(cfId||'cfpw');
-  if(!oldEl||!nwEl||!cfEl)return;
-  const old=oldEl.value,nw=nwEl.value,cf=cfEl.value;
-  const u=me();if(!u)return alert('Session expirée. Reconnectez-vous.');
-  if(u.pass!==old)return alert('Mot de passe actuel incorrect.');
-  if(nw.length<6)return alert('Le nouveau mot de passe doit contenir au moins 6 caractères.');
-  if(nw!==cf)return alert('Les deux nouveaux mots de passe ne correspondent pas.');
-  if(nw===old)return alert('Choisissez un mot de passe différent de l\'actuel.');
-  const d=D.get(),uu=d.users.find(x=>x.id===u.id);if(!uu)return alert('Compte introuvable.');
-  uu.pass=nw;D.save(d);
-  // garder la session cohérente
-  oldEl.value=nwEl.value=cfEl.value='';
-  toast('Mot de passe modifié avec succès.');
-}
-async function hashSecurityAnswer(v){const s=String(v||'').trim().toLocaleLowerCase('fr');if(!s)return '';if(window.crypto&&crypto.subtle){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('')}return btoa(unescape(encodeURIComponent(s)))}
-async function saveSecurityAnswer(){const a=document.getElementById('securitySetup')?.value||'';if(a.trim().length<2)return alert('Saisissez une réponse secrète de 2 caractères minimum.');const u=me(),d=D.get(),x=d.users.find(z=>z.id===u.id);if(!x)return alert('Compte introuvable.');x.securityAnswerHash=await hashSecurityAnswer(a);D.save(d);document.getElementById('securitySetup').value='';toast('Réponse de sécurité enregistrée.')}
-function passwordCard(){
-  return `<div class="card col"><h3 style="margin:0">🔐 Changer mon mot de passe</h3>
-  <p class="mut">Vous pouvez modifier votre mot de passe à tout moment.</p>
-  <input id="oldpw" type="password" placeholder="Mot de passe actuel" autocomplete="current-password">
-  <input id="newpw" type="password" placeholder="Nouveau mot de passe (6 caractères minimum)" autocomplete="new-password">
-  <input id="cfpw" type="password" placeholder="Confirmer le nouveau mot de passe" autocomplete="new-password">
-  <button type="button" onclick="changeMyPassword()">Enregistrer le nouveau mot de passe</button></div>
-  <div class="card col"><h3 style="margin:0">🛡️ Récupération du compte</h3><p class="mut">Définissez votre réponse secrète à la question : « Quelle est votre nom ? »</p><input id="securitySetup" type="text" placeholder="Votre réponse secrète" autocomplete="off"><button type="button" onclick="saveSecurityAnswer()">Enregistrer ma réponse secrète</button></div>`;
-}
+function passwordCard(){return `<div class="card col"><h3 style="margin:0">🔐 Mon compte ZUMUYA GROUP</h3><p class="mut">La connexion se fait uniquement avec votre e-mail sur ZUMUYA GROUP. Le mot de passe se modifie ou se réinitialise depuis votre compte.</p><a href="compte.html" style="font-weight:700">Ouvrir mon compte ZUMUYA →</a></div>`}
 
 const slugify=s=>s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
 const money=(v,c)=>{if(!c||c=='XOF'||c=='XAF')return new Intl.NumberFormat(lang(),{maximumFractionDigits:0}).format(v)+' FCFA';try{return new Intl.NumberFormat(lang(),{style:'currency',currency:c||'XOF'}).format(v)}catch(e){return v+' '+c}};
@@ -178,8 +153,8 @@ const km=(a,b)=>{const R=6371,r=x=>x*Math.PI/180,dl=r(b[0]-a[0]),dn=r(b[1]-a[1])
 function setLang(k){store.s('l','lang',k);inShell?parent.nav(parent.cur):location.reload()}
 function hdr(title){document.getElementById('hdr').innerHTML=`<b>${esc(title)}</b><span class="row"><span id="net"></span><span class="lang">${Object.entries(LANGS).map(([k,v])=>`<button title="${v}" class="${k==lang()?'on':''}" onclick="setLang('${k}')">${k.toUpperCase()}</button>`).join('')}</span><button id="lo" onclick="logout()">${t('logout')}</button></span>`;document.documentElement.dir=lang()=='ar'?'rtl':'ltr';const nt=()=>{const e=document.getElementById('net');if(e){e.textContent=navigator.onLine?'● En ligne':'● Hors ligne — caisse active';e.className=navigator.onLine?'':'off'}};nt();addEventListener('online',nt);addEventListener('offline',nt);startTr()}
 function toast(m){const e=document.createElement('div');e.className='toast';e.textContent=m;document.body.appendChild(e);setTimeout(()=>e.remove(),4500);try{const c=new AudioContext(),o=c.createOscillator();o.connect(c.destination);o.frequency.value=880;o.start();setTimeout(()=>o.stop(),180)}catch(e){}}
-function setOrder(id,patch){const d=D.get(),o=d.orders.find(o=>o.id==id);Object.assign(o,patch);
- if(patch.status=='terminée'){d.rests.find(r=>r.id==o.restId).sales.push({id:uid(),date:Date.now(),items:o.items,total:o.total,src:'en ligne'})}D.save(d)}
+function setOrder(id,patch){const d=D.get(),o=d.orders.find(o=>o.id==id);if(!o)return;Object.assign(o,patch);
+ if(patch.status=='terminée'){const rr=d.rests.find(r=>r.id==o.restId);if(rr&&!(rr.sales||[]).some(x=>x.orderId==o.id)){rr.sales=rr.sales||[];rr.sales.push({id:uid(),orderId:o.id,date:Date.now(),items:o.items,total:o.total,src:o.deliveryMode==='room'?'chambre':'en ligne'})}}D.save(d)}
 function receipt(r,x,title){const items=x.items.map(i=>`<tr><td>${esc(i.n)} ×${i.q}</td><td style="text-align:end">${money(i.p*i.q,r.currency)}</td></tr>`).join('');
  return `<div style="text-align:center">${r.logo?`<img src="${r.logo}" style="width:60px"><br>`:''}<b>${esc(r.name)}</b><br>${esc(r.address||'')}<br>${esc(r.phone||'')}<hr>${title||'Reçu'} #${esc(x.id)}<br>${fdate(x.date||x.created)}</div><table>${items}</table>${x.deliveryFee?`<div>Livraison (${x.distKm} km) : ${money(x.deliveryFee,r.currency)}</div>`:''}<hr><b>TOTAL : ${money(x.total,r.currency)}</b><br>${esc(x.pay||'')}<p style="text-align:center">Merci !</p>`}
 function printHTML(h){document.getElementById('receipt').innerHTML=h;setTimeout(()=>window.print(),150)}
@@ -199,28 +174,27 @@ document.addEventListener('click',()=>{try{window.Notification&&Notification.per
 </script><script>
 const U=guard('driver');U&&RGChat.watch(U.id);let sig='',myPos=null;var dTab='jobs';
 const rest=()=>D.get().rests.find(r=>r.id==U.restId);
+const orc=o=>{const r=D.get().rests.find(x=>x.id==o.restId);return r&&r.currency};
+const pk=o=>{const r=D.get().rests.find(x=>x.id==o.restId);return r?`🍽️ À récupérer chez <b>${esc(r.name)}</b>${r.address?' · '+esc(r.address):''}${r.phone?' · ☎ '+esc(r.phone):''}${r.lat!=null&&r.lng!=null?` · <a target="_blank" rel="noopener" href="https://www.google.com/maps?q=${r.lat},${r.lng}">Itinéraire</a>`:''}`:''};
 const mine=()=>D.get().orders.filter(o=>o.driverId==U.id&&!['terminée','annulée','refusée'].includes(o.status));
 const stages=['préparée','colis récupéré','en route','arrivé','terminée'];
 const nextStage={'préparée':'colis récupéré','colis récupéré':'en route','en route':'arrivé','arrivé':'terminée'};
 const stageLabel={'préparée':'À récupérer au restaurant','colis récupéré':'Colis récupéré','en route':'Commande en route 🛵','arrivé':'Commande arrivée 📍','terminée':'Livraison terminée'};
 function mapUrl(o){const dest=o.cLat!=null&&o.cLng!=null?o.cLat+','+o.cLng: o.addr;const origin=myPos?myPos.join(','):'';return 'https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(dest)+(origin?'&origin='+encodeURIComponent(origin):'')+'&travelmode=driving'}
-function changePass(){const old=document.getElementById('oldpw').value,nw=document.getElementById('newpw').value,cf=document.getElementById('cfpw').value;
- if(U.pass!==old)return alert('Mot de passe actuel incorrect.');if(nw.length<6)return alert('Choisissez au moins 6 caractères.');if(nw!==cf)return alert('Les deux nouveaux mots de passe ne correspondent pas.');
- const d=D.get(),u=d.users.find(x=>x.id===U.id);u.pass=nw;D.save(d);['oldpw','newpw','cfpw'].forEach(x=>document.getElementById(x).value='');toast('Mot de passe modifié avec succès.')}
 function driverBar(){return `<div class="row" style="gap:8px;flex-wrap:wrap;margin-bottom:10px">`+[['jobs','🚚 Livraisons'],['chat','💬 Support'],['acc','🔑 Paramètres du compte']].map(([k,l])=>`<button type="button" class="${dTab==k?'':'sec'}" onclick="dTab='${k}';render()">${l}</button>`).join('')+`</div>`}
 function render(){const d=D.get(),rs=rest();hdr('Espace livreur — '+U.name+(rs?' · '+rs.name:''));const jobs=mine(),done=d.orders.filter(o=>o.driverId==U.id&&o.status=='terminée').reverse().slice(0,10);
  if(dTab=='acc'){m.innerHTML=driverBar()+passwordCard();return}
  if(dTab=='chat'){m.innerHTML=driverBar()+RGChat.userView(U);return}
  m.innerHTML=driverBar()+`<h3>Mes livraisons</h3>`+(jobs.map(o=>{const nxt=nextStage[o.status],hasGPS=o.cLat!=null&&o.cLng!=null;
  return `<div class="card"><div class="row"><b>Commande #${esc(o.id)}</b><span class="badge" data-s="${o.status}">${esc(o.status)}</span></div>
- <b>${esc(o.clientName)}</b> · ${esc(o.clientPhone)}<p>${o.deliveryMode==='room'||o.roomNumber?`🏨 <b>Livraison dans l’hôtel</b><br>Bâtiment : <b>${esc(o.buildingNumber||'Non renseigné')}</b><br>Chambre : <b>${esc(o.roomNumber||'Non renseignée')}</b>`:`📦 <b>Livraison extérieure</b><br>Adresse : ${esc(o.addr||'Non renseignée')}`}</p>
- <p>${o.items.map(i=>`${esc(i.n)} ×${i.q}`).join(', ')}<br><b>${money(o.total,rs?.currency)}</b> (${esc(o.pay)})</p>
+ <b>${esc(o.clientName)}</b> · ${esc(o.clientPhone)}<p class="mut">${pk(o)}</p><p>${o.deliveryMode==='room'||o.roomNumber?`🏨 <b>Livraison dans l’hôtel</b><br>Bâtiment : <b>${esc(o.buildingNumber||'Non renseigné')}</b><br>Chambre : <b>${esc(o.roomNumber||'Non renseignée')}</b>`:`📦 <b>Livraison extérieure</b><br>Adresse : ${esc(o.addr||'Non renseignée')}`}</p>
+ <p>${o.items.map(i=>`${esc(i.n)} ×${i.q}`).join(', ')}<br><b>${money(o.total,orc(o))}</b> (${esc(o.pay)})</p>
  ${hasGPS?`<p class="mut">Position GPS du client enregistrée : ${o.cLat.toFixed(5)}, ${o.cLng.toFixed(5)}</p>`:'<p class="mut">Position GPS précise non disponible : utilisez l’adresse indiquée.</p>'}
  <a href="${mapUrl(o)}" target="_blank" rel="noopener" style="display:inline-block;padding:10px 14px;background:var(--navy2);color:white;text-decoration:none;border-radius:10px;font-weight:700">📍 Ouvrir le trajet dans Google Maps</a>
  <p class="mut">Étape : ${stageLabel[o.status]||o.status}</p>
  ${nxt?`<button onclick="advance('${o.id}','${nxt}')">${nxt=='terminée'?'Confirmer la livraison terminée':'Valider : '+stageLabel[nxt]}</button>`:''}
  </div>`}).join('')||'<p class="mut">Aucune livraison attribuée pour le moment.</p>')+
- (done.length?'<h3>Livraisons terminées</h3>'+done.map(o=>`<div class="card"><b>#${esc(o.id)}</b> — ${esc(o.clientName)} — ${money(o.total,rs?.currency)} <span class="badge" data-s="terminée">terminée</span></div>`).join(''):'')+
+ (done.length?'<h3>Livraisons terminées</h3>'+done.map(o=>`<div class="card"><b>#${esc(o.id)}</b> — ${esc(o.clientName)} — ${money(o.total,orc(o))} <span class="badge" data-s="terminée">terminée</span></div>`).join(''):'')+
  '';
 }
 function advance(id,status){const o=D.get().orders.find(x=>x.id===id);if(!o||o.driverId!==U.id)return alert('Cette livraison ne vous est pas attribuée.');if(nextStage[o.status]!==status)return alert('Étape invalide.');setOrder(id,{status,stageUpdated:Date.now()});toast('Statut mis à jour : '+stageLabel[status]);render()}

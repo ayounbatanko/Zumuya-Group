@@ -71,28 +71,5 @@
         }
       ]
     }
-  ],
-  "screenshots": [
-    {
-      "src": "resto-screenshot-s1-connexion.png",
-      "sizes": "720x1280",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "Connexion"
-    },
-    {
-      "src": "resto-screenshot-s2-restaurant.png",
-      "sizes": "720x1280",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "Espace restaurant"
-    },
-    {
-      "src": "resto-screenshot-s3-client.png",
-      "sizes": "720x1280",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "Commande client"
-    }
   ]
 }
