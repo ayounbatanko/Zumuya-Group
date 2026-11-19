@@ -1,0 +1,28 @@
+
+/* ZUMUYA GROUP — panier du catalogue (partagé par l'accueil et la page Restauration). */
+.pc-add{width:100%;margin-top:8px;min-height:40px;border:0;border-radius:10px;background:#14213d;color:#fff;font:700 13px/1 inherit;cursor:pointer}
+.pc-add:hover{filter:brightness(1.15)}
+.pc-qty{display:inline-flex;align-items:center;gap:10px;margin-top:8px;align-self:flex-start}
+.pc-qty button{width:36px;height:36px;border-radius:10px;border:1px solid #e1e6ed;background:#fff;font:800 18px/1 inherit;color:#14213d;cursor:pointer}
+.pc-qty b{min-width:20px;text-align:center}
+.pc-dock{position:fixed;left:12px;right:12px;bottom:12px;z-index:60;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;pointer-events:none}
+.pc-dock button{pointer-events:auto;min-height:48px;padding:0 18px;border:0;border-radius:999px;font:700 14px inherit;cursor:pointer;box-shadow:0 8px 24px rgba(10,25,41,.28)}
+.pc-cart{background:linear-gradient(135deg,#14213d,#26417a);color:#fff}.pc-cart b{color:#ffb703}.pc-cart span{opacity:.8;margin-left:6px}
+.pc-track{background:#fff;color:#14213d;border:1px solid #e1e6ed!important}
+.pc-panel{position:fixed;inset:0;z-index:80;background:rgba(10,25,41,.55);display:flex;align-items:flex-end;justify-content:center}
+.pc-panel[hidden],.pc-toast[hidden],.pc-dock[hidden]{display:none}
+.pc-box{background:#fff;width:min(560px,100%);max-height:88vh;overflow:auto;border-radius:20px 20px 0 0;padding:18px 18px 22px}
+@media(min-width:700px){.pc-panel{align-items:center}.pc-box{border-radius:20px}}
+.pc-ph2{display:flex;justify-content:space-between;align-items:center;font-size:18px;margin-bottom:6px}
+.pc-ph2 button{width:40px;height:40px;border:0;border-radius:10px;background:#eef3f6;font-size:22px;cursor:pointer}
+.pc-line{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid #e1e6ed}
+.pc-line .pc-qty{margin:0}.pc-lg{display:flex;flex-direction:column;min-width:0}.pc-lt{min-width:70px;text-align:right}
+.pc-tot{display:flex;justify-content:space-between;padding:8px 0}.pc-tot.big{font-size:18px;border-top:2px solid #e1e6ed;margin-top:4px}
+.pc-act{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}.pc-act .btn{flex:1 1 200px;min-height:48px;border:0;cursor:pointer}
+.pc-clear{min-height:48px;padding:0 16px;border:1px solid #e1e6ed;border-radius:10px;background:#fff;font-weight:700;color:#a4281b;cursor:pointer}
+.pc-toast{position:fixed;left:12px;right:12px;bottom:76px;z-index:90;max-width:520px;margin:0 auto;background:#14213d;color:#fff;padding:12px 40px 12px 14px;border-radius:12px;font-size:14px;box-shadow:0 8px 24px rgba(0,0,0,.3)}
+.pc-toast a{color:#ffb703;font-weight:700}.pc-toast button{position:absolute;right:6px;top:6px;width:32px;height:32px;border:0;background:transparent;color:#fff;font-size:20px;cursor:pointer}
+
+.pc-order{cursor:pointer;border:0;font-weight:800}
+.pc-panel .btn,.pc-order{background:#ffb703;color:#14213d;border-radius:10px}
+.pc-panel,.pc-dock,.pc-toast,.pc-box{font-family:inherit}

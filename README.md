@@ -1,31 +1,36 @@
-# ZUMUYA GROUP — projet web
+# ZUMUYA GROUP — plateforme web
 
-Ce dépôt contient les fichiers du projet ZUMUYA GROUP : portail principal, comptes, espace agricole, espace client, modules de restauration, livraison, styles, icônes, manifeste et scripts associés.
+Tous les fichiers sont à la racine du dépôt (GitHub Pages : branche `main`, dossier `/`). Le site s'ouvre sur `index.html`.
 
-## Mise en ligne sur GitHub
+## Un compte = une catégorie = son propre tableau de bord
+La catégorie choisie à l'inscription (`compte.html`) détermine l'espace réservé. Une catégorie qui ouvre la page d'une autre est renvoyée vers la sienne (`zguard.js`).
 
-1. Ouvrir le dépôt GitHub du projet.
-2. Télécharger cette archive ZIP et la décompresser sur l'appareil, ou utiliser l'option d'importation de fichiers de GitHub.
-3. Envoyer le contenu de ce dossier à la racine du dépôt (les fichiers `index.html`, `config.js`, `agro.html`, etc. doivent être visibles à la racine).
-4. Vérifier que `config.js` contient l'URL Supabase et la clé publique `anon` du bon projet.
-5. Ne jamais ajouter une clé `service_role`, un mot de passe, un jeton privé ou un secret dans GitHub.
+| Catégorie | Espace | Fonctionnalités (issues de RestoGest) |
+|---|---|---|
+| Client | `client-espace.html`, `resto-client.html` | restaurants proches (GPS), panier, commande, suivi pas à pas, carte quand la commande est en route, annulation, reçu PDF, messagerie, profil / adresses / favoris |
+| Restaurant | `resto-restaurant.html` | tableau de bord, caisse hors connexion + ticket, historique des ventes, commandes en ligne (accepter, refuser, préparer), menu (photos), livreurs, rapport, paramètres (logo, GPS, devise, tarif au km, paiements), carte de visite + QR, abonnement Pro, écran cuisine |
+| Hôtel | `resto-restaurant.html` | tout ce qui précède + service en chambre et notes de chambre (`hotel.html`) |
+| Livreur | `resto-driver.html` | courses proposées, étapes de livraison, position GPS en direct |
+| Producteur / commerçant agricole | `agro.html` | espace agricole |
+| Propriétaire de la plateforme | `proprietaire.html`, `resto-owner.html` | supervision, partenaires, pays, organisations, abonnements |
 
-## Configuration Supabase
+## Panier des catalogues (accueil `index.html` et `restauration.html`)
+1. Les catalogues sont visibles par tous.
+2. L'ajout au panier est réservé aux comptes **Client** connectés. Un visiteur est invité à se connecter puis revient au catalogue ; un compte professionnel reçoit un message explicatif.
+3. **Un panier = un seul restaurant.** Ajouter un plat d'un autre restaurant propose de vider le panier.
+4. « Passer la commande » ouvre `resto-client.html` avec le panier repris : adresse, mode de paiement, frais de livraison (distance × tarif/km), validation.
+5. « Suivre mes commandes » : statuts en temps réel (envoyée → acceptée → préparée → prise en charge → en route → arrivée → livrée), carte pendant la livraison, notification à chaque changement.
 
-Le fichier `config.js` utilise une URL Supabase et une clé publique `anon`. Une clé `anon` est destinée à être utilisée côté navigateur, mais la sécurité dépend obligatoirement des politiques RLS et des permissions configurées dans Supabase.
+Code : `zcart.js` + `zcart.css` (panier partagé), `catalogue.js` (catalogue de l'accueil), `zsession.js` (session et données publiques).
 
-### Attention — scripts SQL agricoles historiques
+## Mise en route Supabase (un seul projet, réglé dans `config.js`)
+Dans SQL Editor, exécuter dans l'ordre : `sql-portail.sql`, `supabase-setup.sql` (activer `pg_cron` si demandé), puis `ZUMUYA_EXTENSION_ESSAI.sql` (profils / adresses / favoris des clients). Créez votre compte sur `compte.html`, puis décommentez la dernière requête de `sql-portail.sql` (avec votre e-mail) pour devenir propriétaire. `04_auth_phone_email_profile.sql` et `05_suppression_compte.sql` sont des références d'authentification / suppression de compte. Ne jamais mettre de clé `service_role` dans le dépôt.
 
-Les scripts SQL historiques inclus dans cette archive (`SUPABASE-INSTALLATION-COMPLETE.sql`, `ZUMUYA_EXTENSION_ESSAI.sql` et `zumuya-agro.sql`) contiennent des références aux anciennes tables `rg_agro_*`.
+## Coordination restauration · hôtel · livraison
+Une seule commande (`rg_orders`), trois modes de remise : sur place / à emporter (pôle 01), chambre (pôle 02), livraison (pôle 03, attribution automatique au livreur libre le plus proche, côté serveur). Statuts : `en attente < acceptée < préparée < en route < terminée` (+ `annulée`, `refusée`), sans retour en arrière.
 
-La base Supabase actuelle du projet possède des tables agricoles `z_agro_*` (notamment `z_agro_profiles` et `z_agro_products`). **Ne pas exécuter ces anciens scripts agricoles tels quels sur la base actuelle.** Ils sont conservés dans l'archive pour référence et compatibilité historique, pas comme une migration validée pour la base actuelle.
-
-Le module agricole du code source contient également encore des appels à certaines tables `rg_agro_*`. Il devra être adapté aux noms et colonnes réels des tables `z_agro_*` avant de considérer le module agricole comme opérationnel sur la base actuelle.
-
-## Authentification de test
-
-Le fichier `04_auth_phone_email_profile.sql` est fourni comme référence de configuration. La désactivation de la validation SMS dépend aussi des réglages du fournisseur Phone dans Supabase Auth ; la présence d'un champ téléphone dans une table ne désactive pas à elle seule la vérification.
-
-## Important
-
-Cette archive regroupe le code existant du projet. Elle ne constitue pas une certification de fonctionnement en production. Après importation dans GitHub, tester la connexion, la création de compte, les espaces utilisateur, les commandes et les permissions RLS dans un environnement de test.
+## Limites connues
+- Sécurité : les politiques RLS des tables `rg_*` du service restent ouvertes (clé anon) ; `rg_users` contient des mots de passe en clair lisibles. À migrer vers Supabase Auth puis à restreindre en priorité.
+- Les comptes du portail (Supabase Auth) et les données du service (`rg_users`, `rg_rests`, `rg_orders`) sont reliés par `resto-portal-bridge.js`.
+- `agro.js` appelle encore des tables `rg_agro_*` alors que la base actuelle a des tables `z_agro_*` : à adapter avant de considérer l'espace agricole comme opérationnel.
+- Les catalogues ne couvrent que les restaurants (pas encore de produits agricoles ni de boutiques).

@@ -342,7 +342,11 @@ function cancel(id){const current=D.get().orders.find(o=>o.id==id);if(!current)r
 function rc(id){const d=D.get(),o=d.orders.find(o=>o.id==id);alert('Dans la fenêtre d\'impression, choisissez « Enregistrer au format PDF ».');printHTML(receipt(d.rests.find(r=>r.id==o.restId),o,'Reçu de commande'))}
 setInterval(()=>{const mine=D.get().orders.filter(o=>o.clientId==U.id),cu=Object.fromEntries(mine.map(o=>[o.id,o.status])),sig=JSON.stringify(mine.map(o=>[o.id,o.status,o.driverPos]));
  if(seen){for(const k in cu)if(seen[k]!=cu[k])notify('Commande #'+k,cu[k]);if(tab=='myorders'&&sig!=seenSig)render()}seen=cu;seenSig=sig},2000);
-U&&RGChat.watch(U.id);try{const tg=store.g('l','rg_target');if(tg){const rr=D.get().rests.find(r=>r.slug==tg);if(rr){tab='restos';cur=rr.id;cart={}}store.s('l','rg_target','')}}catch(e){}render();
+U&&RGChat.watch(U.id);try{const tg=store.g('l','rg_target');if(tg){const rr=D.get().rests.find(r=>r.slug==tg);if(rr){tab='restos';cur=rr.id;cart={};
+  /* Panier préparé depuis le catalogue de l'accueil (un seul restaurant) : on le reprend ici, puis on le retire de l'accueil. */
+  try{const zc=JSON.parse(store.g('l','zg_cart')||'null');if(zc&&zc.slug==rr.slug)(zc.items||[]).forEach(i=>{const p=(rr.menu||[]).find(x=>x.n==i.n),q=Math.min(99,parseInt(i.q)||0);if(p&&q>0)cart[p.n]=q});store.s('l','zg_cart','')}catch(e){}}
+  store.s('l','rg_target','')}
+ const tb=store.g('l','rg_tab');if(tb){store.s('l','rg_tab','');if(tb=='myorders'){tab='myorders';cur=null}}}catch(e){}render();
 </script>
 <script>
 (()=> {

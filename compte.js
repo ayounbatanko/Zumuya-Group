@@ -36,6 +36,9 @@ async function showAccount(user){
   const type=user.user_metadata?.account_type;
   const routes={customer:'client-espace.html',restaurant:'resto-restaurant.html',hotel:'resto-restaurant.html',delivery:'resto-driver.html',agro_producer:'agro.html',agro_trader:'agro.html'};
   const stay=/parametres|stay/.test(location.hash);
+  /* Retour au catalogue : un visiteur parti se connecter depuis le panier y revient (clients uniquement, valable 30 min). */
+  try{const b=(localStorage.getItem('zg_back')||'').split('|');localStorage.removeItem('zg_back');
+    if(!stay&&type==='customer'&&b[0]&&Date.now()-(+b[1]||0)<18e5&&/^[a-z0-9._-]+\.html(#[\w-]*)?$/i.test(b[0])){location.replace(b[0]);return}}catch(e){}
   let owner=false;try{const {data}=await sb.rpc('rg_is_platform_owner');owner=data===true}catch(e){}
   if(owner&&!stay&&!sessionStorage.getItem('zumuya_redirected')){sessionStorage.setItem('zumuya_redirected','1');location.replace('proprietaire.html');return}
   if(!owner&&type&&routes[type]&&!stay&&(type==='customer'||user.user_metadata?.organization_id)&&!sessionStorage.getItem('zumuya_redirected')){sessionStorage.setItem('zumuya_redirected','1');if(type==='restaurant'||type==='hotel')sessionStorage.setItem('zmy_portal','1');location.replace(routes[type]);return}
@@ -191,7 +194,7 @@ async function submitPartner(e){
     if(['restaurant','agro','agro_trader'].includes(currentCat.id)){
       const agroRole=currentCat.id==='restaurant'?'restaurant':currentCat.id==='agro'?'agro_producer':'agro_trader';
       const {error:agroError}=await sb.from('rg_agro_profiles').upsert({user_id:currentUser.id,role:agroRole,business_name:fd.organization_name.trim(),country:fd.country_code||'CI',city:fd.city.trim(),address:fd.address||'',phone:fd.contact_phone.trim(),lat:Number(fd.latitude),lng:Number(fd.longitude)},{onConflict:'user_id'});
-      if(agroError)throw agroError;
+      if(agroError)console.warn('Profil agricole non enregistré (table rg_agro_profiles absente ?) :',agroError.message);   /* non bloquant : l'espace restaurant / hôtel / livreur n'en dépend pas */
     }
     closeFlow();
     $('#appList').innerHTML='<p class="empty">Compte professionnel activé. Votre espace est disponible.</p>';

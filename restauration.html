@@ -3,14 +3,14 @@
 <title>ZUMUYA Restauration — restaurants proches de vous</title><link rel="icon" href="logo.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&family=Manrope:wght@700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="zservice.css?v=1"></head><body>
+<link rel="stylesheet" href="zservice.css?v=1"><link rel="stylesheet" href="zcart.css?v=1"></head><body>
 <header class="zbar"><a class="zbrand" href="index.html"><img src="logo.svg" alt=""><span>ZUMUYA <b>GROUP</b></span></a>
 <nav><a href="index.html#services">Services</a><a href="hotel.html">Hôtel</a><a href="livraison.html">Livraison</a><a id="who" href="compte.html">Se connecter</a></nav></header>
 <section class="zhero"><span class="eyebrow">PÔLE 01 · RESTAURATION</span><h1>Les restaurants <em>proches de vous</em></h1>
-<p>Tous les catalogues des restaurants partenaires, ouverts à tous : le prix de chaque repas et les frais de livraison selon votre position. Connexion requise uniquement pour commander.</p>
+<p>Tous les catalogues des restaurants partenaires, ouverts à tous : le prix de chaque repas et les frais de livraison selon votre position. Connexion (compte Client) requise uniquement pour commander : ajoutez les plats d’un même restaurant à votre panier, validez, puis suivez votre livraison.</p>
 <div class="zchips" id="chips"></div></section>
 <main class="zwrap" id="app"></main>
-<script src="config.js"></script><script src="zsession.js?v=2"></script>
+<script src="config.js"></script><script src="zsession.js?v=3"></script><script src="zcart.js?v=1"></script>
 <script>
 (()=>{'use strict';
 const $=s=>document.querySelector(s),esc=ZS.esc;let pos=null,rests=[],q='',sort='near',open={},err='';
@@ -19,19 +19,19 @@ if(who){const a=$('#who');a.textContent='Connecté';a.className='zpill';a.href=w
 function chips(){const c=[];c.push('<span class="zchip">● '+(rests.length)+' restaurant'+(rests.length>1?'s':'')+' partenaire'+(rests.length>1?'s':'')+'</span>');
  c.push(pos?'<span class="zchip">📍 Position active</span>':'<span class="zchip warn">📍 Localisation requise</span>');$('#chips').innerHTML=c.join('')}
 function lock(){$('#app').innerHTML='<div class="card lock"><span class="eyebrow" style="color:#0b7d6f">ACCÈS CONNECTÉ</span><h2>Connectez-vous pour voir les restaurants proches</h2><p>Les catalogues, les prix et les frais de livraison s’affichent selon la position de l’utilisateur connecté.</p><a class="btn btn-gold" href="compte.html">Se connecter</a><a class="btn btn-line" href="compte.html?mode=signup">Créer un compte</a></div>'}
-function dishCard(r,p,fee){const img=p.imgs&&p.imgs[0]?'<img loading="lazy" src="'+esc(p.imgs[0])+'" alt="">':'<div class="ph">🍽️</div>';
+function dishCard(r,p,k,fee){const img=p.imgs&&p.imgs[0]?'<img loading="lazy" src="'+esc(p.imgs[0])+'" alt="">':'<div class="ph">🍽️</div>';
  return '<div class="dish">'+img+'<div class="in"><b>'+esc(p.n)+'</b><span class="d">'+esc(p.desc||'')+'</span><span class="pr">'+ZS.money(p.p,r.currency)+'</span>'+
-  (fee!=null?'<span class="dl">🛵 + livraison '+ZS.money(fee,r.currency)+' · total '+ZS.money((+p.p||0)+fee,r.currency)+'</span>':'<span class="dl">🛵 livraison : '+(pos?'tarif à confirmer':'activez la localisation')+'</span>')+'</div></div>'}
+  (fee!=null?'<span class="dl">🛵 + livraison '+ZS.money(fee,r.currency)+' · total '+ZS.money((+p.p||0)+fee,r.currency)+'</span>':'<span class="dl">🛵 livraison : '+(pos?'tarif à confirmer':'activez la localisation')+'</span>')+ZC.ctl(r.id,k,p.n)+'</div></div>'}
 function card(x){const r=x.r,d=x.d,fee=ZS.fee(r,d),ql=q.toLowerCase();
- let menu=(r.menu||[]);const hit=!ql||(r.name||'').toLowerCase().includes(ql);if(ql&&!hit)menu=menu.filter(p=>((p.n||'')+' '+(p.desc||'')).toLowerCase().includes(ql));
+ let menu=(r.menu||[]).map((p,k)=>({p,k}));const hit=!ql||(r.name||'').toLowerCase().includes(ql);if(ql&&!hit)menu=menu.filter(m=>((m.p.n||'')+' '+(m.p.desc||'')).toLowerCase().includes(ql));
  const all=open[r.id]||ql,show=all?menu:menu.slice(0,6);
  return '<article class="card rest"><div class="rest-head">'+(r.logo?'<img class="logo" src="'+esc(r.logo)+'" alt="">':'<div class="logo">🍽️</div>')+
   '<div class="g"><h3>'+esc(r.name)+'</h3><div class="mut">'+esc(r.address||'Adresse non renseignée')+'</div><div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap">'+
   (d!=null?'<span class="badge">📍 '+ZS.dist(d)+'</span>':'<span class="badge grey">distance inconnue</span>')+
   (fee!=null?'<span class="badge gold">🛵 livraison '+ZS.money(fee,r.currency)+'</span>':(+r.kmPrice>0?'<span class="badge grey">🛵 '+ZS.money(r.kmPrice,r.currency)+' / km</span>':'<span class="badge grey">🛵 tarif non défini</span>'))+
   '<span class="badge grey">'+(r.menu||[]).length+' plat'+((r.menu||[]).length>1?'s':'')+'</span></div></div>'+
-  '<a class="btn btn-navy" href="resto-index.html?resto='+encodeURIComponent(r.slug)+'">Commander</a></div>'+
-  (show.length?'<div class="dishes">'+show.map(p=>dishCard(r,p,fee)).join('')+'</div>':'<p class="mut" style="padding:16px 18px">'+(ql?'Aucun plat ne correspond.':'Catalogue bientôt disponible.')+'</p>')+
+  ZC.headBtn(r.id)+'</div>'+
+  (show.length?'<div class="dishes">'+show.map(m=>dishCard(r,m.p,m.k,fee)).join('')+'</div>':'<p class="mut" style="padding:16px 18px">'+(ql?'Aucun plat ne correspond.':'Catalogue bientôt disponible.')+'</p>')+
   (!all&&menu.length>6?'<button class="btn btn-line more" data-open="'+esc(r.id)+'">Voir tout le catalogue ('+menu.length+' plats)</button>':'')+'</article>'}
 function draw(){chips();
  const ql=q.toLowerCase();let list=rests.map(r=>({r,d:pos&&r.lat!=null&&r.lng!=null?ZS.km(pos,[r.lat,r.lng]):null}));
@@ -43,8 +43,8 @@ function draw(){chips();
  const s=$('#s');if(s){s.oninput=e=>{q=e.target.value;const p=e.target.selectionStart;draw();const n=$('#s');n.focus();n.setSelectionRange(p,p)}}
  const o=$('#o');if(o)o.onchange=e=>{sort=e.target.value;draw()};const l=$('#loc');if(l)l.onclick=locate}
 $('#app').addEventListener('click',e=>{const b=e.target.closest('[data-open]');if(b){open[b.dataset.open]=1;draw()}});
-async function locate(){try{pos=await ZS.locate();err=''}catch(e){err='Position indisponible : autorisez la localisation dans votre navigateur pour trier les restaurants et calculer les frais de livraison.'}draw()}
-async function load(){try{const a=await ZS.rests();rests=a.filter(r=>ZS.subOk(r)&&!ZS.isHotel(r))}catch(e){err='Impossible de charger les restaurants. Vérifiez votre connexion.'}draw()}
-draw();load();locate();setInterval(load,60000)
+async function locate(){try{pos=await ZS.locate();err=''}catch(e){err='Position indisponible : autorisez la localisation dans votre navigateur pour trier les restaurants et calculer les frais de livraison.'}ZC.setData(rests,pos);draw()}
+async function load(){try{const a=await ZS.rests();rests=a.filter(r=>ZS.subOk(r)&&!ZS.isHotel(r));ZC.setData(rests,pos)}catch(e){err='Impossible de charger les restaurants. Vérifiez votre connexion.'}draw()}
+ZC.init({onChange:draw});draw();load();locate();setInterval(load,60000)
 })();
 </script></body></html>

@@ -1,4 +1,4 @@
--- ZUMUYA GROUP — EXTENSION ESSAI (à exécuter après SUPABASE-INSTALLATION-COMPLETE.sql)
+-- ZUMUYA GROUP — extension client (profils, adresses, favoris) et groupes agro : à exécuter après sql-portail.sql et supabase-setup.sql
 -- Idempotent : peut être relancé sans dupliquer les tables.
 create extension if not exists pgcrypto;
 
