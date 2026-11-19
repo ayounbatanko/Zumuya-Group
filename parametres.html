@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#102b45">
+<title>Paramètres du compte — ZUMUYA GROUP</title>
+<link rel="icon" href="logo.svg" type="image/svg+xml">
+<link rel="stylesheet" href="compte.css?v=5">
+<style>
+.wide{max-width:640px}
+.sec{border-top:1px solid var(--line);margin-top:22px;padding-top:20px}
+.sec:first-of-type{border-top:0;margin-top:0;padding-top:0}
+.sec h2{margin:0 0 4px;font-size:18px;color:var(--navy)}
+.row2{display:flex;gap:10px;flex-wrap:wrap}.row2 .btn{flex:1;min-width:150px}
+.danger{border:1px solid #e3b4b4;background:#fdf4f4;border-radius:14px;padding:18px;margin-top:26px}
+.danger h2{color:var(--bad)}
+.btn.bad{background:var(--bad)}
+.kv{display:grid;grid-template-columns:130px 1fr;gap:6px 12px;margin:0 0 14px;font-size:15px}.kv dt{color:var(--muted)}.kv dd{margin:0;font-weight:700;word-break:break-word}
+.sw{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
+.sw:last-child{border-bottom:0}.sw span small{display:block}
+.sw input{width:22px;min-height:22px;height:22px}
+</style>
+</head>
+<body>
+<header class="bar"><a class="brand" href="index.html"><img src="logo.svg" alt=""><span>ZUMUYA <b>GROUP</b></span></a><a class="back" id="backLink" href="compte.html#stay">← Retour à mon compte</a></header>
+<main>
+<section class="card wide" id="box" hidden>
+  <h1>Paramètres du compte</h1>
+  <p class="lead">Gérez vos informations, votre sécurité, vos préférences et vos données.</p>
+
+  <div class="sec">
+    <h2>Profil</h2>
+    <dl class="kv"><dt>Catégorie</dt><dd id="pCat">—</dd><dt>Téléphone</dt><dd id="pPhone">—</dd><dt>Membre depuis</dt><dd id="pSince">—</dd></dl>
+    <form id="nameForm" novalidate>
+      <label>Nom complet<input id="pName" type="text" autocomplete="name" maxlength="80"></label>
+      <p class="msg" id="nameMsg" hidden></p>
+      <button class="btn small" type="submit">Enregistrer le nom</button>
+    </form>
+    <p style="margin:14px 0 0"><a class="btn small" id="spaceLink" href="compte.html#stay" style="display:inline-flex;align-items:center;text-decoration:none" hidden>🏠 Ouvrir mon espace</a></p>
+  </div>
+
+  <div class="sec">
+    <h2>Numéro de téléphone</h2>
+    <p class="lead" style="margin-bottom:12px">Il sert à vous connecter. Un code SMS confirme le nouveau numéro.</p>
+    <form id="phoneForm" novalidate>
+      <label>Nouveau numéro (avec indicatif, ex. +22790000000)<input id="newPhone" type="tel" inputmode="tel" placeholder="+227…"></label>
+      <div id="otpWrap" hidden><label>Code reçu par SMS<input id="otp" inputmode="numeric" autocomplete="one-time-code" maxlength="8"></label></div>
+      <p class="msg" id="phoneMsg" hidden></p>
+      <button class="btn small" type="submit" id="phoneBtn">Changer de numéro</button>
+    </form>
+  </div>
+
+  <div class="sec">
+    <h2>Mot de passe</h2>
+    <form id="pwForm" novalidate>
+      <label>Mot de passe actuel<span class="pw"><input id="pwOld" type="password" autocomplete="current-password"><button type="button" class="eye" data-eye="pwOld">Afficher</button></span></label>
+      <label>Nouveau mot de passe<span class="pw"><input id="pwNew" type="password" autocomplete="new-password"><button type="button" class="eye" data-eye="pwNew">Afficher</button></span><small>8 caractères minimum.</small></label>
+      <label>Confirmer le nouveau mot de passe<span class="pw"><input id="pwNew2" type="password" autocomplete="new-password"><button type="button" class="eye" data-eye="pwNew2">Afficher</button></span></label>
+      <p class="msg" id="pwMsg" hidden></p>
+      <button class="btn small" type="submit">Modifier le mot de passe</button>
+    </form>
+  </div>
+
+  <div class="sec">
+    <h2>Préférences</h2>
+    <div class="sw"><span><b>Notifications sur cet appareil</b><small id="notifState">—</small></span><button class="btn small" type="button" id="notifBtn">Activer</button></div>
+    <div class="sw"><span><b>Langue de l’interface</b><small>Les espaces Restauration, Hôtel et Livraison proposent FR · EN · ES · AR en haut de l’écran.</small></span></div>
+  </div>
+
+  <div class="sec">
+    <h2>Sécurité et données</h2>
+    <div class="row2">
+      <button class="btn ghost" type="button" id="logoutAll" style="width:auto">Me déconnecter de tous mes appareils</button>
+      <button class="btn ghost" type="button" id="exportBtn" style="width:auto">Télécharger mes données</button>
+    </div>
+    <p class="msg" id="secMsg" hidden style="margin-top:12px"></p>
+    <button class="btn ghost" type="button" id="logout" style="margin-top:12px">Se déconnecter</button>
+  </div>
+
+  <div class="danger" id="dangerZone">
+    <h2>Supprimer mon compte</h2>
+    <p class="lead" style="margin-bottom:12px" id="delWarn">Cette action est définitive : votre compte et vos données personnelles seront effacés.</p>
+    <button class="btn bad small" type="button" id="delOpen">Supprimer mon compte…</button>
+    <form id="delForm" novalidate hidden style="margin-top:14px">
+      <label>Pour confirmer, tapez <b>SUPPRIMER</b><input id="delWord" autocomplete="off" autocapitalize="characters"></label>
+      <label>Votre mot de passe<span class="pw"><input id="delPw" type="password" autocomplete="current-password"><button type="button" class="eye" data-eye="delPw">Afficher</button></span></label>
+      <p class="msg" id="delMsg" hidden></p>
+      <div class="row2"><button class="btn bad" type="submit" id="delBtn">Supprimer définitivement</button><button class="btn ghost" type="button" id="delCancel" style="width:auto">Annuler</button></div>
+    </form>
+  </div>
+</section>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="parametres.js?v=1"></script>
+</body>
+</html>

@@ -146,7 +146,7 @@ const OWNER_ACCOUNT_NAME='Ayouba Tanko';
 const isOwnerAccount=u=>!!u&&String(u.name||'').trim().toLocaleLowerCase('fr')===OWNER_ACCOUNT_NAME.toLocaleLowerCase('fr');
 function guard(role){const u=me();const allowed=role==='owner'?(u&&(u.role==='owner'||(u.role==='restaurant'&&isOwnerAccount(u)))):(u&&u.role===role);if(!allowed){navTo('index');return null}return u}
 function logout(){store.clr();try{Object.keys(localStorage).filter(function(k){return /^sb-.*-auth-token$/.test(k)}).forEach(function(k){localStorage.removeItem(k)})}catch(e){}navTo('compte.html')}
-function passwordCard(){return `<div class="card col"><h3 style="margin:0">🔐 Mon compte ZUMUYA GROUP</h3><p class="mut">La connexion se fait uniquement avec votre e-mail sur ZUMUYA GROUP. Le mot de passe se modifie ou se réinitialise depuis votre compte.</p><a href="compte.html" style="font-weight:700">Ouvrir mon compte ZUMUYA →</a></div>`}
+function passwordCard(){return `<div class="card col"><h3 style="margin:0">🔐 Mon compte ZUMUYA GROUP</h3><p class="mut">La connexion se fait uniquement avec votre numéro de téléphone. Gérez votre profil, votre mot de passe, vos préférences ou supprimez votre compte.</p><a href="parametres.html" style="font-weight:700">⚙️ Ouvrir les paramètres de mon compte →</a></div>`}
 
 const slugify=s=>s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
 const money=(v,c)=>{if(!c||c=='XOF'||c=='XAF')return new Intl.NumberFormat(lang(),{maximumFractionDigits:0}).format(v)+' FCFA';try{return new Intl.NumberFormat(lang(),{style:'currency',currency:c||'XOF'}).format(v)}catch(e){return v+' '+c}};

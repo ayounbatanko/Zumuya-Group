@@ -5,7 +5,7 @@ ZS.esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;
 /* Session du portail (Supabase Auth) : lue dans le stockage local, sans charger de bibliothèque. */
 ZS.portal=()=>{try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);
   if(/^sb-.*-auth-token$/.test(k)){const v=JSON.parse(localStorage.getItem(k)||'null'),s=v&&(v.currentSession||v);
-   if(s&&s.access_token&&s.refresh_token){const u=s.user||{};return{kind:'portal',email:u.email||'',name:(u.user_metadata&&u.user_metadata.name)||u.email||'Mon compte'}}}}}catch(e){}return null};
+   if(s&&s.access_token&&s.refresh_token){const u=s.user||{};return{kind:'portal',email:u.email||'',phone:u.phone||'',name:(u.user_metadata&&u.user_metadata.name)||u.phone||u.email||'Mon compte'}}}}}catch(e){}return null};
 /* Session du Service (restaurant, hôtel, client, livreur) : ouverte dans cet onglet uniquement. */
 ZS.resto=()=>{try{const id=sessionStorage.getItem('uid');if(!id)return null;const d=JSON.parse(localStorage.getItem('rm_db')||'null');
   const u=d&&(d.users||[]).find(x=>x.id==id);if(!u||u.disabled)return null;const r=u.restId?(d.rests||[]).find(x=>x.id==u.restId):null;

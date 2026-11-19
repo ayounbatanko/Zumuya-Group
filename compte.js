@@ -1,15 +1,12 @@
 (()=>{'use strict';
 const $=s=>document.querySelector(s);
-let sb=null,mode='in',legacyPhone=false;
+let sb=null,mode='in';
 const ROLE_TYPES=['restaurant','hotel','delivery','agro_producer','agro_trader','commerce','business'];
 const roleToPartner={restaurant:'restaurant',hotel:'hotel',delivery:'delivery',agro_producer:'agro',agro_trader:'agro_trader',commerce:'commerce',business:'business'};
-function isCustomer(){return $('#accountCategory').value==='customer'}
-function usePhone(){return mode==='in'&&isCustomer()&&legacyPhone}
-/* E-mail pour TOUS les types de compte. Seule exception : un ancien compte client créé avec un numéro peut encore se connecter par téléphone. */
-function updateIdentityFields(){const byPhone=usePhone();
-  $('#phoneWrap').hidden=!byPhone;$('#emailWrap').hidden=byPhone;$('#phone').required=byPhone;$('#email').required=!byPhone;
-  $('#categoryHelp').textContent=byPhone?'Ancien compte client : connexion avec numéro de téléphone et indicatif du pays.':'Pour tous les types de compte : inscription et connexion avec votre adresse e-mail.';
-  const lb=$('#legacyPhoneBtn');if(lb){lb.hidden=!(mode==='in'&&isCustomer());lb.textContent=byPhone?'Me connecter avec mon adresse e-mail':'Mon compte client a été créé avec un numéro de téléphone'}}
+/* Téléphone UNIQUEMENT, pour toutes les catégories (plus d'e-mail). */
+function readPhone(){const raw=$('#phone').value.trim().replace(/[\s().-]/g,''),dial=$('#dialCode').value;return raw.startsWith('+')?raw:dial+raw.replace(/^0/,'')}
+const PHONE_RE=/^\+[1-9]\d{7,14}$/;
+function updateIdentityFields(){$('#phone').required=true;$('#categoryHelp').textContent='Pour tous les types de compte : inscription et connexion avec votre numéro de téléphone et votre mot de passe.'}
 const MIN=8;
 
 function showMsg(text,type='error'){const m=$('#msg');m.textContent=text;m.className='msg '+type;m.hidden=!text}
@@ -18,7 +15,7 @@ function setMode(m,init){
   $('#tabIn').classList.toggle('active',!up);$('#tabUp').classList.toggle('active',up);
   $('#tabIn').setAttribute('aria-selected',String(!up));$('#tabUp').setAttribute('aria-selected',String(up));
   $('#nameWrap').hidden=!up;$('#confirmWrap').hidden=!up;$('#pwHelp').hidden=!up;
-  $('#accountCategory').disabled=false;if(up)legacyPhone=false;updateIdentityFields();
+  $('#accountCategory').disabled=false;updateIdentityFields();
   $('#displayName').required=up;$('#passwordConfirm').required=up;
   $('#password').autocomplete=up?'new-password':'current-password';
   $('#submitBtn').textContent=up?'Créer mon compte':'Se connecter';
@@ -37,51 +34,46 @@ function updateMatch(){
 }
 function showAccount(user){
   const type=user.user_metadata?.account_type;
-  const routes={customer:'client-espace.html',restaurant:'resto-restaurant.html',hotel:'hotel.html',delivery:'resto-driver.html',agro_producer:'agro.html',agro_trader:'agro.html'};
-  if(type&&routes[type]&&(type==='customer'||user.user_metadata?.organization_id)&&!sessionStorage.getItem('zumuya_redirected')){sessionStorage.setItem('zumuya_redirected','1');if(type==='restaurant')sessionStorage.setItem('zmy_portal','1');location.replace(routes[type]);return}
+  const routes={customer:'client-espace.html',restaurant:'resto-restaurant.html',hotel:'resto-restaurant.html',delivery:'resto-driver.html',agro_producer:'agro.html',agro_trader:'agro.html'};
+  if(type&&routes[type]&&!/parametres|stay/.test(location.hash)&&(type==='customer'||user.user_metadata?.organization_id)&&!sessionStorage.getItem('zumuya_redirected')){sessionStorage.setItem('zumuya_redirected','1');if(type==='restaurant'||type==='hotel')sessionStorage.setItem('zmy_portal','1');location.replace(routes[type]);return}
   sessionStorage.removeItem('zumuya_redirected');
   $('#auth').hidden=true;$('#account').hidden=false;
-  $('#accPhone').textContent=user.email||user.phone||user.user_metadata?.phone_display||'—';
+  $('#accPhone').textContent=fmtPhone(user.phone||user.user_metadata?.phone_display||'')||'—';
+  const sp=$('#mySpace'),rt=routes[type];if(sp){sp.hidden=!rt;if(rt)sp.href=rt}
   $('#accName').textContent=(user.user_metadata&&user.user_metadata.name)||'—';
   $('#recovery').hidden=true;
   checkOwner();
   initPartner(user);
 }
+function fmtPhone(p){p=String(p||'');return p&&!p.startsWith('+')&&/^\d{8,15}$/.test(p)?'+'+p:p}
 function showAuth(){$('#account').hidden=true;$('#recovery').hidden=true;$('#auth').hidden=false}
 
 async function submit(e){
   e.preventDefault();showMsg('');
-  const customer=usePhone(),password=$('#password').value,name=$('#displayName').value.trim(),confirm=$('#passwordConfirm').value;
-  const email=$('#email').value.trim().toLowerCase();
-  const raw=$('#phone').value.trim().replace(/[\s().-]/g,''),dial=$('#dialCode').value;
-  const phone=raw.startsWith('+')?raw:dial+raw.replace(/^0/,'');
-  const accountType=$('#accountCategory').value;
+  const password=$('#password').value,name=$('#displayName').value.trim(),confirm=$('#passwordConfirm').value;
+  const phone=readPhone(),accountType=$('#accountCategory').value;
   if(mode==='up'){
     if(!name)return showMsg('Saisissez votre nom complet.');
-    if(customer&&!/^\+[1-9]\d{7,14}$/.test(phone))return showMsg('Saisissez un numéro valide avec son indicatif international.');
-    if(!customer&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))return showMsg('Saisissez une adresse e-mail valide.');
+    if(!PHONE_RE.test(phone))return showMsg('Saisissez un numéro valide (indicatif du pays + numéro).');
     if(password.length<MIN)return showMsg('Le mot de passe doit contenir au moins '+MIN+' caractères.');
     if(password!==confirm){updateMatch();return showMsg('Les deux saisies du mot de passe ne sont pas identiques.')}
   }else{
-    if(customer&&!/^\+[1-9]\d{7,14}$/.test(phone))return showMsg('Saisissez votre numéro avec indicatif international.');
-    if(!customer&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))return showMsg('Saisissez votre adresse e-mail.');
+    if(!PHONE_RE.test(phone))return showMsg('Saisissez votre numéro de téléphone avec son indicatif.');
     if(!password)return showMsg('Saisissez votre mot de passe.');
   }
   if(!sb)return showMsg('Le service de connexion n’est pas configuré. Vérifiez le fichier config.js.');
   const btn=$('#submitBtn');btn.disabled=true;
   try{
     if(mode==='up'){
-      const metadata={name,account_type:accountType,requested_account_type:accountType};
-      const payload={email,password,options:{data:metadata}};
-      const {data,error}=await sb.auth.signUp(payload);
+      const metadata={name,account_type:accountType,requested_account_type:accountType,phone_display:phone};
+      const {data,error}=await sb.auth.signUp({phone,password,options:{data:metadata}});
       if(error)throw error;
-      if(data.user&&Array.isArray(data.user.identities)&&data.user.identities.length===0)throw new Error('Un compte existe déjà avec cette identité. Connectez-vous.');
+      if(data.user&&Array.isArray(data.user.identities)&&data.user.identities.length===0)throw new Error('Un compte existe déjà avec ce numéro. Connectez-vous.');
       $('#password').value='';$('#passwordConfirm').value='';updateMatch();
       if(data.session){showAccount(data.session.user);return}
-      showMsg('Compte créé. Selon le réglage Supabase, confirmez votre adresse e-mail avant la première connexion.','success');
+      showMsg('Compte créé. Si la confirmation par SMS est activée, confirmez votre numéro avant la première connexion.','success');
     }else{
-      const credentials=customer?{phone,password}:{email,password};
-      const {data,error}=await sb.auth.signInWithPassword(credentials);
+      const {data,error}=await sb.auth.signInWithPassword({phone,password});
       if(error)throw error;
       showAccount(data.user);
     }
@@ -90,12 +82,12 @@ async function submit(e){
 }
 function translate(err){
   const m=(err&&err.message)||'';
-  if(/Invalid login credentials/i.test(m))return usePhone()?'Numéro de téléphone ou mot de passe incorrect.':'Adresse e-mail ou mot de passe incorrect.';
-  if(/Email not confirmed/i.test(m))return 'Confirmez d’abord votre adresse e-mail grâce au lien reçu dans votre boîte de réception.';
-  if(/Phone not confirmed/i.test(m))return 'La confirmation téléphone est encore activée dans Supabase. Désactivez-la dans Authentication > Providers > Phone pour cette version d’essai.';
-  if(/already registered|already been registered/i.test(m))return 'Un compte existe déjà avec cette adresse e-mail. Connectez-vous.';
+  if(/Invalid login credentials/i.test(m))return 'Numéro de téléphone ou mot de passe incorrect.';
+  if(/Phone not confirmed/i.test(m))return 'Ce numéro n’est pas encore confirmé. Saisissez le code reçu par SMS ou contactez le support.';
+  if(/already registered|already been registered/i.test(m))return 'Un compte existe déjà avec ce numéro. Connectez-vous.';
   if(/rate limit|too many/i.test(m))return 'Trop de tentatives. Patientez quelques minutes puis réessayez.';
   if(/Password should be|weak/i.test(m))return 'Mot de passe trop faible. Utilisez au moins 8 caractères.';
+  if(/Phone signups are disabled|phone provider/i.test(m))return 'L’inscription par téléphone n’est pas activée (Supabase > Authentication > Providers > Phone).';
   if(/fetch|network/i.test(m))return 'Connexion impossible. Vérifiez votre accès Internet.';
   return m||'Une erreur est survenue. Réessayez.';
 }
@@ -197,8 +189,8 @@ async function submitPartner(e){
     }
     closeFlow();
     $('#appList').innerHTML='<p class="empty">Compte professionnel activé. Votre espace est disponible.</p>';
-    const destinations={restaurant:'resto-restaurant.html',hotel:'hotel.html',delivery:'resto-driver.html',agro:'agro.html',agro_trader:'agro.html'};
-    if(currentCat.id==='restaurant')sessionStorage.setItem('zmy_portal','1');
+    const destinations={restaurant:'resto-restaurant.html',hotel:'resto-restaurant.html',delivery:'resto-driver.html',agro:'agro.html',agro_trader:'agro.html'};
+    if(currentCat.id==='restaurant'||currentCat.id==='hotel')sessionStorage.setItem('zmy_portal','1');
     if(destinations[currentCat.id])location.href=destinations[currentCat.id];
   }catch(err){
     pShow(/duplicate|unique/i.test(err.message||'')?'Vous avez déjà une demande active dans cette catégorie.':'Votre demande n’a pas pu être envoyée. Réessayez dans un instant.');
@@ -220,18 +212,11 @@ function pwMsg(id,t,type='error'){const m=$(id);m.textContent=t;m.className='msg
 $('#forgotBtn').addEventListener('click',async()=>{
   if(!sb)return;
   try{
-    if(usePhone()){
-      const raw=$('#phone').value.trim().replace(/[\s().-]/g,''),phone=raw.startsWith('+')?raw:$('#dialCode').value+raw.replace(/^0/,'');
-      if(!/^\+[1-9]\d{7,14}$/.test(phone))return showMsg('Saisissez votre numéro avec indicatif pour recevoir un code SMS.');
-      const {error}=await sb.auth.signInWithOtp({phone,options:{shouldCreateUser:false}});if(error)throw error;
-      const token=prompt('Saisissez le code reçu par SMS :');if(!token)return;
-      const verified=await sb.auth.verifyOtp({phone,token:token.trim(),type:'sms'});if(verified.error)throw verified.error;
-    }else{
-      const email=$('#email').value.trim().toLowerCase();
-      if(!email)return showMsg('Saisissez votre adresse e-mail pour recevoir le lien de réinitialisation.');
-      const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname});if(error)throw error;
-      return showMsg('Un lien de réinitialisation a été envoyé à votre adresse e-mail.','success');
-    }
+    const phone=readPhone();
+    if(!PHONE_RE.test(phone))return showMsg('Saisissez votre numéro avec indicatif pour recevoir un code SMS.');
+    const {error}=await sb.auth.signInWithOtp({phone,options:{shouldCreateUser:false}});if(error)throw error;
+    const token=prompt('Saisissez le code reçu par SMS :');if(!token)return;
+    const verified=await sb.auth.verifyOtp({phone,token:token.trim(),type:'sms'});if(verified.error)throw verified.error;
     $('#auth').hidden=true;$('#recovery').hidden=false;showMsg('');
   }catch(err){showMsg(translate(err))}
 });
@@ -257,7 +242,7 @@ $('#pwForm').addEventListener('submit',async e=>{
   if(a===o)return pwMsg('#pwMsg','Le nouveau mot de passe doit être différent de l’actuel.');
   $('#pwBtn').disabled=true;
   try{
-    const identity=currentUser&&(currentUser.phone?{phone:currentUser.phone}:{email:currentUser.email});
+    const identity=currentUser&&(currentUser.phone?{phone:currentUser.phone}:{email:currentUser.email});/* comptes téléphone */
     const r=await sb.auth.signInWithPassword({...identity,password:o});
     if(r.error)throw new Error('Mot de passe actuel incorrect.');
     const {error}=await sb.auth.updateUser({password:a});if(error)throw error;
@@ -272,8 +257,6 @@ document.addEventListener('click',e=>{
   if(eye){const i=document.getElementById(eye.dataset.eye),show=i.type==='password';i.type=show?'text':'password';eye.textContent=show?'Masquer':'Afficher'}
 });
 $('#authForm').addEventListener('submit',submit);
-$('#accountCategory').addEventListener('change',()=>{if(!isCustomer())legacyPhone=false;updateIdentityFields()});
-$('#legacyPhoneBtn').addEventListener('click',()=>{legacyPhone=!legacyPhone;showMsg('');updateIdentityFields()});
 $('#password').addEventListener('input',updateMatch);
 $('#passwordConfirm').addEventListener('input',updateMatch);
 $('#logout').addEventListener('click',async()=>{if(sb)await sb.auth.signOut();showAuth();setMode('in')});

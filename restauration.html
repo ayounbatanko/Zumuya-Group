@@ -7,10 +7,10 @@
 <header class="zbar"><a class="zbrand" href="index.html"><img src="logo.svg" alt=""><span>ZUMUYA <b>GROUP</b></span></a>
 <nav><a href="index.html#services">Services</a><a href="hotel.html">Hôtel</a><a href="livraison.html">Livraison</a><a id="who" href="compte.html">Se connecter</a></nav></header>
 <section class="zhero"><span class="eyebrow">PÔLE 01 · RESTAURATION</span><h1>Les restaurants <em>proches de vous</em></h1>
-<p>Tous les catalogues des restaurants partenaires, le prix de chaque repas et les frais de livraison calculés selon votre position.</p>
+<p>Tous les catalogues des restaurants partenaires, ouverts à tous : le prix de chaque repas et les frais de livraison selon votre position. Connexion par téléphone requise uniquement pour commander.</p>
 <div class="zchips" id="chips"></div></section>
 <main class="zwrap" id="app"></main>
-<script src="config.js"></script><script src="zsession.js?v=1"></script>
+<script src="config.js"></script><script src="zsession.js?v=2"></script>
 <script>
 (()=>{'use strict';
 const $=s=>document.querySelector(s),esc=ZS.esc;let pos=null,rests=[],q='',sort='near',open={},err='';
@@ -45,6 +45,6 @@ function draw(){chips();
 $('#app').addEventListener('click',e=>{const b=e.target.closest('[data-open]');if(b){open[b.dataset.open]=1;draw()}});
 async function locate(){try{pos=await ZS.locate();err=''}catch(e){err='Position indisponible : autorisez la localisation dans votre navigateur pour trier les restaurants et calculer les frais de livraison.'}draw()}
 async function load(){try{const a=await ZS.rests();rests=a.filter(r=>ZS.subOk(r)&&!ZS.isHotel(r))}catch(e){err='Impossible de charger les restaurants. Vérifiez votre connexion.'}draw()}
-if(!who){lock();chips()}else{draw();load();locate();setInterval(load,60000)}
+draw();load();locate();setInterval(load,60000)
 })();
 </script></body></html>

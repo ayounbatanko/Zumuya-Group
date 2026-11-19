@@ -182,3 +182,27 @@ footer>div{gap:13px}
 @media(max-width:650px){.hero-visual.tech{height:350px;max-width:100%;transform:none;margin:8px 0 0}.hero-visual.tech .core{width:132px;height:132px;border-radius:24px}.hero-visual.tech .core img{width:46px;height:46px}.hero-visual.tech .core b{font-size:13px}.hero-visual.tech .core small{display:none}.tnode{font-size:10px;padding:7px 9px}.pulse{width:140px;height:140px;margin:-70px 0 0 -70px}}
 
 [hidden]{display:none!important}
+
+/* Catalogue public des restaurants (accueil) */
+.pc{max-width:1180px;margin:22px auto 0}
+.pc-bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+.pc-bar input{flex:1 1 240px;min-height:46px;padding:0 14px;border:1px solid var(--line);border-radius:10px;background:#fff}
+.pc-bar select{min-height:46px;padding:0 12px;border:1px solid var(--line);border-radius:10px;background:#fff;font:inherit}
+.pc-bar .btn{min-height:46px;padding:0 16px;border:0;cursor:pointer}
+.pc-rest{background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);margin-bottom:18px;overflow:hidden}
+.pc-head{display:flex;gap:14px;align-items:center;flex-wrap:wrap;padding:16px 18px;border-bottom:1px solid var(--line)}
+.pc-logo{width:54px;height:54px;border-radius:14px;object-fit:cover;background:#eef3f6;display:grid;place-items:center;font-size:26px}
+.pc-g{flex:1 1 220px;min-width:0}.pc-g h3{margin:0;font-size:18px;color:var(--navy)}
+.pc-mut{color:var(--muted);font-size:13px}
+.pc-badges{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.pc-b{display:inline-flex;align-items:center;font:700 12px ui-monospace,Menlo,monospace;padding:5px 10px;border-radius:999px;background:#e7f7f4;color:#0b7d6f;border:1px solid #b6e8df}
+.pc-b.gold{background:#fbf2de;color:#8a5a0e;border-color:#f0dcae}.pc-b.grey{background:#eef3f6;color:#5b6f7c;border-color:var(--line)}
+.pc-order{padding:11px 18px;font-size:14px;border-radius:10px}
+.pc-dishes{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;padding:16px 18px}
+.pc-dish{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#fff;display:flex;flex-direction:column}
+.pc-ph{height:110px;background:#eef3f6;display:grid;place-items:center;font-size:34px}.pc-dish img{width:100%;height:110px;object-fit:cover}
+.pc-in{padding:10px 12px;display:flex;flex-direction:column;gap:3px;flex:1}.pc-in b{font-size:14px}.pc-d{font-size:12px;color:var(--muted);flex:1}
+.pc-pr{font-weight:900;color:var(--navy);font-size:15px}.pc-dl{font-size:12px;color:#8a5a0e}
+.pc-more{display:block;width:calc(100% - 36px);margin:0 18px 16px;min-height:44px;border:1px solid var(--line);border-radius:10px;background:#fff;font-weight:700;color:var(--navy);cursor:pointer}
+.pc-err{background:#fdecea;color:#a4281b;padding:10px 14px;border-radius:10px;margin-bottom:14px;font-size:14px;font-weight:600}
+@media(max-width:600px){.pc-dishes{grid-template-columns:repeat(2,1fr);padding:12px}.pc-head{padding:14px}}

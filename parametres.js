@@ -1,0 +1,103 @@
+(()=>{'use strict';
+const $=s=>document.querySelector(s);
+const MIN=8,PHONE_RE=/^\+[1-9]\d{7,14}$/;
+const CAT={customer:'Client',restaurant:'Restaurant partenaire',hotel:'Hôtel / hébergement',delivery:'Livreur',agro_producer:'Producteur agricole',agro_trader:'Commerçant agricole',commerce:'Commerce / boutique',business:'Entreprise / partenaire'};
+const SPACE={customer:'client-espace.html',restaurant:'resto-restaurant.html',hotel:'resto-restaurant.html',delivery:'resto-driver.html',agro_producer:'agro.html',agro_trader:'agro.html'};
+let sb=null,user=null;
+function msg(id,t,type='error'){const m=$(id);m.textContent=t;m.className='msg '+type;m.hidden=!t}
+function fmt(p){p=String(p||'');return p&&!p.startsWith('+')&&/^\d{8,15}$/.test(p)?'+'+p:p}
+function tr(err){const m=(err&&err.message)||'';
+  if(/Invalid login/i.test(m))return 'Mot de passe incorrect.';
+  if(/rate limit|too many/i.test(m))return 'Trop de tentatives. Patientez quelques minutes.';
+  if(/already|registered/i.test(m))return 'Ce numéro est déjà utilisé par un autre compte.';
+  if(/Token has expired|invalid/i.test(m))return 'Code invalide ou expiré.';
+  return m||'Une erreur est survenue. Réessayez.'}
+async function verifyPw(pw){const r=await sb.auth.signInWithPassword({phone:user.phone,password:pw});if(r.error)throw new Error('Mot de passe incorrect.')}
+
+function fill(){
+  const md=user.user_metadata||{},type=md.account_type;
+  $('#pCat').textContent=CAT[type]||'—';$('#pPhone').textContent=fmt(user.phone||md.phone_display)||'—';
+  $('#pSince').textContent=user.created_at?new Date(user.created_at).toLocaleDateString('fr-FR'):'—';
+  $('#pName').value=md.name||'';
+  const sp=$('#spaceLink');if(SPACE[type]&&(type==='customer'||md.organization_id)){sp.hidden=false;sp.href=SPACE[type]}
+  if(['restaurant','hotel'].includes(type)&&md.organization_id)$('#delWarn').textContent='Cette action est définitive : votre compte, la fiche de votre établissement, votre menu et vos données seront effacés, et votre établissement disparaîtra du catalogue public.';
+  else if(type==='delivery')$('#delWarn').textContent='Cette action est définitive : votre compte livreur et vos données seront effacés.';
+  notifState();
+}
+function notifState(){const b=$('#notifBtn'),s=$('#notifState');
+  if(!('Notification'in window)){s.textContent='Non pris en charge par ce navigateur.';b.hidden=true;return}
+  const p=Notification.permission;s.textContent=p==='granted'?'Activées.':p==='denied'?'Bloquées : autorisez-les dans les réglages du navigateur.':'Désactivées.';b.hidden=p!=='default'}
+
+$('#nameForm').addEventListener('submit',async e=>{e.preventDefault();msg('#nameMsg','');
+  const n=$('#pName').value.trim();if(!n)return msg('#nameMsg','Saisissez votre nom.');
+  try{const {data,error}=await sb.auth.updateUser({data:{name:n}});if(error)throw error;user=data.user;
+    try{await sb.from('rg_profiles').update({display_name:n}).eq('user_id',user.id)}catch(_){}
+    msg('#nameMsg','Nom enregistré.','success')}catch(err){msg('#nameMsg',tr(err))}});
+
+let phoneStep=0,pendingPhone='';
+$('#phoneForm').addEventListener('submit',async e=>{e.preventDefault();msg('#phoneMsg','');const btn=$('#phoneBtn');btn.disabled=true;
+  try{
+    if(phoneStep===0){
+      const p=$('#newPhone').value.trim().replace(/[\s().-]/g,'');if(!PHONE_RE.test(p))throw new Error('Saisissez un numéro valide avec indicatif (ex. +22790000000).');
+      const {error}=await sb.auth.updateUser({phone:p});if(error)throw error;
+      pendingPhone=p;phoneStep=1;$('#otpWrap').hidden=false;btn.textContent='Confirmer le code';msg('#phoneMsg','Un code SMS a été envoyé à ce numéro.','success');
+    }else{
+      const t=$('#otp').value.trim();if(!t)throw new Error('Saisissez le code reçu par SMS.');
+      const {data,error}=await sb.auth.verifyOtp({phone:pendingPhone,token:t,type:'phone_change'});if(error)throw error;
+      user=data.user||user;await sb.auth.updateUser({data:{phone_display:pendingPhone}});
+      phoneStep=0;$('#otpWrap').hidden=true;$('#otp').value='';$('#newPhone').value='';btn.textContent='Changer de numéro';
+      $('#pPhone').textContent=pendingPhone;msg('#phoneMsg','Numéro modifié. Utilisez-le pour vos prochaines connexions.','success');
+    }
+  }catch(err){msg('#phoneMsg',tr(err))}finally{btn.disabled=false}});
+
+$('#pwForm').addEventListener('submit',async e=>{e.preventDefault();msg('#pwMsg','');
+  const o=$('#pwOld').value,a=$('#pwNew').value,b=$('#pwNew2').value;
+  if(!o)return msg('#pwMsg','Saisissez votre mot de passe actuel.');
+  if(a.length<MIN)return msg('#pwMsg','Le nouveau mot de passe doit contenir au moins '+MIN+' caractères.');
+  if(a!==b)return msg('#pwMsg','Les deux nouveaux mots de passe ne sont pas identiques.');
+  if(a===o)return msg('#pwMsg','Le nouveau mot de passe doit être différent de l’actuel.');
+  try{await verifyPw(o);const {error}=await sb.auth.updateUser({password:a});if(error)throw error;$('#pwForm').reset();msg('#pwMsg','Mot de passe modifié.','success')}catch(err){msg('#pwMsg',tr(err))}});
+
+$('#notifBtn').addEventListener('click',async()=>{try{await Notification.requestPermission()}catch(_){}notifState()});
+
+function clearLocal(){try{Object.keys(localStorage).filter(k=>/^sb-.*-auth-token$/.test(k)).forEach(k=>localStorage.removeItem(k));sessionStorage.removeItem('uid');sessionStorage.removeItem('zmy_portal');sessionStorage.removeItem('zumuya_redirected')}catch(_){}}
+$('#logout').addEventListener('click',async()=>{try{await sb.auth.signOut()}catch(_){}clearLocal();location.replace('compte.html')});
+$('#logoutAll').addEventListener('click',async()=>{try{await sb.auth.signOut({scope:'global'})}catch(_){}clearLocal();location.replace('compte.html')});
+
+$('#exportBtn').addEventListener('click',async()=>{msg('#secMsg','');
+  try{
+    const out={exporte_le:new Date().toISOString(),compte:{id:user.id,telephone:user.phone,cree_le:user.created_at,profil:user.user_metadata||{}}};
+    try{const a=await sb.from('rg_partner_applications').select('*');out.demandes_partenaire=a.data||[]}catch(_){}
+    try{const o=await sb.from('rg_organizations').select('*').eq('owner_id',user.id);out.organisations=o.data||[]}catch(_){}
+    const blob=new Blob([JSON.stringify(out,null,2)],{type:'application/json'}),u=URL.createObjectURL(blob),a=document.createElement('a');
+    a.href=u;a.download='mes-donnees-zumuya.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),2000);
+    msg('#secMsg','Fichier téléchargé.','success');
+  }catch(err){msg('#secMsg',tr(err))}});
+
+$('#delOpen').addEventListener('click',()=>{$('#delForm').hidden=false;$('#delOpen').hidden=true;$('#delWord').focus()});
+$('#delCancel').addEventListener('click',()=>{$('#delForm').hidden=true;$('#delOpen').hidden=false;$('#delForm').reset();msg('#delMsg','')});
+$('#delForm').addEventListener('submit',async e=>{e.preventDefault();msg('#delMsg','');
+  if($('#delWord').value.trim().toUpperCase()!=='SUPPRIMER')return msg('#delMsg','Tapez le mot SUPPRIMER pour confirmer.');
+  const pw=$('#delPw').value;if(!pw)return msg('#delMsg','Saisissez votre mot de passe.');
+  const btn=$('#delBtn');btn.disabled=true;
+  try{
+    await verifyPw(pw);
+    const {error}=await sb.rpc('rg_delete_my_account');
+    if(error){if(/function|schema cache|does not exist/i.test(error.message||''))throw new Error('La suppression n’est pas encore activée sur le serveur : exécutez le fichier 05_suppression_compte.sql dans Supabase.');throw error}
+    try{await sb.auth.signOut()}catch(_){}clearLocal();
+    alert('Votre compte a été supprimé.');location.replace('index.html');
+  }catch(err){msg('#delMsg',tr(err))}finally{btn.disabled=false}});
+
+document.addEventListener('click',e=>{const eye=e.target.closest('[data-eye]');
+  if(eye){const i=document.getElementById(eye.dataset.eye),show=i.type==='password';i.type=show?'text':'password';eye.textContent=show?'Masquer':'Afficher'}});
+
+(async()=>{
+  try{
+    const c=window.ZUMAYA_CONFIG;if(!c||!window.supabase)throw 0;
+    sb=window.supabase.createClient(c.SUPABASE_URL,c.SUPABASE_ANON_KEY);
+    const {data:{session}}=await sb.auth.getSession();
+    if(!session){location.replace('compte.html');return}
+    user=session.user;$('#box').hidden=false;fill();
+  }catch(_){document.querySelector('main').innerHTML='<section class="card"><p>Le service n’est pas disponible pour le moment.</p></section>'}
+})();
+})();

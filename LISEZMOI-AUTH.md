@@ -1,30 +1,21 @@
-# Authentification ZUMUYA GROUP : e-mail pour tout le monde
+# Authentification ZUMUYA GROUP : numéro de téléphone pour tout le monde
 
-La page unique `compte.html` propose un sélecteur de catégorie (client, restaurant, hôtel, livreur, producteur, commerçant, commerce, entreprise). **Toutes les catégories se connectent et s'inscrivent avec adresse e-mail + mot de passe** (mot de passe saisi deux fois à l'inscription). Les libellés ne répètent plus « (e-mail) ».
+`compte.html` : sélecteur de catégorie (client, restaurant, hôtel, livreur, producteur, commerçant, commerce, entreprise). **Toutes les catégories s'inscrivent et se connectent avec numéro de téléphone (indicatif du pays) + mot de passe.** L'option e-mail a été retirée.
 
-Seule exception : un ancien compte client créé avec un numéro de téléphone peut encore se connecter grâce au lien « Mon compte client a été créé avec un numéro de téléphone » (connexion uniquement).
+## À régler dans Supabase
+Authentication > Providers > **Phone** : activer. Sans fournisseur SMS, désactivez « Confirm phone » (sinon aucun code ne sera envoyé). Avec un fournisseur SMS (Twilio, etc.), la confirmation et « mot de passe oublié » (code SMS) fonctionnent.
+Exécutez ensuite dans SQL Editor : `04_auth_phone_email_profile.sql` (déjà compatible téléphone) puis **`05_suppression_compte.sql`** (suppression de compte).
 
-## Restaurants partenaires : plus de seconde connexion
+## Espaces selon la catégorie
+- Restaurant → `resto-restaurant.html` : Abonnement Pro, Tableau de bord, Caisse, Commandes en ligne, Menu, Historique des ventes, Rapport du chiffre d'affaires, Gestion des livreurs, Support, Paramètres et réglages.
+- Hôtel (ou restaurant d'hôtel) → même espace **+ Module hôtel**.
+- Client → `client-espace.html` ; Livreur → `resto-driver.html` ; Producteur/commerçant → `agro.html`.
 
-Après connexion e-mail, un restaurant ayant sa fiche partenaire arrive directement sur son espace (`resto-restaurant.html`, tableau de bord RestoGest). Le fichier `resto-portal-bridge.js` (chargé par `resto-restaurant.html` et `resto-index.html`) reconnaît la session du portail, retrouve ou crée le compte local et la fiche restaurant, puis ouvre la session. L'écran « Gestion Multiples de Restaurant » ne redemande plus d'identifiants dans ce parcours. « Changer de compte » et « Déconnexion » dans le Service restent possibles.
+## Paramètres du compte (toutes catégories) : `parametres.html`
+Profil (nom), changement de numéro (code SMS), mot de passe, notifications, déconnexion (un appareil / tous), export des données, **suppression du compte** (mot SUPPRIMER + mot de passe, fonction SQL `rg_delete_my_account`). Accessible depuis chaque espace.
 
-## Configuration Supabase Auth
+## Accueil public
+`index.html` affiche, sans connexion, tous les restaurants partenaires actifs et leurs catalogues (`catalogue.js`), avec distance et frais de livraison si la position est activée. « Commander » redirige vers la connexion si besoin.
 
-Dans Authentication > Providers :
-1. Activez **Email** pour tous les comptes. (**Phone** n'est utile que pour les anciens comptes clients.)
-2. Choisissez les règles de confirmation adaptées à votre exploitation. La confirmation par SMS nécessite un fournisseur SMS configuré ; la confirmation e-mail nécessite le service e-mail Supabase ou un SMTP personnalisé.
-
-## SQL
-
-Après le schéma principal, exécutez `04_auth_phone_email_profile.sql` dans SQL Editor. Il rend le déclencheur de profil compatible avec les comptes dont l'identifiant est un téléphone (email nul) comme avec les comptes e-mail.
-
-## Connexion
-
-Le champ identifiant est toujours l'adresse e-mail. Choisissez la même catégorie qu'à l'inscription. Les professionnels complètent ensuite leur fiche d'organisation depuis « Devenir partenaire » si elle n'a pas encore été créée.
-
-## Portail unique (mise à jour)
-`resto-index.html` n'affiche plus aucun formulaire de connexion ni de création de compte (ni « Support — problème de connexion »). Il sert seulement d'aiguillage :
-- session portail valide → arrivée dans l'espace de la catégorie : client (`resto-client.html`), restaurant/hôtel (`resto-restaurant.html`), livreur (`resto-driver.html`), propriétaire de la plateforme (`resto-owner.html`), producteur/commerçant (`agro.html`) ;
-- pas de session → `compte.html`.
-`resto-portal-bridge.js` (chargé par toutes les pages `resto-*`) crée/relie automatiquement le profil local (client, livreur, restaurant, hôtel) au compte e-mail du portail. La déconnexion d'une page `resto-*` ferme aussi la session portail et renvoie sur `compte.html`.
-Les anciens comptes locaux (téléphone / nom d'utilisateur) ne peuvent plus se connecter : les utilisateurs recréent un compte sur `compte.html`.
+## Remarque
+Les anciens comptes créés avec e-mail ne peuvent plus se connecter : ils recréent un compte avec leur numéro.
