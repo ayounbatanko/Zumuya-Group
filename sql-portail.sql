@@ -49,7 +49,7 @@ create or replace function public.rg_handle_new_user() returns trigger
 language plpgsql security definer set search_path = public as $$
 begin
   insert into public.rg_profiles (user_id, display_name)
-  values (new.id, coalesce(new.raw_user_meta_data->>'name', split_part(new.email,'@',1)))
+  values (new.id, coalesce(new.raw_user_meta_data->>'name', nullif(split_part(coalesce(new.email,''),'@',1),''), new.phone, 'Utilisateur'))
   on conflict (user_id) do nothing;
   return new;
 end $$;
@@ -58,7 +58,7 @@ create trigger rg_on_auth_user_created after insert on auth.users
   for each row execute function public.rg_handle_new_user();
 -- Comptes déjà existants :
 insert into public.rg_profiles (user_id, display_name)
-  select id, coalesce(raw_user_meta_data->>'name', split_part(email,'@',1)) from auth.users
+  select id, coalesce(raw_user_meta_data->>'name', nullif(split_part(coalesce(email,''),'@',1),''), phone, 'Utilisateur') from auth.users
 on conflict (user_id) do nothing;
 
 -- ===== Organisations, établissements, activité, paiements =====
@@ -68,6 +68,7 @@ create table if not exists public.rg_organizations (
   public_name text not null,
   country_code text references public.rg_countries(code),
   organization_type text,
+  city text, address text, contact_phone text, latitude double precision, longitude double precision, details jsonb not null default '{}'::jsonb,
   verification_status text not null default 'pending'
     check (verification_status in ('pending','verified','rejected','suspended')),
   owner_id uuid references auth.users(id) on delete set null,
@@ -159,7 +160,7 @@ create policy orgs_read on public.rg_organizations for select to authenticated
   using (owner_id = auth.uid() or public.rg_is_platform_owner());
 drop policy if exists orgs_ins on public.rg_organizations;
 create policy orgs_ins on public.rg_organizations for insert to authenticated
-  with check (owner_id = auth.uid() and verification_status = 'pending');
+  with check (owner_id = auth.uid() and verification_status = 'verified');
 drop policy if exists orgs_upd on public.rg_organizations;
 create policy orgs_upd on public.rg_organizations for update to authenticated
   using (public.rg_is_platform_owner()) with check (public.rg_is_platform_owner());

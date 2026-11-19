@@ -19,8 +19,8 @@ do $$ declare t text; begin
   foreach t in array array['rg_users','rg_rests','rg_orders','rg_chats'] loop
     execute format('alter table public.%I enable row level security', t);
     execute format('drop policy if exists %I on public.%I', t||'_all', t);
-    execute format('create policy %I on public.%I for all to anon, authenticated using (true) with check (true)', t||'_all', t);
-    execute format('grant select, insert, update, delete on public.%I to anon, authenticated', t);
+    -- Les politiques fines sont ajoutées à la fin du script consolidé.
+    execute format('revoke all on public.%I from anon, authenticated', t);
     begin execute format('alter publication supabase_realtime add table public.%I', t);
     exception when duplicate_object then null; end;
   end loop;
@@ -138,7 +138,8 @@ begin
   perform rg_dispatch_order(p_order);
 end $$;
 
-grant execute on function public.rg_dispatch_tick(), public.rg_driver_accept(text,text), public.rg_driver_refuse(text,text) to anon, authenticated;
+revoke all on function public.rg_dispatch_tick() from public, anon, authenticated;
+revoke all on function public.rg_driver_accept(text,text), public.rg_driver_refuse(text,text) from public, anon, authenticated;
 
 -- Passage régulier toutes les 15 s (expiration des offres de 90 s)
 do $$ begin

@@ -1,6 +1,10 @@
 (()=>{'use strict';
 const $=s=>document.querySelector(s);
 let sb=null,mode='in';
+const ROLE_TYPES=['restaurant','hotel','delivery','agro_producer','agro_trader','commerce','business'];
+const roleToPartner={restaurant:'restaurant',hotel:'hotel',delivery:'delivery',agro_producer:'agro',agro_trader:'agro_trader',commerce:'commerce',business:'business'};
+function isCustomer(){return $('#accountCategory').value==='customer'}
+function updateIdentityFields(){const customer=isCustomer();$('#phoneWrap').hidden=!customer;$('#emailWrap').hidden=customer;$('#phone').required=customer;$('#email').required=!customer;$('#categoryHelp').textContent=customer?'Compte client : connexion et inscription avec numéro de téléphone et indicatif du pays.':'Compte professionnel : inscription et connexion avec adresse e-mail.';$('#forgotBtn').textContent=customer?'Mot de passe oublié ?':'Mot de passe oublié ?'}
 const MIN=8;
 
 function showMsg(text,type='error'){const m=$('#msg');m.textContent=text;m.className='msg '+type;m.hidden=!text}
@@ -8,8 +12,9 @@ function setMode(m,init){
   mode=m;const up=m==='up';
   $('#tabIn').classList.toggle('active',!up);$('#tabUp').classList.toggle('active',up);
   $('#tabIn').setAttribute('aria-selected',String(!up));$('#tabUp').setAttribute('aria-selected',String(up));
-  $('#nameWrap').hidden=!up;$('#confirmWrap').hidden=!up;$('#pwHelp').hidden=!up;$('#accountTypeWrap').hidden=!up;
-  $('#displayName').required=up;$('#passwordConfirm').required=up;$('#accountType').required=up;
+  $('#nameWrap').hidden=!up;$('#confirmWrap').hidden=!up;$('#pwHelp').hidden=!up;
+  $('#accountCategory').disabled=false;updateIdentityFields();
+  $('#displayName').required=up;$('#passwordConfirm').required=up;
   $('#password').autocomplete=up?'new-password':'current-password';
   $('#submitBtn').textContent=up?'Créer mon compte':'Se connecter';
   $('#authTitle').textContent=up?'Créer un compte':'Bienvenue';
@@ -26,52 +31,56 @@ function updateMatch(){
   else{h.textContent='Les deux mots de passe ne sont pas identiques.';h.className='bad';$('#passwordConfirm').setAttribute('aria-invalid','true')}
 }
 function showAccount(user){
-  const accountType=(user.user_metadata&&user.user_metadata.account_type)||'';
-  if(accountType==='restaurant'){location.replace('resto-index.html');return}
-  if(['agro_producer','agro_trader'].includes(accountType)){location.replace('agro.html');return}
-  if(accountType==='customer'){location.replace('index.html#catalogue-restaurants');return}
-  if(accountType==='hotel'){location.replace('hotel.html');return}
-  if(accountType==='delivery'){location.replace('livraison.html');return}
+  const type=user.user_metadata?.account_type;
+  const routes={customer:'client-espace.html',restaurant:'resto-owner.html',hotel:'hotel.html',delivery:'resto-driver.html',agro_producer:'agro.html',agro_trader:'agro.html'};
+  if(type&&routes[type]&&(type==='customer'||user.user_metadata?.organization_id)&&!sessionStorage.getItem('zumuya_redirected')){sessionStorage.setItem('zumuya_redirected','1');location.replace(routes[type]);return}
+  sessionStorage.removeItem('zumuya_redirected');
   $('#auth').hidden=true;$('#account').hidden=false;
-  $('#agroLink').hidden=!['restaurant','agro_producer','agro_trader'].includes(accountType);
-  $('#accPhone').textContent=user.phone||user.user_metadata?.phone_e164||'—';
+  $('#accPhone').textContent=user.phone||user.email||user.user_metadata?.phone_display||'—';
   $('#accName').textContent=(user.user_metadata&&user.user_metadata.name)||'—';
   $('#recovery').hidden=true;
   checkOwner();
-  $('#partnerPanel').hidden=true; // Les comptes professionnels sont activés dès leur inscription, sans demande d'approbation.
   initPartner(user);
 }
 function showAuth(){$('#account').hidden=true;$('#recovery').hidden=true;$('#auth').hidden=false}
 
-function fullPhone(){
-  const dial=$('#dialCode').value,raw=$('#phone').value.trim();
-  let digits=raw.replace(/\D/g,'');
-  if(digits.startsWith('0'))digits=digits.slice(1);
-  if(!dial||digits.length<6||digits.length>14)return '';
-  return dial+digits;
-}
 async function submit(e){
   e.preventDefault();showMsg('');
-  const phone=fullPhone(),password=$('#password').value,name=$('#displayName').value.trim(),confirm=$('#passwordConfirm').value;
-  if(!phone)return showMsg('Saisissez un numéro de téléphone valide avec son indicatif pays.');
+  const customer=isCustomer(),password=$('#password').value,name=$('#displayName').value.trim(),confirm=$('#passwordConfirm').value;
+  const email=$('#email').value.trim().toLowerCase();
+  const raw=$('#phone').value.trim().replace(/[\s().-]/g,''),dial=$('#dialCode').value;
+  const phone=raw.startsWith('+')?raw:dial+raw.replace(/^0/,'');
+  const accountType=$('#accountCategory').value;
   if(mode==='up'){
     if(!name)return showMsg('Saisissez votre nom complet.');
-    if(!$('#accountType').value)return showMsg('Choisissez votre type de compte.');
+    if(customer&&!/^\+[1-9]\d{7,14}$/.test(phone))return showMsg('Saisissez un numéro valide avec son indicatif international.');
+    if(!customer&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))return showMsg('Saisissez une adresse e-mail valide.');
     if(password.length<MIN)return showMsg('Le mot de passe doit contenir au moins '+MIN+' caractères.');
-    if(password!==confirm){updateMatch();return showMsg('Les deux mots de passe ne sont pas identiques.')}
-  }else if(!password)return showMsg('Saisissez votre mot de passe.');
+    if(password!==confirm){updateMatch();return showMsg('Les deux saisies du mot de passe ne sont pas identiques.')}
+  }else{
+    if(customer&&!/^\+[1-9]\d{7,14}$/.test(phone))return showMsg('Saisissez votre numéro avec indicatif international.');
+    if(!customer&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))return showMsg('Saisissez votre adresse e-mail.');
+    if(!password)return showMsg('Saisissez votre mot de passe.');
+  }
   if(!sb)return showMsg('Le service de connexion n’est pas configuré. Vérifiez le fichier config.js.');
   const btn=$('#submitBtn');btn.disabled=true;
   try{
     if(mode==='up'){
-      const accountType=$('#accountType').value;
-      const {data,error}=await sb.auth.signUp({phone,password,options:{data:{name,account_type:accountType,phone_e164:phone,country_dial_code:$('#dialCode').value}}});
+      const metadata={name,account_type:accountType,requested_account_type:accountType};
+      const payload=customer?{phone,password,options:{data:{...metadata,phone_display:phone,country_code:dial}}}:{email,password,options:{data:metadata}};
+      const {data,error}=await sb.auth.signUp(payload);
       if(error)throw error;
-      if(data.user&&Array.isArray(data.user.identities)&&data.user.identities.length===0)throw new Error('Un compte existe déjà avec ce numéro. Connectez-vous.');
+      if(data.user&&Array.isArray(data.user.identities)&&data.user.identities.length===0)throw new Error('Un compte existe déjà avec cette identité. Connectez-vous.');
+      $('#password').value='';$('#passwordConfirm').value='';updateMatch();
       if(data.session){showAccount(data.session.user);return}
-      showMsg('Compte enregistré. Pour permettre une connexion immédiate par téléphone et mot de passe sans code SMS, désactivez la confirmation téléphonique obligatoire dans Supabase Auth > Providers > Phone. Puis reconnectez-vous.','success');
+      if(customer){
+        showMsg('Compte créé. Si Supabase ne vous connecte pas automatiquement, désactivez la confirmation du téléphone dans Authentication > Providers > Phone, puis reconnectez-vous avec votre numéro et votre mot de passe. Aucun code SMS n’est demandé dans cette version d’essai.','success');
+      }else{
+        showMsg('Compte professionnel créé. Selon le réglage Supabase, confirmez votre adresse e-mail avant la première connexion.','success');
+      }
     }else{
-      const {data,error}=await sb.auth.signInWithPassword({phone,password});
+      const credentials=customer?{phone,password}:{email,password};
+      const {data,error}=await sb.auth.signInWithPassword(credentials);
       if(error)throw error;
       showAccount(data.user);
     }
@@ -81,8 +90,8 @@ async function submit(e){
 function translate(err){
   const m=(err&&err.message)||'';
   if(/Invalid login credentials/i.test(m))return 'Numéro de téléphone ou mot de passe incorrect.';
-  if(/Phone not confirmed/i.test(m))return 'Votre numéro n’est pas encore confirmé. Vérifiez le code reçu par SMS.';
-  if(/already registered|already been registered/i.test(m))return 'Un compte existe déjà avec ce numéro de téléphone. Connectez-vous.';
+  if(/Phone not confirmed/i.test(m))return 'La confirmation téléphone est encore activée dans Supabase. Désactivez-la dans Authentication > Providers > Phone pour cette version d’essai.';
+  if(/already registered|already been registered/i.test(m))return 'Un compte existe déjà avec ce numéro. Connectez-vous.';
   if(/rate limit|too many/i.test(m))return 'Trop de tentatives. Patientez quelques minutes puis réessayez.';
   if(/Password should be|weak/i.test(m))return 'Mot de passe trop faible. Utilisez au moins 8 caractères.';
   if(/fetch|network/i.test(m))return 'Connexion impossible. Vérifiez votre accès Internet.';
@@ -101,7 +110,8 @@ const CATS=[
  {id:'transport',icon:'🚕',label:'Transport',desc:'Chauffeurs, taxis, transporteurs',fields:[F('organization_name','Nom complet ou de la société'),F('city','Ville'),F('vehicle','Type de véhicule','select',true,['Taxi','Moto-taxi','Minibus','Bus','Camion']),F('capacity','Capacité (places ou tonnage)'),F('experience','Années d’expérience','number',false)]},
  {id:'services',icon:'🧰',label:'Prestataire de services',desc:'Artisans, techniciens, indépendants',fields:[F('organization_name','Nom ou raison sociale'),F('city','Ville'),F('trade','Métier / type de prestation'),F('experience','Années d’expérience','number',false),F('description','Décrivez vos prestations','textarea',true,null,true)]},
  {id:'events',icon:'🎟️',label:'Événements',desc:'Organisateurs, salles, billetterie',fields:[F('organization_name','Nom de la structure'),F('city','Ville'),F('event_types','Types d’événements'),F('capacity','Capacité maximale (personnes)','number',false)]},
- {id:'agro',icon:'🌾',label:'Agriculture',desc:'Producteurs, coopératives, fournisseurs',fields:[F('organization_name','Nom du producteur ou de la coopérative'),F('city','Localité'),F('crops','Cultures / produits'),F('volume','Volume annuel estimé (ex. 20 tonnes)','text',false),F('members','Nombre de membres','number',false)]},
+ {id:'agro',icon:'🌾',label:'Producteur agricole',desc:'Producteurs et coopératives agricoles',fields:[F('organization_name','Nom du producteur ou de la coopérative'),F('city','Localité'),F('address','Adresse / quartier'),F('crops','Cultures / produits'),F('volume','Volume annuel estimé (ex. 20 tonnes)','text',false),F('members','Nombre de membres','number',false)]},
+ {id:'agro_trader',icon:'🧺',label:'Commerçant agricole',desc:'Vendeurs, grossistes et détaillants de produits agricoles',fields:[F('organization_name','Nom du commerce'),F('city','Localité'),F('address','Adresse / quartier'),F('products','Produits agricoles vendus'),F('market','Marché / zone de vente','text',false)]},
  {id:'travel',icon:'🧭',label:'Tourisme & voyages',desc:'Agences, guides, hébergements touristiques',fields:[F('organization_name','Nom de l’agence ou du guide'),F('city','Ville'),F('offer_type','Type d’offre','select',true,['Agence de voyages','Guide','Hébergement touristique','Excursions']),F('destinations','Destinations proposées')]},
  {id:'business',icon:'📊',label:'Entreprise / institution',desc:'Entreprises, institutions, partenaires techniques',fields:[F('organization_name','Nom de l’entreprise ou de l’institution'),F('city','Ville'),F('partner_kind','Type de partenariat','select',true,['Commercial','Institutionnel','Technique','Paiement']),F('website','Site web','url',false)]}
 ];
@@ -134,6 +144,7 @@ function openForm(id){
   $('#formTitle').textContent='2. '+currentCat.icon+' '+currentCat.label;
   $('#formFields').innerHTML=countryCtl+currentCat.fields.map(fieldHtml).join('')+
     fieldHtml(F('contact_phone','Téléphone (avec indicatif)','tel'))+
+    ((['restaurant','hotel','agro','agro_trader'].includes(id))?`<label class="full">Position GPS obligatoire<div class="row"><input id="partnerLat" name="latitude" type="number" step="any" placeholder="Latitude" required><input id="partnerLng" name="longitude" type="number" step="any" placeholder="Longitude" required><button type="button" id="partnerLocate" class="btn ghost">Me localiser</button></div></label>`:'')+
     fieldHtml(F('message','Pourquoi souhaitez-vous devenir partenaire ?','textarea',true,null,true));
   pShow('');$('#stepCat').hidden=true;$('#partnerForm').hidden=false;
   $('#formFields select').focus();
@@ -160,16 +171,32 @@ async function submitPartner(e){
     if(f.req&&!v)return pShow('Renseignez le champ « '+f.label+' ».');
   }
   if(!/^[+()\d\s.-]{6,30}$/.test(fd.contact_phone.trim()))return pShow('Saisissez un numéro de téléphone valide, par exemple +227 90 00 00 00.');
-  if(activeFor(currentCat.id))return pShow('Vous avez déjà une demande active dans cette catégorie.');
+  if(['restaurant','hotel','agro','agro_trader'].includes(currentCat.id)&&(!fd.latitude||!fd.longitude))return pShow('La position GPS est obligatoire pour ce type de compte. Cliquez sur « Me localiser ».');
+  if(activeFor(currentCat.id))return pShow('Vous avez déjà un compte actif dans cette catégorie.');
   const details={};
   currentCat.fields.forEach(f=>{if(!COLS.includes(f.name)){const v=(fd[f.name]||'').trim();if(v)details[f.name]=f.type==='number'?Number(v):v}});
   const btn=$('#pSubmit');btn.disabled=true;
   try{
-    const {error}=await sb.from('rg_partner_applications').insert({
-      category:currentCat.id,country_code:fd.country_code,city:fd.city.trim(),organization_name:fd.organization_name.trim(),
-      contact_phone:fd.contact_phone.trim(),contact_email:null,message:fd.message.trim(),details,status:'pending'});
+    const roleMap={restaurant:'restaurant',hotel:'hotel',delivery:'delivery',agro:'agro_producer',agro_trader:'agro_trader',commerce:'commerce',business:'business'};
+    const accountType=roleMap[currentCat.id]||'business';
+    const {data:org,error}=await sb.from('rg_organizations').insert({
+      legal_name:fd.organization_name.trim(),public_name:fd.organization_name.trim(),country_code:fd.country_code||'CI',
+      organization_type:currentCat.id,verification_status:'verified',owner_id:currentUser.id,
+      city:fd.city.trim(),address:fd.address||null,latitude:fd.latitude?Number(fd.latitude):null,longitude:fd.longitude?Number(fd.longitude):null,
+      contact_phone:fd.contact_phone.trim(),details
+    }).select('id').single();
     if(error)throw error;
-    closeFlow();await loadApps();
+    const {error:metaError}=await sb.auth.updateUser({data:{account_type:accountType,organization_id:org.id,organization_name:fd.organization_name.trim()}});
+    if(metaError)throw metaError;
+    if(['restaurant','agro','agro_trader'].includes(currentCat.id)){
+      const agroRole=currentCat.id==='restaurant'?'restaurant':currentCat.id==='agro'?'agro_producer':'agro_trader';
+      const {error:agroError}=await sb.from('rg_agro_profiles').upsert({user_id:currentUser.id,role:agroRole,business_name:fd.organization_name.trim(),country:fd.country_code||'CI',city:fd.city.trim(),address:fd.address||'',phone:fd.contact_phone.trim(),lat:Number(fd.latitude),lng:Number(fd.longitude)},{onConflict:'user_id'});
+      if(agroError)throw agroError;
+    }
+    closeFlow();
+    $('#appList').innerHTML='<p class="empty">Compte professionnel activé. Votre espace est disponible.</p>';
+    const destinations={restaurant:'resto-owner.html',hotel:'hotel.html',delivery:'resto-driver.html',agro:'agro.html',agro_trader:'agro.html',commerce:'resto-owner.html'};
+    if(destinations[currentCat.id])location.href=destinations[currentCat.id];
   }catch(err){
     pShow(/duplicate|unique/i.test(err.message||'')?'Vous avez déjà une demande active dans cette catégorie.':'Votre demande n’a pas pu être envoyée. Réessayez dans un instant.');
   }finally{btn.disabled=false}
@@ -177,6 +204,7 @@ async function submitPartner(e){
 $('#startPartner').addEventListener('click',()=>{renderCats();$('#partnerFlow').hidden=false;$('#startPartner').hidden=true;$('#stepCat').hidden=false;$('#partnerForm').hidden=true});
 $('#catGrid').addEventListener('click',e=>{const b=e.target.closest('[data-cat]');if(b&&!b.disabled)openForm(b.dataset.cat)});
 $('#backCat').addEventListener('click',()=>{$('#partnerForm').hidden=true;$('#stepCat').hidden=false});
+document.addEventListener('click',e=>{if(e.target&&e.target.id==='partnerLocate'){if(!navigator.geolocation)return pShow('La géolocalisation n’est pas disponible sur cet appareil.');e.target.disabled=true;navigator.geolocation.getCurrentPosition(pos=>{document.querySelector('#partnerLat').value=pos.coords.latitude;document.querySelector('#partnerLng').value=pos.coords.longitude;pShow('Position GPS enregistrée.','success');e.target.disabled=false},()=>{pShow('Autorisez la localisation GPS pour continuer.');e.target.disabled=false},{enableHighAccuracy:true,timeout:15000})}});
 $('#pCancel').addEventListener('click',closeFlow);
 $('#partnerForm').addEventListener('submit',submitPartner);
 
@@ -187,15 +215,22 @@ async function checkOwner(){
 }
 function pwMsg(id,t,type='error'){const m=$(id);m.textContent=t;m.className='msg '+type;m.hidden=!t}
 $('#forgotBtn').addEventListener('click',async()=>{
-  const phone=fullPhone();
-  if(!phone)return showMsg('Saisissez votre numéro avec son indicatif pays avant de demander la réinitialisation.');
   if(!sb)return;
-  try{const {error}=await sb.auth.signInWithOtp({phone,options:{shouldCreateUser:false}});if(error)throw error;
-    const token=prompt('Saisissez le code reçu par SMS :');if(!token)return;
-    const {data,error:verifyError}=await sb.auth.verifyOtp({phone,token:token.trim(),type:'sms'});if(verifyError)throw verifyError;
-    $('#auth').hidden=true;$('#recovery').hidden=false;currentUser=data.user;
-    showMsg('Code vérifié. Définissez votre nouveau mot de passe ci-dessous.','success')}
-  catch(err){showMsg(translate(err))}
+  try{
+    if(isCustomer()){
+      const raw=$('#phone').value.trim().replace(/[\s().-]/g,''),phone=raw.startsWith('+')?raw:$('#dialCode').value+raw.replace(/^0/,'');
+      if(!/^\+[1-9]\d{7,14}$/.test(phone))return showMsg('Saisissez votre numéro avec indicatif pour recevoir un code SMS.');
+      const {error}=await sb.auth.signInWithOtp({phone,options:{shouldCreateUser:false}});if(error)throw error;
+      const token=prompt('Saisissez le code reçu par SMS :');if(!token)return;
+      const verified=await sb.auth.verifyOtp({phone,token:token.trim(),type:'sms'});if(verified.error)throw verified.error;
+    }else{
+      const email=$('#email').value.trim().toLowerCase();
+      if(!email)return showMsg('Saisissez votre adresse e-mail pour recevoir le lien de réinitialisation.');
+      const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname});if(error)throw error;
+      return showMsg('Un lien de réinitialisation a été envoyé à votre adresse e-mail.','success');
+    }
+    $('#auth').hidden=true;$('#recovery').hidden=false;showMsg('');
+  }catch(err){showMsg(translate(err))}
 });
 $('#recForm').addEventListener('submit',async e=>{
   e.preventDefault();pwMsg('#recMsg','');
@@ -219,8 +254,8 @@ $('#pwForm').addEventListener('submit',async e=>{
   if(a===o)return pwMsg('#pwMsg','Le nouveau mot de passe doit être différent de l’actuel.');
   $('#pwBtn').disabled=true;
   try{
-    const phone=currentUser&&currentUser.phone;
-    const r=await sb.auth.signInWithPassword({phone,password:o});
+    const identity=currentUser&&(currentUser.phone?{phone:currentUser.phone}:{email:currentUser.email});
+    const r=await sb.auth.signInWithPassword({...identity,password:o});
     if(r.error)throw new Error('Mot de passe actuel incorrect.');
     const {error}=await sb.auth.updateUser({password:a});if(error)throw error;
     $('#pwForm').reset();pwMsg('#pwMsg','Mot de passe modifié avec succès.','success');
@@ -234,12 +269,13 @@ document.addEventListener('click',e=>{
   if(eye){const i=document.getElementById(eye.dataset.eye),show=i.type==='password';i.type=show?'text':'password';eye.textContent=show?'Masquer':'Afficher'}
 });
 $('#authForm').addEventListener('submit',submit);
+$('#accountCategory').addEventListener('change',updateIdentityFields);
 $('#password').addEventListener('input',updateMatch);
 $('#passwordConfirm').addEventListener('input',updateMatch);
 $('#logout').addEventListener('click',async()=>{if(sb)await sb.auth.signOut();showAuth();setMode('in')});
 
 (async()=>{
-  setMode(new URLSearchParams(location.search).get('mode')==='signup'?'up':'in',true);
+  setMode(new URLSearchParams(location.search).get('mode')==='signup'?'up':'in',true);updateIdentityFields();
   try{
     const c=window.ZUMAYA_CONFIG;
     if(!c||!c.SUPABASE_URL||c.SUPABASE_URL.includes('VOTRE-PROJET'))throw new Error('config');

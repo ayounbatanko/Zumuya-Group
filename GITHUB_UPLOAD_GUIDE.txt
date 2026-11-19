@@ -1,0 +1,17 @@
+GUIDE RAPIDE — AJOUTER ZUMUYA GROUP SUR GITHUB
+
+1. Décompresser ZUMUYA_GROUP_GITHUB.zip.
+2. Ouvrir le dépôt GitHub existant.
+3. Choisir Add file / Upload files.
+4. Sélectionner les fichiers et dossiers contenus dans ZUMUYA_GROUP_GITHUB.
+5. Vérifier que les fichiers arrivent à la racine du dépôt, puis valider avec Commit changes.
+6. Ne pas supprimer les fichiers existants du dépôt sans les comparer au préalable.
+
+CONFIGURATION
+- Vérifier config.js : URL Supabase + clé publique anon du projet.
+- Ne jamais publier service_role, mots de passe ou secrets.
+
+ATTENTION SUPABASE
+Les scripts SQL agricoles historiques de cette archive ciblent encore des tables rg_agro_*.
+La base actuelle utilise z_agro_*. Ne pas exécuter ces scripts tels quels.
+Le code du module agricole devra être aligné sur les tables z_agro_* avant son test complet.

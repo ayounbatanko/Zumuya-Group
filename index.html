@@ -22,7 +22,7 @@
   <a class="brand" href="#accueil" aria-label="ZUMUYA GROUP, accueil"><img src="logo.svg" alt=""><span>ZUMUYA <b>GROUP</b><small>L'Afrique de l'Ouest en réseau</small></span></a>
   <button class="menu" id="menuBtn" aria-label="Ouvrir le menu" aria-expanded="false">☰</button>
   <nav id="mainNav">
-    <a href="#services">Nos services</a><a href="#comment">Comment ça marche</a><a href="#deploiement">Expansion</a>
+    <a href="#services">Nos services</a><a href="resto-client.html">Voir les menus</a><a href="#comment">Comment ça marche</a><a href="#deploiement">Expansion</a>
     <a href="compte.html" class="nav-login" id="navLogin">Se connecter</a>
     <a href="compte.html?mode=signup" class="nav-signup">Créer un compte</a>
   </nav>
@@ -33,7 +33,7 @@
     <span class="eyebrow"><i></i> NÉ AU NIGER · PENSÉ POUR L'AFRIQUE DE L'OUEST</span>
     <h1>Un seul écosystème.<br><em>Des possibilités infinies.</em></h1>
     <p class="hero-lead">ZUMUYA GROUP rassemble les services, les commerces, les entreprises et les talents dans une plateforme numérique conçue pour accompagner la transformation économique de l'Afrique de l'Ouest.</p>
-    <div class="hero-actions" id="heroActions"><a class="btn btn-gold" href="compte.html?mode=signup">Créer un compte <span>→</span></a><a class="btn btn-glass" href="compte.html">Se connecter</a></div>
+    <div class="hero-actions" id="heroActions"><a class="btn btn-gold" href="resto-client.html">Voir les restaurants et menus <span>→</span></a><a class="btn btn-glass" href="compte.html?mode=signup">Créer un compte</a><a class="btn btn-glass" href="compte.html">Se connecter</a></div>
     <div class="hero-proof"><span>12 pôles métiers</span><span>Une vision régionale</span><span>Une plateforme évolutive</span></div>
   </div>
   <div class="hero-visual tech" aria-label="Réseau technologique des pôles ZUMUYA GROUP">
@@ -43,14 +43,9 @@
       <circle cx="22%" cy="19%" r="3"/><circle cx="78%" cy="17%" r="3"/><circle cx="80%" cy="55%" r="3"/><circle cx="72%" cy="87%" r="3"/><circle cx="22%" cy="77%" r="3"/></svg>
     <div class="pulse p1"></div><div class="pulse p2"></div>
     <div class="core"><i class="cb tl"></i><i class="cb tr"></i><i class="cb bl"></i><i class="cb br"></i><img src="logo.svg" alt=""><b>ZUMUYA<br>GROUP</b><small>Connecter · Simplifier · Développer</small></div>
-    <span class="tnode" style="left:22%;top:19%"><em>01</em>🍽️ Restaurant</span><span class="tnode" style="left:78%;top:17%"><em>02</em>🏨 Hôtel</span><span class="tnode" style="left:80%;top:55%"><em>04</em>🌾 Agro</span><span class="tnode" style="left:72%;top:87%"><em>05</em>🛍️ Commerce</span><span class="tnode" style="left:22%;top:77%"><em>03</em>📦 Livraison</span>
+    <span class="tnode" style="left:22%;top:19%"><em>01</em>🍽️ Restaurant</span><span class="tnode" style="left:78%;top:17%"><em>02</em>🏨 Hôtel</span><span class="tnode" style="left:80%;top:55%"><em>09</em>🌾 Agro</span><span class="tnode" style="left:72%;top:87%"><em>05</em>🛍️ Commerce</span><span class="tnode" style="left:22%;top:77%"><em>03</em>📦 Livraison</span>
     <span class="tread r1">● RÉSEAU EN LIGNE</span><span class="tread r2">NIGER → AFRIQUE DE L'OUEST</span>
   </div>
-</section>
-<section class="section public-catalog" id="catalogue-restaurants">
-  <div class="section-heading"><div><span class="eyebrow">COMMANDEZ EN LIGNE</span><h2>Les menus des <em>restaurants partenaires</em></h2><p>Consultez les plats, leurs descriptions, les prix et une estimation de livraison calculée selon votre position et le tarif au kilomètre du restaurant.</p></div></div>
-  <div class="catalog-tools"><button type="button" id="catalogLocate">📍 Utiliser ma position</button><span id="catalogLocationStatus">La localisation permet de calculer les frais de livraison.</span></div>
-  <div id="publicRestaurantCatalog" class="public-restaurant-grid"><p class="catalog-empty">Chargement des restaurants et de leurs menus…</p></div>
 </section>
 <section class="trust-strip"><span>UNE AMBITION RÉGIONALE</span><b>NIGER</b><b>SAHEL</b><b>AFRIQUE DE L'OUEST</b><span>TECHNOLOGIE AU SERVICE DES ÉCONOMIES LOCALES</span></section>
 
@@ -61,11 +56,12 @@
   
 </section>
 
+<section class="section" id="catalogue-public"><div class="section-heading"><div><span class="eyebrow">ACCÈS PUBLIC</span><h2>Découvrez les menus <em>sans créer de compte</em></h2><p>Consultez les restaurants partenaires, leurs plats, leurs descriptions et leurs tarifs. Les frais de livraison sont calculés dans le parcours de commande selon les paramètres du restaurant et votre position GPS.</p><a class="btn btn-dark" style="background:var(--navy);color:#fff" href="resto-client.html">Ouvrir le catalogue des restaurants →</a></div></div></section>
 <section class="how section" id="comment">
   <div class="section-heading"><div><span class="eyebrow">SIMPLE ET RAPIDE</span><h2>Votre compte en <em>trois étapes</em></h2><p>Un seul compte pour accéder à l'ensemble des services ZUMUYA GROUP.</p></div></div>
   <ol class="steps">
-    <li><b>Créez votre compte</b><span>Renseignez votre nom, choisissez votre indicatif pays et saisissez votre numéro de téléphone et votre mot de passe.</span></li>
-    <li><b>Confirmez votre numéro par SMS</b><span>Saisissez le code de confirmation reçu par SMS pour activer votre compte.</span></li>
+    <li><b>Créez votre compte</b><span>Renseignez votre numéro de téléphone et choisissez un mot de passe, à saisir deux fois.</span></li>
+    <li><b>Confirmez votre e-mail</b><span>Confirmez votre numéro par SMS si cette option est activée.</span></li>
     <li><b>Connectez-vous</b><span>Utilisez votre numéro de téléphone et votre mot de passe pour accéder à votre compte.</span></li>
   </ol>
   <div class="steps-cta"><a class="btn btn-dark" style="background:var(--navy);color:#fff" href="compte.html?mode=signup">Créer un compte →</a></div>
@@ -87,5 +83,5 @@
 <footer><a class="brand" href="#accueil"><img src="logo.svg" alt=""><span>ZUMUYA <b>GROUP</b><small>L'Afrique de l'Ouest en réseau</small></span></a><p>© <span id="year"></span> ZUMUYA GROUP. Tous droits réservés.</p><div><a href="compte.html" id="footLogin">Connexion</a></div></footer>
 <div class="modal" id="moduleModal" aria-hidden="true"><div class="modal-card"><button class="modal-x" data-close aria-label="Fermer">×</button><div id="modalIcon" class="modal-icon"></div><span id="modalCode" class="eyebrow"></span><h2 id="modalTitle"></h2><p id="modalDescription"></p><p class="notice" id="modalNotice"></p><a class="btn btn-gold" id="modalAction" href="compte.html?mode=signup">Créer un compte →</a></div></div>
 <div id="toast" role="status" aria-live="polite"></div>
-<script src="config.js"></script><script src="zsession.js?v=2"></script><script src="modules.js?v=7"></script><script src="app.js?v=7"></script><script src="public-catalog.js?v=1"></script>
+<script src="zsession.js?v=1"></script><script src="modules.js?v=6"></script><script src="app.js?v=6"></script>
 </body></html>
