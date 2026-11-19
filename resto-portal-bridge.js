@@ -1,4 +1,5 @@
-/* Pont portail -> Service de Restauration.
+/* Pont portail -> Service de Restauration (SEUL point d'entrée : compte.html).
+   Gère les comptes client, livreur, restaurant et hôtel. Le propriétaire est géré par resto-index.html (aiguillage).
    Un restaurant (ou hôtel) qui s'est connecté sur le portail avec son e-mail et son mot de passe (Supabase Auth)
    est reconnu ici automatiquement : on retrouve ou on crée son compte local + sa fiche restaurant, puis on ouvre
    la session. Plus de deuxième écran de connexion.
@@ -17,17 +18,23 @@ function portal(){try{for(var i=0;i<localStorage.length;i++){var k=localStorage.
    if(s&&s.access_token&&s.user&&s.user.id)return s}}}catch(e){}return null}
 var s=portal();if(!s)return;
 var pu=s.user,md=pu.user_metadata||{},type=md.account_type;
-if(type!=='restaurant'&&type!=='hotel')return;
-if(!md.organization_id)return;            /* fiche partenaire pas encore créée : le portail la demande */
-var fromPortal=sget('zmy_portal')==='1';
-if(isIndex&&!fromPortal)return;           /* sur l'écran de connexion, seulement juste après une connexion portail */
+var ROLE={restaurant:'restaurant',hotel:'restaurant',customer:'client',delivery:'driver'}[type];
+if(!ROLE)return;
+if((type==='restaurant'||type==='hotel')&&!md.organization_id)return;   /* fiche partenaire pas encore créée : le portail la demande */
+var fromPortal=true;
 var d=D.get(),cur=sget('uid'),curU=cur&&d.users.find(function(x){return x.id==cur&&!x.disabled});
-if(curU&&(curU.portalId===pu.id||!fromPortal))return;   /* session déjà valable : on n'y touche pas */
-var email=String(pu.email||'').toLowerCase();
+if(curU&&curU.portalId===pu.id)return;   /* session déjà liée à ce compte portail */
+var email=String(pu.email||pu.phone||md.phone_display||'').toLowerCase();
 var uid=function(){return Math.random().toString(36).slice(2,9)};
 function slug(t){return String(t||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'')}
 var u=d.users.find(function(x){return x.portalId===pu.id})||d.users.find(function(x){return x.role==='restaurant'&&email&&String(x.phone||'').toLowerCase()===email});
 var r=u&&u.restId&&d.rests.find(function(x){return x.id===u.restId})||d.rests.find(function(x){return x.portalOrgId===md.organization_id});
+if(ROLE==='client'||ROLE==='driver'){
+  var uu=d.users.find(function(x){return x.portalId===pu.id&&x.role===ROLE});
+  if(!uu){uu={id:uid(),role:ROLE,phone:email,name:String(md.name||email||'Utilisateur'),portalId:pu.id,email:email,created:Date.now()};
+    if(String(uu.name).trim().toLocaleLowerCase('fr')==='ayouba tanko')uu.name=email||'Utilisateur';
+    d.users.push(uu);D.save(d)}
+  sset('uid',uu.id);window.ZBRIDGE={fresh:true,userId:uu.id};return}
 var orgName=md.organization_name||md.name||'Mon restaurant';
 var changed=false;
 if(!r){

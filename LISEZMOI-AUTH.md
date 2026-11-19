@@ -21,3 +21,10 @@ Après le schéma principal, exécutez `04_auth_phone_email_profile.sql` dans SQ
 ## Connexion
 
 Le champ identifiant est toujours l'adresse e-mail. Choisissez la même catégorie qu'à l'inscription. Les professionnels complètent ensuite leur fiche d'organisation depuis « Devenir partenaire » si elle n'a pas encore été créée.
+
+## Portail unique (mise à jour)
+`resto-index.html` n'affiche plus aucun formulaire de connexion ni de création de compte (ni « Support — problème de connexion »). Il sert seulement d'aiguillage :
+- session portail valide → arrivée dans l'espace de la catégorie : client (`resto-client.html`), restaurant/hôtel (`resto-restaurant.html`), livreur (`resto-driver.html`), propriétaire de la plateforme (`resto-owner.html`), producteur/commerçant (`agro.html`) ;
+- pas de session → `compte.html`.
+`resto-portal-bridge.js` (chargé par toutes les pages `resto-*`) crée/relie automatiquement le profil local (client, livreur, restaurant, hôtel) au compte e-mail du portail. La déconnexion d'une page `resto-*` ferme aussi la session portail et renvoie sur `compte.html`.
+Les anciens comptes locaux (téléphone / nom d'utilisateur) ne peuvent plus se connecter : les utilisateurs recréent un compte sur `compte.html`.

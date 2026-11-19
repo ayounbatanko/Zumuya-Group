@@ -113,7 +113,7 @@ nav:empty{display:none;padding:0;border:0;height:0;overflow:hidden}
 .back-btn:hover{filter:brightness(1.1);transform:translateY(-1px)}
 </style></head><body>
 <div id="hdr"></div><nav id="nav"></nav><main id="m"></main><div id="receipt"></div>
-<script src="config.js"></script><script src="resto-db.js"></script><script src="resto-portal-bridge.js?v=1"></script><script src="resto-notif.js"></script>
+<script src="config.js"></script><script src="resto-db.js"></script><script src="resto-portal-bridge.js?v=2"></script><script src="resto-notif.js"></script>
 <script src="resto-chat.js"></script>
 <script src="resto-charts.js"></script>
 <script src="resto-qr.js"></script>
@@ -145,7 +145,7 @@ const cardSlug=()=>inShell?SH.location.hash.split('/')[1]:new URLSearchParams(lo
 const OWNER_ACCOUNT_NAME='Ayouba Tanko';
 const isOwnerAccount=u=>!!u&&String(u.name||'').trim().toLocaleLowerCase('fr')===OWNER_ACCOUNT_NAME.toLocaleLowerCase('fr');
 function guard(role){const u=me();const allowed=role==='owner'?(u&&(u.role==='owner'||(u.role==='restaurant'&&isOwnerAccount(u)))):(u&&u.role===role);if(!allowed){navTo('index');return null}return u}
-function logout(){store.clr();navTo('index')}
+function logout(){store.clr();try{Object.keys(localStorage).filter(function(k){return /^sb-.*-auth-token$/.test(k)}).forEach(function(k){localStorage.removeItem(k)})}catch(e){}navTo('compte.html')}
 function changeMyPassword(oldId,newId,cfId){
   const oldEl=document.getElementById(oldId||'oldpw'),nwEl=document.getElementById(newId||'newpw'),cfEl=document.getElementById(cfId||'cfpw');
   if(!oldEl||!nwEl||!cfEl)return;

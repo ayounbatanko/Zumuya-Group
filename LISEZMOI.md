@@ -47,7 +47,7 @@ Voir `COORDINATION-POLES.md` pour le fonctionnement commun des pôles 01, 02 et 
 
 1. **Bug grave corrigé** (`resto-index.html`) : l'ancienne page ouvrait automatiquement le compte restaurant dès qu'une session existait. Désormais, une session ouverte affiche seulement « Continuer vers mon espace » / « Changer de compte ». Le portail n'ouvre plus `resto-index.html` : « En savoir plus » mène aux pages de service ci-dessous.
 2. **`restauration.html`** (pôle 01) : réservé à l'utilisateur connecté ; restaurants classés par distance (GPS), catalogue complet, prix de chaque repas, frais de livraison = distance × tarif/km du restaurant. Les comptes hôtels n'y figurent pas.
-3. **`hotel.html`** (pôle 02) : service à part, ouvert uniquement avec un compte hôtel (commandes, chambres, accès à la gestion de l'hôtel). Création : `resto-index.html?type=hotel`.
+3. **`hotel.html`** (pôle 02) : service à part, ouvert uniquement avec un compte hôtel (commandes, chambres, accès à la gestion de l'hôtel). Création : `compte.html?mode=signup` (catégorie hôtel).
 4. **`livraison.html`** (pôle 03) : service à part, coordonné avec 01 et 02 (statistiques réseau, tableau des livraisons du restaurant/hôtel, accès livreur).
 5. **Bouton « Connecté »** sur l'accueil (`app.js` + `zsession.js`) dès qu'un utilisateur est connecté (portail ou service).
 6. **Visuel technologique** du hero (réseau animé des pôles).
@@ -62,3 +62,6 @@ Nouveaux fichiers : `zsession.js`, `zservice.css`, `restauration.html`, `hotel.h
 
 ## RestoGest : fonctionnalités uniquement sur zumuya
 Toutes les fonctionnalités RestoGest (restaurant, client, livreur, propriétaire, carte de visite, extensions) vivent uniquement dans ce dépôt (`resto-*`). L'ancien dépôt RestoGest doit être remplacé par le kit `kit-RestoGest-ancien-depot.zip` (redirection + auto-suppression de l'ancien service worker). Voir `LISEZMOI-RESTOGEST.md` dans le kit.
+
+## Connexion : uniquement `compte.html`
+L'ancien écran « Service de Restauration » (téléphone / mot de passe, créer un compte, support connexion) est supprimé. Voir `LISEZMOI-AUTH.md`, section « Portail unique ».
