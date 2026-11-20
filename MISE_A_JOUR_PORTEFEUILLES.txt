@@ -1,0 +1,32 @@
+MISE À JOUR ZUMUYA GROUP — 20/11/2026
+
+MODIFICATIONS
+1. Inscription en deux étapes : choix visuel de la catégorie, puis formulaire d'inscription.
+2. Redirection après connexion :
+   - customer -> client-espace.html
+   - agro_producer / agro_trader -> agro.html (même si la fiche professionnelle doit encore être créée)
+   - restaurant / hotel -> resto-restaurant.html lorsque la fiche partenaire est validée
+   - delivery -> resto-driver.html lorsque la fiche partenaire est validée
+3. Ajout d'un module portefeuille dans les espaces Client, Agro, Restaurant/Hôtel et Livreur.
+4. Enregistrement du moyen de retrait, affichage du solde et de l'historique, demande de retrait.
+5. Espace propriétaire : taux de commission modifiable (valeur initiale 5 %, limite 0 à 30 %) et liste des demandes de retrait.
+6. Migration SQL sécurisée : 07_portefeuilles_commissions.sql.
+
+INSTALLATION OBLIGATOIRE
+- Déployer les fichiers du dossier sur l'hébergement du site.
+- Dans Supabase > SQL Editor, exécuter 07_portefeuilles_commissions.sql APRÈS les scripts SQL déjà utilisés par le projet.
+- Vérifier que le compte propriétaire existe dans rg_platform_owners.
+- Tester l'inscription, la connexion, la redirection et l'accès au portefeuille sur des comptes de test.
+
+IMPORTANT — PAIEMENTS RÉELS
+Le code prépare les portefeuilles, le grand livre, les retraits en attente et le calcul de commission côté serveur.
+Les dépôts et paiements réels ne sont PAS activés par cette livraison : aucun prestataire de paiement ni identifiants marchands/webhook ne sont fournis dans le projet. Le bouton de dépôt l'indique explicitement.
+Avant d'encaisser de l'argent, connecter un prestataire compatible (Mobile Money / carte) via une Edge Function Supabase, vérifier la signature du webhook, puis appeler rg_wallet_settle_sale depuis le serveur après confirmation définitive du paiement. Ne jamais appeler cette fonction depuis le navigateur.
+Les demandes de retrait sont enregistrées et les fonds sont réservés ; le versement effectif doit être réalisé et confirmé par l'intégration du prestataire de paiement. La liste propriétaire permet de les suivre.
+La commission initiale est 5 % et se règle depuis Espace propriétaire > Portefeuille & commissions. La fonction serveur applique ce taux au moment du règlement de la vente.
+
+SÉCURITÉ
+- Les soldes ne sont jamais modifiables directement depuis le navigateur.
+- Les écritures comptables de vente sont réservées au rôle service_role.
+- Les demandes de retrait passent par une fonction RPC qui contrôle le solde.
+- Les politiques RLS limitent la lecture des données du portefeuille à son propriétaire et à l'administrateur de plateforme.

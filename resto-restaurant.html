@@ -111,7 +111,7 @@ nav:empty{display:none;padding:0;border:0;height:0;overflow:hidden}
   font-weight:700!important;box-shadow:0 4px 12px rgba(20,33,61,.35)!important;
 }
 .back-btn:hover{filter:brightness(1.1);transform:translateY(-1px)}
-</style></head><body>
+</style></head><body><a href="messagerie.html" style="position:fixed;right:14px;bottom:76px;z-index:9999;background:#c59a42;color:#102b45;padding:12px 16px;border-radius:999px;text-decoration:none;font-weight:800;box-shadow:0 5px 20px #102b4540">💬 Messagerie</a><a href="#walletPanel" style="position:fixed;right:14px;bottom:18px;z-index:9999;background:#102b45;color:white;padding:12px 16px;border-radius:999px;text-decoration:none;font-weight:800;box-shadow:0 5px 20px #102b4540">👛 Portefeuille</a>
 <div id="hdr"></div><nav id="nav"></nav><main id="m"></main><div id="receipt"></div>
 <script src="config.js"></script><script src="resto-db.js"></script><script src="resto-portal-bridge.js?v=2"></script><script src="resto-notif.js"></script>
 <script src="resto-chat.js"></script>
@@ -373,6 +373,7 @@ settings(r){const bar=[['rest','🍽️ Restaurant'],['pay','💳 Paiements'],['
 settingsMain(r){return `<div class="card col"><label>Nom<input id="sn" value="${esc(r.name)}" style="width:100%"></label>
  <div class="row">${r.logo?`<img src="${r.logo}" class="logo">`:''}<label>Logo <input type="file" id="sl" accept="image/*"></label></div>
  <label>Téléphone<input id="sp" value="${esc(r.phone)}" style="width:100%"></label><label>Adresse<input id="sa" value="${esc(r.address)}" style="width:100%"></label>
+ <div class="card col" style="margin:0;padding:14px"><b>🕒 Horaires de commande en ligne</b><p class="mut">En dehors de ces horaires, le restaurant apparaît comme fermé et les commandes en ligne sont bloquées.</p><div class="row"><label>Ouverture<input id="openAt" type="time" value="${esc(r.openAt||'08:00')}"></label><label>Fermeture<input id="closeAt" type="time" value="${esc(r.closeAt||'22:00')}"></label></div><label style="display:flex;gap:8px;align-items:center"><input id="onlineOrders" type="checkbox" ${r.onlineOrders===false?'':'checked'}> Accepter les commandes en ligne pendant les horaires</label></div>
  <div class="card" style="margin:0;padding:12px"><b>🛵 Tarif de livraison</b><label class="mut">Prix pour 1 kilomètre (${esc(r.currency||'XOF')})<input id="skm" type="number" min="0" step="any" value="${r.kmPrice??''}" placeholder="ex. 200" style="width:100%"></label><p class="mut">Le prix de livraison du client = distance (restaurant → client) × ce prix. Il est ajouté automatiquement à son panier.</p></div>
  <div class="card" style="margin:0;padding:12px;${r.lat!=null?'background:rgba(18,163,107,.1);border-inline-start:4px solid var(--ok)':'background:rgba(255,183,3,.12);border-inline-start:4px solid var(--gold)'}">
   <b>📍 Position exacte du restaurant (Google Maps)</b>
@@ -419,7 +420,7 @@ function payCard(r){const l=payMethods(r).map(p=>`<div class="row" style="justif
  return `<div class="card col"><h3 style="margin:0">💳 Moyens de paiement en ligne</h3><p class="mut">Ajoutez autant de moyens de paiement que vous voulez (Orange Money, MTN MoMo, Wave, Moov, carte, PayPal…). Vos clients les voient et les choisissent à la commande.</p>${l}<hr><input id="pmName" placeholder="Nom (ex. Orange Money)"><input id="pmDet" placeholder="Numéro, lien de paiement ou instructions"><button type="button" onclick="addPay()">➕ Ajouter ce moyen de paiement</button></div>`}
 function addPay(){const n=pmName.value.trim();if(!n)return alert('Saisissez le nom du moyen de paiement.');try{let added=false;upd(r=>{const l=payMethods(r).slice();if(l.some(x=>x.name.toLowerCase()==n.toLowerCase()))return;l.push({id:uid(),name:n,details:pmDet.value.trim()});r.payMethods=l;r.pay=l.map(x=>x.name);added=true});if(!added)return alert('Ce moyen de paiement existe déjà.');render();showOperationSuccess('Ajout du moyen de paiement « '+n+' »',()=>{tab='settings';setSub='pay';render()})}catch(e){alert('Échec de l’enregistrement du moyen de paiement.')}}
 function delPay(id){const item=payMethods(R()).find(x=>x.id==id);if(!item)return;try{upd(r=>{r.payMethods=payMethods(r).filter(x=>x.id!=id);r.pay=r.payMethods.map(x=>x.name)});render();showOperationSuccess('Suppression du moyen de paiement « '+item.name+' »',()=>{tab='settings';setSub='pay';render()})}catch(e){alert('Échec de la suppression du moyen de paiement.')}}
-function saveS(){const f=sl.files[0],go=logo=>{try{upd(r=>{r.name=sn.value;r.phone=sp.value;r.address=sa.value;r.currency=sc.value;r.lat=la.value?+la.value:null;r.lng=ln.value?+ln.value:null;r.kmPrice=(typeof skm!=='undefined'&&skm.value!=='')?Math.max(0,+skm.value):null;if(logo)r.logo=logo});render();showOperationSuccess('Modification des paramètres du restaurant',()=>{tab='settings';setSub='rest';render()})}catch(e){alert('Échec de l’enregistrement des paramètres du restaurant. Vérifiez votre espace de stockage et réessayez.')}};
+function saveS(){const f=sl.files[0],go=logo=>{try{upd(r=>{r.name=sn.value;r.phone=sp.value;r.address=sa.value;r.currency=sc.value;r.openAt=document.getElementById('openAt')?.value||'08:00';r.closeAt=document.getElementById('closeAt')?.value||'22:00';r.onlineOrders=document.getElementById('onlineOrders')?.checked!==false;r.lat=la.value?+la.value:null;r.lng=ln.value?+ln.value:null;r.kmPrice=(typeof skm!=='undefined'&&skm.value!=='')?Math.max(0,+skm.value):null;if(logo)r.logo=logo});render();showOperationSuccess('Modification des paramètres du restaurant',()=>{tab='settings';setSub='rest';render()})}catch(e){alert('Échec de l’enregistrement des paramètres du restaurant. Vérifiez votre espace de stockage et réessayez.')}};
  if(f){const fr=new FileReader();fr.onload=()=>go(fr.result);fr.onerror=()=>alert('Impossible de lire le fichier du logo.');fr.readAsDataURL(f)}else go()}
 let pendN=-1;
 setInterval(()=>{const r=R();if(!r)return;const os=D.get().orders.filter(o=>o.restId==U.restId),cur=Object.fromEntries(os.map(o=>[o.id,o.status])),pend=os.filter(o=>o.status=='en attente').length;
@@ -459,4 +460,25 @@ render();
 })();
 </script>
 <script src="resto-ext-loader.js"></script>
-</body></html>
+<style>
+.wallet-panel{border:1px solid #dce4eb;border-radius:18px;padding:20px;background:#fff;margin:18px 0}
+.wallet-head{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.wallet-kicker{font-size:.72rem;letter-spacing:.14em;font-weight:800;color:#a67c32}
+.wallet-head h2{margin:5px 0}.wallet-head strong{background:#102b45;color:white;border-radius:14px;padding:16px 20px;font-size:1.35rem}
+.wallet-actions{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0}
+.wallet-actions .btn,.wallet-panel .btn{border:0;border-radius:10px;padding:12px 16px;font-weight:800;cursor:pointer}
+.wallet-panel .btn{background:#102b45;color:white}.wallet-panel .btn.secondary{background:#e8edf3;color:#102b45}
+.wallet-ledger .entry{border-radius:10px;padding:12px;margin:8px 0;border:1px solid #e5eaf0}
+.wallet-panel form{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin:12px 0}.wallet-panel form label{display:flex;flex-direction:column;gap:6px}.wallet-panel input,.wallet-panel select{padding:10px;border:1px solid #ccd4df;border-radius:9px;font:inherit}.wallet-ledger .credit{color:#167447;font-weight:800}.wallet-ledger .debit{color:#a33b35;font-weight:800}
+</style><section class="panel wallet-panel" id="walletPanel">
+  <div class="wallet-head"><div><span class="wallet-kicker">PORTEFEUILLE ZUMUYA</span><h2>Mon portefeuille</h2><p class="muted">Solde, encaissements de ventes et retraits sécurisés.</p></div><strong id="walletBalance">Chargement…</strong></div>
+  <div class="wallet-actions"><button type="button" class="btn" id="walletDeposit">＋ Déposer de l’argent</button><button type="button" class="btn secondary" id="walletWithdrawToggle">↗ Demander un retrait</button></div>
+  <p class="muted" id="walletNotice">Les dépôts seront activés après raccordement du prestataire de paiement et de son webhook sécurisé.</p>
+  <form id="walletWithdrawForm" class="grid" hidden>
+    <label>Montant à retirer (FCFA)<input name="amount" type="number" min="1" step="1" required></label>
+    <label>Moyen de paiement<select name="method" required><option value="">Choisir</option><option value="mobile_money">Mobile Money</option><option value="bank">Virement bancaire</option></select></label>
+    <label>Numéro / référence du bénéficiaire<input name="destination" required placeholder="Numéro Mobile Money ou RIB"></label>
+    <div><button class="btn" type="submit">Envoyer la demande</button></div>
+  </form>
+  <h3>Historique des opérations</h3><div id="walletLedger" class="wallet-ledger"><p class="muted">Chargement…</p></div>
+</section><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="wallet.js"></script></body></html>

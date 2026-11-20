@@ -33,11 +33,21 @@
     header.bar a.brand{color:#fff;text-decoration:none;font-weight:700}
     header.bar .actions{display:flex;gap:8px;align-items:center}
   </style>
-</head>
+<style>
+.wallet-panel{border:1px solid #dce4eb;border-radius:18px;padding:20px;background:#fff;margin:18px 0}
+.wallet-head{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.wallet-kicker{font-size:.72rem;letter-spacing:.14em;font-weight:800;color:#a67c32}
+.wallet-head h2{margin:5px 0}.wallet-head strong{background:#102b45;color:white;border-radius:14px;padding:16px 20px;font-size:1.35rem}
+.wallet-actions{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0}
+.wallet-actions .btn,.wallet-panel .btn{border:0;border-radius:10px;padding:12px 16px;font-weight:800;cursor:pointer}
+.wallet-panel .btn{background:#102b45;color:white}.wallet-panel .btn.secondary{background:#e8edf3;color:#102b45}
+.wallet-ledger .entry{border-radius:10px;padding:12px;margin:8px 0;border:1px solid #e5eaf0}
+.wallet-panel form{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin:12px 0}.wallet-panel form label{display:flex;flex-direction:column;gap:6px}.wallet-panel input,.wallet-panel select{padding:10px;border:1px solid #ccd4df;border-radius:9px;font:inherit}.wallet-ledger .credit{color:#167447;font-weight:800}.wallet-ledger .debit{color:#a33b35;font-weight:800}
+</style></head>
 <body>
 <header class="bar">
   <a class="brand" href="index.html">ZUMUYA <b>GROUP</b></a>
-  <div class="actions">
+  <div class="actions"><a class="btn gold" href="#walletPanel">👛 Portefeuille</a><a class="btn" href="messagerie.html">💬 Messagerie</a>
     <a class="btn secondary" href="parametres.html" style="background:#e8edf3;color:#14213d">⚙️ Paramètres</a>
     <button id="logout" class="btn" type="button">Déconnexion</button>
   </div>
@@ -70,6 +80,22 @@
     </form>
   </section>
 
+<section class="panel wallet-panel" id="walletPanel">
+  <div class="wallet-head"><div><span class="wallet-kicker">PORTEFEUILLE ZUMUYA</span><h2>Mon portefeuille</h2><p class="muted">Solde, encaissements de ventes et retraits sécurisés.</p></div><strong id="walletBalance">Chargement…</strong></div>
+  <div class="wallet-actions"><button type="button" class="btn" id="walletDeposit">＋ Déposer de l’argent</button><button type="button" class="btn secondary" id="walletWithdrawToggle">↗ Demander un retrait</button></div>
+  <p class="muted" id="walletNotice">Les dépôts seront activés après raccordement du prestataire de paiement et de son webhook sécurisé.</p>
+  <form id="walletMethodForm" class="grid">
+    <label>Moyen de retrait enregistré<select name="method" required><option value="">Choisir</option><option value="mobile_money">Mobile Money</option><option value="bank">Virement bancaire</option></select></label>
+    <label>Numéro / référence du bénéficiaire<input name="destination" required placeholder="Numéro Mobile Money ou RIB"></label>
+    <div><button class="btn secondary" type="submit">Enregistrer mon moyen de retrait</button></div>
+  </form>
+  <form id="walletWithdrawForm" class="grid" hidden>
+    <label>Montant à retirer (FCFA)<input name="amount" type="number" min="1" step="1" required></label>
+    <div><button class="btn" type="submit">Envoyer la demande</button></div>
+  </form>
+  <h3>Historique des opérations</h3><div id="walletLedger" class="wallet-ledger"><p class="muted">Chargement…</p></div>
+</section>
+
   <section class="panel">
     <h2>Mes adresses de livraison</h2>
     <form id="addressForm" class="grid">
@@ -99,6 +125,6 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="client-espace.js"></script>
+<script src="client-espace.js"></script><script src="wallet.js"></script>
 </body>
 </html>

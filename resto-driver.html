@@ -111,7 +111,7 @@ nav:empty{display:none;padding:0;border:0;height:0;overflow:hidden}
   font-weight:700!important;box-shadow:0 4px 12px rgba(20,33,61,.35)!important;
 }
 .back-btn:hover{filter:brightness(1.1);transform:translateY(-1px)}
-</style></head><body>
+</style></head><body><a href="messagerie.html" style="position:fixed;right:14px;bottom:76px;z-index:9999;background:#c59a42;color:#102b45;padding:12px 16px;border-radius:999px;text-decoration:none;font-weight:800;box-shadow:0 5px 20px #102b4540">💬 Messagerie</a><a href="#walletPanel" style="position:fixed;right:14px;bottom:18px;z-index:9999;background:#102b45;color:white;padding:12px 16px;border-radius:999px;text-decoration:none;font-weight:800;box-shadow:0 5px 20px #102b4540">👛 Portefeuille</a>
 <div id="hdr"></div><main id="m"></main>
 <script src="config.js"></script><script src="resto-db.js"></script><script src="resto-portal-bridge.js?v=2"></script><script src="resto-notif.js"></script>
 <script src="resto-chat.js"></script>
@@ -229,4 +229,25 @@ render();
 })();
 </script>
 <script src="resto-ext-loader.js"></script>
-</body></html>
+<style>
+.wallet-panel{border:1px solid #dce4eb;border-radius:18px;padding:20px;background:#fff;margin:18px 0}
+.wallet-head{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.wallet-kicker{font-size:.72rem;letter-spacing:.14em;font-weight:800;color:#a67c32}
+.wallet-head h2{margin:5px 0}.wallet-head strong{background:#102b45;color:white;border-radius:14px;padding:16px 20px;font-size:1.35rem}
+.wallet-actions{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0}
+.wallet-actions .btn,.wallet-panel .btn{border:0;border-radius:10px;padding:12px 16px;font-weight:800;cursor:pointer}
+.wallet-panel .btn{background:#102b45;color:white}.wallet-panel .btn.secondary{background:#e8edf3;color:#102b45}
+.wallet-ledger .entry{border-radius:10px;padding:12px;margin:8px 0;border:1px solid #e5eaf0}
+.wallet-panel form{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin:12px 0}.wallet-panel form label{display:flex;flex-direction:column;gap:6px}.wallet-panel input,.wallet-panel select{padding:10px;border:1px solid #ccd4df;border-radius:9px;font:inherit}.wallet-ledger .credit{color:#167447;font-weight:800}.wallet-ledger .debit{color:#a33b35;font-weight:800}
+</style><section class="panel wallet-panel" id="walletPanel">
+  <div class="wallet-head"><div><span class="wallet-kicker">PORTEFEUILLE ZUMUYA</span><h2>Mon portefeuille</h2><p class="muted">Solde, encaissements de ventes et retraits sécurisés.</p></div><strong id="walletBalance">Chargement…</strong></div>
+  <div class="wallet-actions"><button type="button" class="btn" id="walletDeposit">＋ Déposer de l’argent</button><button type="button" class="btn secondary" id="walletWithdrawToggle">↗ Demander un retrait</button></div>
+  <p class="muted" id="walletNotice">Les dépôts seront activés après raccordement du prestataire de paiement et de son webhook sécurisé.</p>
+  <form id="walletWithdrawForm" class="grid" hidden>
+    <label>Montant à retirer (FCFA)<input name="amount" type="number" min="1" step="1" required></label>
+    <label>Moyen de paiement<select name="method" required><option value="">Choisir</option><option value="mobile_money">Mobile Money</option><option value="bank">Virement bancaire</option></select></label>
+    <label>Numéro / référence du bénéficiaire<input name="destination" required placeholder="Numéro Mobile Money ou RIB"></label>
+    <div><button class="btn" type="submit">Envoyer la demande</button></div>
+  </form>
+  <h3>Historique des opérations</h3><div id="walletLedger" class="wallet-ledger"><p class="muted">Chargement…</p></div>
+</section><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="wallet.js"></script></body></html>

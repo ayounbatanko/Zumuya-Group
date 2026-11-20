@@ -7,6 +7,14 @@
 <title>Mon compte — ZUMUYA GROUP</title>
 <link rel="icon" href="logo.svg" type="image/svg+xml">
 <link rel="stylesheet" href="compte.css?v=8">
+<style>
+.category-picker{margin:18px 0}.category-picker h2{font-size:1.25rem;color:#102b45}.category-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.category-card{display:flex;flex-direction:column;align-items:flex-start;text-align:left;gap:7px;padding:17px;border:1px solid #dce4eb;border-radius:15px;background:#fff;color:#102b45;cursor:pointer;min-height:130px;transition:.18s}
+.category-card:hover,.category-card:focus{border-color:#c59a42;box-shadow:0 8px 22px #102b4518;transform:translateY(-2px)}
+.category-card span{font-size:1.8rem}.category-card b{font-size:1rem}.category-card small{color:#657587;line-height:1.4}
+.category-back{margin:0 0 12px;border:0;background:transparent;color:#31516e;font-weight:700;cursor:pointer}
+@media(max-width:480px){.category-grid{grid-template-columns:1fr}.category-card{min-height:unset}}
+</style>
 </head>
 <body>
 <header class="bar"><a class="brand" href="index.html"><img src="logo.svg" alt=""><span>ZUMUYA <b>GROUP</b></span></a><a class="back" href="index.html">← Retour au site</a></header>
@@ -18,8 +26,20 @@
     <button type="button" role="tab" class="active" id="tabIn" data-mode="in" aria-selected="true">Connexion</button>
     <button type="button" role="tab" id="tabUp" data-mode="up" aria-selected="false">Créer un compte</button>
   </div>
+  <div id="categoryPicker" class="category-picker" hidden>
+    <h2>Quel type de compte souhaitez-vous créer ?</h2><button type="button" class="category-back" id="categoryBack" hidden>← Modifier la catégorie</button>
+    <p class="lead">Choisissez votre catégorie pour afficher le formulaire adapté.</p>
+    <div class="category-grid">
+      <button type="button" class="category-card" data-account-type="customer"><span>🛍️</span><b>Client</b><small>Acheter, commander et suivre mes commandes</small></button>
+      <button type="button" class="category-card" data-account-type="agro_producer"><span>🌾</span><b>Producteur agricole</b><small>Publier et vendre mes récoltes</small></button>
+      <button type="button" class="category-card" data-account-type="restaurant"><span>🍽️</span><b>Restaurant</b><small>Gérer mon établissement et mes commandes</small></button>
+      <button type="button" class="category-card" data-account-type="hotel"><span>🏨</span><b>Hôtel / hébergement</b><small>Gérer mon établissement</small></button>
+      <button type="button" class="category-card" data-account-type="delivery"><span>🛵</span><b>Livreur</b><small>Recevoir et suivre des missions</small></button>
+      <button type="button" class="category-card" data-account-type="agro_trader"><span>🧺</span><b>Commerçant agricole</b><small>Approvisionner et vendre des produits</small></button>
+    </div>
+  </div>
   <form id="authForm" novalidate>
-    <label id="categoryWrap">Type de compte (à l’inscription)
+    <label id="categoryWrap" hidden>Type de compte (à l’inscription)
       <select id="accountCategory" required>
         <option value="customer">Client — achat en ligne</option>
         <option value="restaurant">Restaurant partenaire</option>

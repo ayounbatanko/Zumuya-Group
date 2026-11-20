@@ -1,7 +1,7 @@
 (()=>{'use strict';
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let sb,session,countries=[],rests=[],orders=[];
-const TITLES={overview:'Vue d’ensemble',services:'Services : restauration, hôtel, livraison',partners:'Partenaires',countries:'Déploiement par pays',orgs:'Organisations',payments:'Transactions',activity:'Activité métier'};
+const TITLES={overview:'Vue d’ensemble',services:'Services : restauration, hôtel, livraison',partners:'Partenaires',countries:'Déploiement par pays',orgs:'Organisations',payments:'Transactions',wallet:'Portefeuille & commissions',activity:'Activité métier'};
 const msg=s=>{$('#loginMsg').textContent=s};
 const fail=s=>{const e=$('#err');e.hidden=!s;e.textContent=s||''};
 const dt=x=>x?new Date(x).toLocaleDateString('fr-FR'):'—';
@@ -15,6 +15,12 @@ function show(){const t=(location.hash||'#overview').slice(1),k=TITLES[t]?t:'ove
  $$('[data-p]').forEach(s=>s.hidden=s.dataset.p!==k);$$('#tabs a').forEach(a=>a.classList.toggle('on',a.dataset.t===k));$('#title').textContent=TITLES[k];scrollTo(0,0)}
 addEventListener('hashchange',show);
 
+$('#commissionForm')?.addEventListener('submit',async e=>{
+ e.preventDefault();const value=Number($('#commissionPercent').value);const out=$('#commissionMsg');
+ if(!Number.isFinite(value)||value<0||value>30){out.textContent='Choisissez un taux entre 0 et 30 %.';return}
+ const {error}=await sb.rpc('rg_wallet_set_commission',{p_percent:value});
+ out.textContent=error?error.message:'Taux de commission enregistré.';if(!error)await loadWalletAdmin();
+});
 /* ---------- Démarrage / authentification ---------- */
 async function start(){
  if(!window.ZUMAYA_CONFIG||!ZUMAYA_CONFIG.SUPABASE_URL||ZUMAYA_CONFIG.SUPABASE_URL.includes('VOTRE-PROJET'))throw Error('Configuration Supabase non renseignée.');
@@ -27,6 +33,16 @@ async function verify(s){session=s;
 
 /* ---------- Chargement des données ---------- */
 async function optional(p){try{const r=await p;return r.error?null:r}catch(e){return null}}
+async function loadWalletAdmin(){
+ const [w,c,wd]=await Promise.all([
+  sb.from('rg_wallets').select('balance_minor').eq('user_id',session.user.id).maybeSingle(),
+  sb.from('rg_wallet_settings').select('commission_percent').eq('id',true).maybeSingle(),
+  sb.from('rg_wallet_withdrawals').select('id,user_id,amount_minor,currency_code,status,payment_method,created_at').order('created_at',{ascending:false}).limit(50)
+ ]);
+ if(!w.error)$('#ownerWalletBalance').textContent=new Intl.NumberFormat('fr-FR').format(w.data?.balance_minor||0)+' FCFA';
+ if(!c.error&&c.data){$('#ownerCommissionCurrent').textContent=c.data.commission_percent+' %';$('#commissionPercent').value=c.data.commission_percent}
+ if(!wd.error)$('#ownerWithdrawals').innerHTML=(wd.data||[]).map(x=>`<div class="entry"><b>${Number(x.amount_minor).toLocaleString('fr-FR')} FCFA</b> · ${esc(x.status)} · ${esc(x.payment_method?.type||'')} · ${esc(x.payment_method?.destination||'')}<small> · ${dt(x.created_at)}</small></div>`).join('')||'Aucune demande de retrait.';
+}
 async function refresh(){fail('');
  const [orgs,ests,records,partners,payments,c,prof,rr,oo]=await Promise.all([
   sb.from('rg_organizations').select('id,legal_name,public_name,country_code,organization_type,verification_status,created_at').order('created_at',{ascending:false}).limit(100),
@@ -42,7 +58,7 @@ async function refresh(){fail('');
  countries=c.data||[];rests=(rr&&rr.data||[]).map(x=>x.data).filter(Boolean);orders=(oo&&oo.data||[]).map(x=>x.data).filter(o=>o&&o.restId&&!String(o.id).startsWith('__'));
  const orgNames=Object.fromEntries((orgs.data||[]).map(x=>[x.id,x.public_name]));
  const pend=(partners.data||[]).filter(x=>x.status==='pending');
- renderOverview(orgs.data||[],prof.count||0,ests.count||0,payments.data||[],pend);
+ renderOverview(orgs.data||[],prof.count||0,ests.count||0,payments.data||[],pend);await loadWalletAdmin();
  renderServices();renderPartners(partners.data||[]);renderCountries();renderOrgs(orgs.data||[]);renderPayments(payments.data||[]);renderActivity(records.data||[],orgNames);
  if(!rr)fail('Les données du Service de Restauration ne sont pas lisibles : exécutez supabase-setup.sql dans ce projet Supabase.');
  const b=$('#pBadge');b.hidden=!pend.length;b.textContent=pend.length;$('#live').textContent='● Connecté · '+new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}

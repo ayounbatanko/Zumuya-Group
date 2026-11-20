@@ -1,6 +1,6 @@
 (()=>{'use strict';
 const $=s=>document.querySelector(s);
-let sb=null,mode='in';
+let sb=null,mode='in',selectedCategory=null;
 const ROLE_TYPES=['restaurant','hotel','delivery','agro_producer','agro_trader','commerce','business'];
 const roleToPartner={restaurant:'restaurant',hotel:'hotel',delivery:'delivery',agro_producer:'agro',agro_trader:'agro_trader',commerce:'commerce',business:'business'};
 /* L'identifiant de connexion du portail reste l'adresse e-mail ; le rôle est détecté depuis le profil après connexion. */
@@ -15,8 +15,11 @@ function setMode(m,init){
   $('#tabIn').classList.toggle('active',!up);$('#tabUp').classList.toggle('active',up);
   $('#tabIn').setAttribute('aria-selected',String(!up));$('#tabUp').setAttribute('aria-selected',String(up));
   $('#nameWrap').hidden=!up;$('#confirmWrap').hidden=!up;$('#pwHelp').hidden=!up;
+  const picker=$('#categoryPicker'),form=$('#authForm');
+  if(up){selectedCategory=null;picker.hidden=false;form.hidden=true;$('#categoryBack').hidden=true;}
+  else{picker.hidden=true;form.hidden=false;}
   const categoryWrap=$('#categoryWrap');
-  if(categoryWrap)categoryWrap.hidden=!up;
+  if(categoryWrap)categoryWrap.hidden=true;
   $('#accountCategory').disabled=!up;$('#accountCategory').required=up;updateIdentityFields();
   $('#displayName').required=up;$('#passwordConfirm').required=up;
   $('#password').autocomplete=up?'new-password':'current-password';
@@ -43,7 +46,7 @@ async function showAccount(user){
     if(!stay&&type==='customer'&&b[0]&&Date.now()-(+b[1]||0)<18e5&&/^[a-z0-9._-]+\.html(#[\w-]*)?$/i.test(b[0])){location.replace(b[0]);return}}catch(e){}
   let owner=false;try{const {data}=await sb.rpc('rg_is_platform_owner');owner=data===true}catch(e){}
   if(owner&&!stay&&!sessionStorage.getItem('zumuya_redirected')){sessionStorage.setItem('zumuya_redirected','1');location.replace('proprietaire.html');return}
-  if(!owner&&type&&routes[type]&&!stay&&(type==='customer'||user.user_metadata?.organization_id)&&!sessionStorage.getItem('zumuya_redirected')){sessionStorage.setItem('zumuya_redirected','1');if(type==='restaurant'||type==='hotel')sessionStorage.setItem('zmy_portal','1');location.replace(routes[type]);return}
+  if(!owner&&type&&routes[type]&&!stay&&!sessionStorage.getItem('zumuya_redirected')){sessionStorage.setItem('zumuya_redirected','1');if(type==='restaurant'||type==='hotel')sessionStorage.setItem('zmy_portal','1');location.replace(routes[type]);return}
   sessionStorage.removeItem('zumuya_redirected');
   $('#auth').hidden=true;$('#account').hidden=false;$('#recovery').hidden=true;
   $('#accPhone').textContent=user.email||user.phone||'—';
@@ -69,6 +72,7 @@ async function submit(e){
   const email=$('#email').value.trim().toLowerCase(),accountType=$('#accountCategory').value;
   if(!EMAIL_RE.test(email))return showMsg('Saisissez une adresse e-mail valide.');
   if(mode==='up'){
+    if(!selectedCategory)return showMsg('Choisissez d’abord une catégorie de compte.');
     if(!name)return showMsg('Saisissez votre nom complet.');
     if(password.length<MIN)return showMsg('Le mot de passe doit contenir au moins '+MIN+' caractères.');
     if(password!==confirm){updateMatch();return showMsg('Les deux saisies du mot de passe ne sont pas identiques.')}
@@ -263,6 +267,15 @@ $('#pwForm').addEventListener('submit',async e=>{
 });
 
 document.addEventListener('click',e=>{
+  const cat=e.target.closest('[data-account-type]');
+  if(cat){
+    selectedCategory=cat.dataset.accountType;$('#accountCategory').value=selectedCategory;
+    $('#categoryPicker').hidden=true;$('#authForm').hidden=false;$('#categoryBack').hidden=false;
+    $('#authTitle').textContent='Créer votre compte — '+(LABEL[selectedCategory]||'Compte professionnel');
+    $('#authLead').textContent='Renseignez vos informations pour créer votre compte.';
+    $('#displayName').focus();return;
+  }
+  if(e.target.closest('#categoryBack')){$('#categoryPicker').hidden=false;$('#authForm').hidden=true;$('#categoryBack').hidden=true;return}
   const t=e.target.closest('[data-mode]');if(t){setMode(t.dataset.mode);return}
   const eye=e.target.closest('[data-eye]');
   if(eye){const i=document.getElementById(eye.dataset.eye),show=i.type==='password';i.type=show?'text':'password';eye.textContent=show?'Masquer':'Afficher'}

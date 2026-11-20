@@ -1,0 +1,25 @@
+MISE À JOUR ZUMUYA GROUP — 20/11/2026
+
+MODIFICATIONS INCLUSES
+- Parcours d'inscription avec choix préalable de la catégorie et formulaire correspondant.
+- Redirection client vers client-espace.html après connexion.
+- Redirection producteur agricole / commerçant vers agro.html après activation du profil.
+- Portefeuille visible dans les espaces client, agro, restaurant/hôtel et livreur.
+- Portefeuille propriétaire avec réglage de commission (5 % initialement, modifiable entre 0 et 30 %).
+- Messagerie privée entre acteurs, avec annuaire des profils agro actifs et bouton de contact depuis les fiches fournisseurs.
+- Navigation et raccourcis vers le portefeuille et la messagerie.
+
+INSTALLATION SUPABASE
+1. Conserver les scripts SQL de base déjà utilisés par le projet.
+2. Exécuter 07_portefeuilles_commissions.sql dans Supabase SQL Editor.
+3. Exécuter 08_messagerie_acteurs.sql dans Supabase SQL Editor.
+4. Déployer ensuite les fichiers du ZIP à la racine du dépôt GitHub Pages (même niveau que index.html).
+5. Vérifier config.js : URL Supabase et clé anon uniquement côté navigateur.
+
+PAIEMENTS — IMPORTANT
+Le portefeuille et le grand livre sont créés, les demandes de retrait sont enregistrées et la commission est calculée côté serveur lors du règlement d'une vente. Le taux initial est de 5 %.
+Les dépôts réels Mobile Money / carte, les retraits réellement exécutés et le versement de la commission au propriétaire ne deviennent opérationnels qu'après raccordement d'un prestataire de paiement, de ses clés secrètes côté serveur et de ses webhooks vérifiés. Ne jamais mettre une clé service_role dans les fichiers du site. Ne jamais créditer un portefeuille depuis le navigateur.
+La fonction rg_wallet_settle_sale est réservée au rôle service_role et doit être appelée uniquement par une Edge Function/webhook après confirmation du paiement.
+
+MESSAGERIE
+Les messages sont privés : seules les personnes membres d'une conversation peuvent lire ses messages. Les tables et fonctions sont protégées par RLS. Exécuter impérativement 08_messagerie_acteurs.sql avant d'utiliser la messagerie.
