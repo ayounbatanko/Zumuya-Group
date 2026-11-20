@@ -184,7 +184,7 @@ const U=guard('restaurant');U&&RGChat.watch(U.id);var setSub='rest';let tab=null
 const R=()=>D.get().rests.find(r=>r.id==U.restId);
 const upd=f=>{const d=D.get();f(d.rests.find(r=>r.id==U.restId),d);D.save(d)};
 const day=ts=>new Date(ts).toISOString().slice(0,10);
-const tabs=['sub','dash','hotel','pos','orders','menu','hist','report','drivers','support','settings'];
+const tabs=['sub','dash','hotel','pos','orders','menu','hist','report','drivers','support','settings','wallet'];
 try{const h=(location.hash||'').slice(1);if(tabs.includes(h))tab=h}catch(e){}
 const tabMeta={
  sub:{label:'Abonnement Pro',ico:'⭐'},
@@ -197,15 +197,15 @@ const tabMeta={
  report:{label:'Rapport du chiffre d\'affaires',ico:'📈'},
  support:{label:'Support (écrire à l\'administrateur)',ico:'💬'},
  hotel:{label:'Module hôtel',ico:'🏨'},
- settings:{label:'Paramètres et réglages',ico:'⚙️'}
+ settings:{label:'Paramètres et réglages',ico:'⚙️'}, wallet:{label:'Portefeuille',ico:'👛'}
 };
 function isHotelAccount(){const r=R();return !!(r&&(r.businessType==='hotel'||(r.hotel&&r.hotel.enabled)))}
 function homeGrid(){const pend=D.get().orders.filter(o=>o.restId==U.restId&&o.status=='en attente').length;
- const order=[ 'sub','dash',...(isHotelAccount()?['hotel']:[]),'pos','orders','menu','hist','report','drivers','support','settings'];
+ const order=[ 'sub','dash',...(isHotelAccount()?['hotel']:[]),'pos','orders','menu','hist','report','drivers','support','settings','wallet'];
  const btns=order.map(k=>{const m=tabMeta[k];const badge=(k=='orders'&&pend)?` <span class="badge">${pend}</span>`:'';
   const cls=(k==='settings'||k==='sub')?'hg-btn full':'hg-btn';
   return `<button class="${cls}" onclick="tab='${k}';render()"><span class="ico">${m.ico}</span><span>${m.label}${badge}</span></button>`}).join('');
- return `<div class="home-grid-wrap"><div class="card"><h2 style="margin:0 0 14px;text-align:center">Service de Restauration</h2><div class="home-grid">${btns}<a class="hg-btn full" href="agro.html" style="text-decoration:none"><span class="ico">🌾</span><span>Fournisseurs agricoles proches</span></a><a class="hg-btn" href="messagerie.html" style="text-decoration:none"><span class="ico">💬</span><span>Messagerie</span></a><a class="hg-btn" href="#walletPanel" style="text-decoration:none"><span class="ico">👛</span><span>Portefeuille</span></a></div></div></div>`}
+ return `<div class="home-grid-wrap"><div class="card"><h2 style="margin:0 0 14px;text-align:center">Service de Restauration</h2><div class="home-grid">${btns}<a class="hg-btn full" href="index.html#catalogue-public" style="text-decoration:none"><span class="ico">🌾</span><span>Voir les fournisseurs agricoles</span></a><a class="hg-btn" href="messagerie.html" style="text-decoration:none"><span class="ico">💬</span><span>Messagerie</span></a><button class="hg-btn" onclick="tab='wallet';render()"><span class="ico">👛</span><span>Portefeuille</span></button></div></div></div>`}
 function proUI(r,s){
  const e=s.end?new Date(s.end).toLocaleDateString():'';
  // Formulaire de paiement reçu du propriétaire
@@ -255,9 +255,9 @@ function banner(r,s){const go=` <a href="#" onclick="tab='sub';render();return f
  if(s.state=='trial')return `<div class="card warn">🎁 <b>Essai gratuit</b> : ${s.days} jour(s) restant(s).${go}</div>`;
  if(s.state=='pro'&&s.ok)return `<div class="card okc"><b>Pro actif</b> : ${s.days} jour(s) restant(s).</div>`;
  return ''}
-function render(){const r=R(),s=subInfo(r);if(tab==='hotel'&&!isHotelAccount())tab=null;
+function render(){const r=R(),s=subInfo(r);if(tab==='hotel'&&!isHotelAccount())tab=null;const wallet=document.getElementById('walletPanel');if(wallet)wallet.hidden=true;
  const title=tab&&tabMeta[tab]?tabMeta[tab].label:r.name;
- hdr(title);nav.innerHTML='<a class="znav-action" href="agro.html">🌾 Fournisseurs proches</a><a class="znav-action" href="messagerie.html">💬 Messagerie</a><a class="znav-action" href="#walletPanel">👛 Portefeuille</a>';
+ hdr(title);nav.innerHTML='<a class="znav-action" href="index.html#catalogue-public">🌾 Fournisseurs proches</a><a class="znav-action" href="messagerie.html">💬 Messagerie</a><a class="znav-action" href="#walletPanel">👛 Portefeuille</a>';
  // Bouton retour dans l'en-tête quand on est dans une section
  if(tab){
   const lo=document.getElementById('lo');
@@ -272,7 +272,7 @@ function render(){const r=R(),s=subInfo(r);if(tab==='hotel'&&!isHotelAccount())t
  if(!s.ok){m.innerHTML=tab==='account'?passwordCard():tab==='support'?RGChat.userView(U):proUI(r,s)+`<div class="row" style="gap:8px"><button type="button" class="sec" onclick="tab='support';render()">💬 Support</button><button type="button" class="sec" onclick="tab='account';render()">🔑 Paramètres du compte</button></div>`;return}
  if(!tab){m.innerHTML=banner(r,s)+homeGrid();return}
  const back=`<div class="back-row"><button type="button" class="back-btn" onclick="tab=null;render()">← Retour à l'accueil</button></div>`;
- m.innerHTML=back+(V[tab])(r)}
+ if(tab==='wallet'){m.innerHTML=back+'<h2>Portefeuille ZUMUYA</h2>';if(wallet){wallet.hidden=false;m.appendChild(wallet)}return}m.innerHTML=back+(V[tab])(r)}
 function getOwnerPlans(){
  const d=D.get();const op=d.ownerPay||{};
  const cur=op.defaultCurrency||'XOF';
@@ -474,7 +474,7 @@ render();
 .wallet-panel .btn{background:#102b45;color:white}.wallet-panel .btn.secondary{background:#e8edf3;color:#102b45}
 .wallet-ledger .entry{border-radius:10px;padding:12px;margin:8px 0;border:1px solid #e5eaf0}
 .wallet-panel form{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin:12px 0}.wallet-panel form label{display:flex;flex-direction:column;gap:6px}.wallet-panel input,.wallet-panel select{padding:10px;border:1px solid #ccd4df;border-radius:9px;font:inherit}.wallet-ledger .credit{color:#167447;font-weight:800}.wallet-ledger .debit{color:#a33b35;font-weight:800}
-</style><section class="panel wallet-panel" id="walletPanel">
+</style><section class="panel wallet-panel" id="walletPanel" hidden>
   <div class="wallet-head"><div><span class="wallet-kicker">PORTEFEUILLE ZUMUYA</span><h2>Mon portefeuille</h2><p class="muted">Solde, encaissements de ventes et retraits sécurisés.</p></div><strong id="walletBalance">Chargement…</strong></div>
   <div class="wallet-actions"><button type="button" class="btn" id="walletDeposit">＋ Déposer de l’argent</button><button type="button" class="btn secondary" id="walletWithdrawToggle">↗ Demander un retrait</button></div>
   <p class="muted" id="walletNotice">Les dépôts seront activés après raccordement du prestataire de paiement et de son webhook sécurisé.</p>

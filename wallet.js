@@ -36,5 +36,5 @@ $('#walletWithdrawForm')?.addEventListener('submit',async e=>{
  if(error){note(error.message);return}
  e.currentTarget.reset();e.currentTarget.hidden=true;note('Demande de retrait enregistrée. Elle sera traitée après vérification du moyen de paiement.');await load();
 });
-load().catch(e=>note(e.message));
+window.RGWalletLoad=()=>load().catch(e=>note(e.message));load().catch(e=>note(e.message));
 })();

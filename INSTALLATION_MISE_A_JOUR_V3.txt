@@ -1,0 +1,23 @@
+ZUMUYA GROUP — VERSION 3
+
+1) Remplacer les fichiers du dépôt par ceux de cette archive.
+2) Dans Supabase SQL Editor, exécuter dans l'ordre :
+   - 07_portefeuilles_commissions.sql (si pas encore installé)
+   - 08_messagerie_acteurs.sql (si pas encore installé)
+   - 09_catalogues_publics.sql (si pas encore installé)
+   - 10_logistique_organisations.sql
+3) Le tableau de bord propriétaire présente des indicateurs supplémentaires.
+4) L'espace Agro est réservé aux comptes Producteur agricole / Commerçant agricole.
+   Les restaurants et hôtels sont renvoyés vers le marketplace public.
+5) Les sections du portefeuille sont masquées par défaut et accessibles par onglet.
+6) La migration 10 crée les organisations de livraison, les invitations de livreurs,
+   les membres et les missions. Une organisation doit être créée/vérifiée dans
+   rg_organizations et reliée à rg_delivery_organizations avant d'inviter un livreur.
+
+IMPORTANT — erreur 401 rg_orders :
+Le code historique resto-db.js utilise encore la clé anon pour ses requêtes REST
+et charge les tables globalement. Accorder les écritures anon à rg_orders serait
+une fuite de commandes et de données personnelles. La migration n'ouvre donc pas
+rg_orders au rôle anon. Le connecteur de synchronisation historique doit être
+migré vers des appels authentifiés et des politiques RLS par utilisateur/organisation
+avant de réactiver ses écritures sur cette table. Ne désactivez pas RLS.

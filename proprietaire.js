@@ -67,6 +67,11 @@ async function refresh(){fail('');
 function renderOverview(orgs,users,ests,pays,pend){
  const hotels=rests.filter(isHotel),restos=rests.filter(r=>!isHotel(r)),done=['terminée','refusée','annulée'],act=orders.filter(o=>!done.includes(o.status));
  $('#stats').innerHTML=stat('Organisations',orgs.length)+stat('Comptes ZUMUYA',users)+stat('Établissements',ests)+stat('Transactions',pays.length)+stat('Restaurants',restos.length,restos.filter(subOk).length+' actifs')+stat('Hôtels',hotels.length,hotels.filter(subOk).length+' actifs')+stat('Commandes en cours',act.length,orders.length+' au total');
+ const sales=orders.reduce((n,o)=>n+(Number(o.total)||0),0),completed=orders.filter(o=>o.status==='terminée').length;
+ const deliveryAssigned=orders.filter(o=>o.driverId).length,completion=orders.length?Math.round(completed/orders.length*100):0;
+ const insight=document.getElementById('ownerInsights');
+ if(insight)insight.innerHTML=stat('Volume de ventes estimé',sales.toLocaleString('fr-FR')+' FCFA')+stat('Commandes terminées',completed)+stat('Taux d’achèvement',completion+' %')+stat('Courses attribuées',deliveryAssigned);
+
  const days=[...Array(7)].map((_,i)=>{const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-6+i);return d}),
   cnt=days.map(d=>orders.filter(o=>o.created&&new Date(o.created).toDateString()===d.toDateString()).length),mx=Math.max(1,...cnt);
  $('#ordTotal').textContent=cnt.reduce((a,b)=>a+b,0)+' commandes';
