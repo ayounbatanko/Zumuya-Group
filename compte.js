@@ -187,7 +187,7 @@ async function submitPartner(e){
     const accountType=roleMap[currentCat.id]||'business';
     const {data:org,error}=await sb.from('rg_organizations').insert({
       legal_name:fd.organization_name.trim(),public_name:fd.organization_name.trim(),country_code:fd.country_code||'CI',
-      organization_type:currentCat.id,verification_status:'verified',owner_id:currentUser.id,
+      organization_type:currentCat.id,verification_status:'pending',owner_id:currentUser.id,
       city:fd.city.trim(),address:fd.address||null,latitude:fd.latitude?Number(fd.latitude):null,longitude:fd.longitude?Number(fd.longitude):null,
       contact_phone:fd.contact_phone.trim(),details
     }).select('id').single();
