@@ -228,3 +228,11 @@ footer>div{gap:13px}
 .niger-map-card>b{display:block;text-align:center;font:800 10px ui-monospace,monospace;letter-spacing:.12em;color:#f0cf88}
 @media(max-width:760px){.niger-map-card{right:2%;bottom:4%;width:34%;padding:8px}.niger-map-card svg{max-height:85px}.niger-map-card>b{font-size:8px}.niger-map-card>span{font-size:7px}}
 @media(max-width:520px){.niger-map-card{width:36%;bottom:3%}.hero-visual{min-height:430px}}
+
+/* Sélecteur de catégorie du catalogue public */
+.pc-cats{display:flex;gap:8px;margin:0 0 14px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.pc-cats::-webkit-scrollbar{display:none}
+.pc-cats button{flex:0 0 auto;min-height:44px;padding:0 16px;border:1px solid var(--line);border-radius:999px;background:#fff;color:inherit;font:inherit;font-weight:700;cursor:pointer;white-space:nowrap}
+.pc-cats button i{font-style:normal;font-size:.8em;opacity:.7;margin-left:4px}
+.pc-cats button.on{background:#102b45;border-color:#102b45;color:#fff}
+.pc-cats button.on i{opacity:.9}

@@ -29,7 +29,15 @@ $('#walletWithdrawToggle')?.addEventListener('click',()=>$('#walletWithdrawForm'
 $('#walletWithdrawForm')?.addEventListener('submit',async e=>{
  e.preventDefault();const f=Object.fromEntries(new FormData(e.currentTarget));const amount=Math.round(Number(f.amount));
  if(!amount||amount<=0)return note('Saisissez un montant valide.');
- const {data:methodRow,error:methodError}=await sb.from('rg_wallet_payout_methods').select('method_type,destination').eq('user_id',user.id).maybeSingle();
+ let methodRow=null,methodError=null;
+ if(f.method&&f.destination){
+  const up=await sb.from('rg_wallet_payout_methods').upsert({user_id:user.id,method_type:f.method,destination:String(f.destination).trim()},{onConflict:'user_id'});
+  if(up.error){note(up.error.message);return}
+  methodRow={method_type:f.method,destination:String(f.destination).trim()};
+ }else{
+  const r=await sb.from('rg_wallet_payout_methods').select('method_type,destination').eq('user_id',user.id).maybeSingle();
+  methodRow=r.data;methodError=r.error;
+ }
  if(methodError||!methodRow){note('Enregistrez d’abord votre moyen de retrait.');return}
  const method={type:methodRow.method_type,destination:methodRow.destination};
  const {error}=await sb.rpc('rg_wallet_request_withdrawal',{p_amount_minor:amount,p_method:method});

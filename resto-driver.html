@@ -15,7 +15,7 @@
 <meta name="twitter:image" content="resto-apercu-facebook.jpg">
 <title>Livreur Service de Restauration</title><style>:root{--bg:#f4f5f9;--card:#fff;--ink:#16213e;--mut:#6a7390;--bd:#e3e6ef;--navy:#14213d;--navy2:#26417a;--gold:#ffb703;--gold2:#fb8500;--ok:#12a36b;--bad:#e5383b;--acc:#fb8500;--kpi:#26417a;--sh:0 6px 22px rgba(20,33,61,.08)}
 @media(prefers-color-scheme:dark){:root{--bg:#0d1325;--card:#161f38;--ink:#eef1fb;--mut:#93a0c4;--bd:#27345a;--kpi:#ffc93c;--sh:0 6px 22px rgba(0,0,0,.35)}}
-*{box-sizing:border-box}
+*{box-sizing:border-box}[hidden]{display:none!important}
 body{margin:0;font:15px/1.55 "Segoe UI",system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--ink)}
 h2,h3{margin:.2em 0 .4em;letter-spacing:-.2px}
 #hdr{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 20px;background:linear-gradient(120deg,#0f1a33,#26417a);color:#fff;position:sticky;top:0;z-index:5;box-shadow:0 4px 16px rgba(0,0,0,.2)}
@@ -113,7 +113,7 @@ nav:empty{display:none;padding:0;border:0;height:0;overflow:hidden}
 .back-btn:hover{filter:brightness(1.1);transform:translateY(-1px)}
 </style><style>.driver-nav-action{display:inline-flex;align-items:center;text-decoration:none;padding:9px 13px;border-radius:12px;border:1px solid var(--bd);background:var(--card);color:var(--ink);font-weight:800;font-size:13px}</style></head><body>
 <div id="hdr"></div><main id="m"></main>
-<script src="config.js"></script><script src="resto-db.js"></script><script src="resto-portal-bridge.js?v=2"></script><script src="resto-notif.js"></script>
+<script src="config.js"></script><script src="resto-db.js?v=3"></script><script src="resto-portal-bridge.js?v=2"></script><script src="resto-notif.js"></script>
 <script src="resto-chat.js"></script>
 <script>let SH=window;try{if(window.parent!==window&&window.parent.nav)SH=window.parent}catch(e){}
 SH.__m=SH.__m||{l:{},s:{}};
@@ -182,8 +182,8 @@ const nextStage={'préparée':'colis récupéré','colis récupéré':'en route'
 const stageLabel={'préparée':'À récupérer au restaurant','colis récupéré':'Colis récupéré','en route':'Commande en route 🛵','arrivé':'Commande arrivée 📍','terminée':'Livraison terminée'};
 function mapUrl(o){const dest=o.cLat!=null&&o.cLng!=null?o.cLat+','+o.cLng: o.addr;const origin=myPos?myPos.join(','):'';return 'https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(dest)+(origin?'&origin='+encodeURIComponent(origin):'')+'&travelmode=driving'}
 function driverBar(){return `<div class="row driver-tabs" style="gap:8px;flex-wrap:wrap;margin-bottom:10px">`+[['jobs','🚚 Livraisons'],['chat','💬 Support'],['acc','🔑 Paramètres du compte'],['wallet','👛 Portefeuille']].map(([k,l])=>`<button type="button" class="${dTab==k?'':'sec'}" onclick="dTab='${k}';render()">${l}</button>`).join('')+`<a class="driver-nav-action" href="messagerie.html">💬 Messagerie</a></div>`}
-function render(){const wallet=document.getElementById('walletPanel');if(wallet)wallet.hidden=true;const d=D.get(),rs=rest();hdr('Espace livreur — '+U.name+(rs?' · '+rs.name:''));const jobs=mine(),done=d.orders.filter(o=>o.driverId==U.id&&o.status=='terminée').reverse().slice(0,10);
- if(dTab=='wallet'){m.innerHTML=driverBar()+'<h2>Portefeuille</h2>';if(wallet){wallet.hidden=false;m.appendChild(wallet)}return}if(dTab=='acc'){m.innerHTML=driverBar()+passwordCard();return}
+function render(){const wallet=document.getElementById('walletPanel');if(wallet){wallet.hidden=true;if(wallet.parentNode!==document.body)document.body.appendChild(wallet)}const d=D.get(),rs=rest();hdr('Espace livreur — '+U.name+(rs?' · '+rs.name:''));const jobs=mine(),done=d.orders.filter(o=>o.driverId==U.id&&o.status=='terminée').reverse().slice(0,10);
+ if(dTab=='wallet'){m.innerHTML=driverBar();if(wallet){wallet.hidden=false;m.appendChild(wallet);if(window.RGWalletLoad)window.RGWalletLoad()}return}if(dTab=='acc'){m.innerHTML=driverBar()+passwordCard();return}
  if(dTab=='chat'){m.innerHTML=driverBar()+RGChat.userView(U);return}
  m.innerHTML=driverBar()+`<h3>Mes livraisons</h3>`+(jobs.map(o=>{const nxt=nextStage[o.status],hasGPS=o.cLat!=null&&o.cLng!=null;
  return `<div class="card"><div class="row"><b>Commande #${esc(o.id)}</b><span class="badge" data-s="${o.status}">${esc(o.status)}</span></div>
@@ -250,4 +250,4 @@ render();
     <div><button class="btn" type="submit">Envoyer la demande</button></div>
   </form>
   <h3>Historique des opérations</h3><div id="walletLedger" class="wallet-ledger"><p class="muted">Chargement…</p></div>
-</section><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="wallet.js"></script></body></html>
+</section><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="wallet.js?v=2"></script></body></html>

@@ -15,7 +15,7 @@
 <meta name="twitter:image" content="resto-apercu-facebook.jpg">
 <title>Restaurant</title><style>:root{--bg:#f4f5f9;--card:#fff;--ink:#16213e;--mut:#6a7390;--bd:#e3e6ef;--navy:#14213d;--navy2:#26417a;--gold:#ffb703;--gold2:#fb8500;--ok:#12a36b;--bad:#e5383b;--acc:#fb8500;--kpi:#26417a;--sh:0 6px 22px rgba(20,33,61,.08)}
 @media(prefers-color-scheme:dark){:root{--bg:#0d1325;--card:#161f38;--ink:#eef1fb;--mut:#93a0c4;--bd:#27345a;--kpi:#ffc93c;--sh:0 6px 22px rgba(0,0,0,.35)}}
-*{box-sizing:border-box}
+*{box-sizing:border-box}[hidden]{display:none!important}
 body{margin:0;font:15px/1.55 "Segoe UI",system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--ink)}
 h2,h3{margin:.2em 0 .4em;letter-spacing:-.2px}
 #hdr{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 20px;background:linear-gradient(120deg,#0f1a33,#26417a);color:#fff;position:sticky;top:0;z-index:5;box-shadow:0 4px 16px rgba(0,0,0,.2)}
@@ -117,7 +117,7 @@ nav:empty{display:none;padding:0;border:0;height:0;overflow:hidden}
 @media(max-width:600px){nav{padding:9px 10px;gap:6px}.znav-action{padding:8px 10px;font-size:12px}}
 </style></head><body>
 <div id="hdr"></div><nav id="nav"></nav><main id="m"></main><div id="receipt"></div>
-<script src="config.js"></script><script src="resto-db.js"></script><script src="resto-portal-bridge.js?v=2"></script><script src="resto-notif.js"></script>
+<script src="config.js"></script><script src="resto-db.js?v=3"></script><script src="resto-portal-bridge.js?v=2"></script><script src="resto-notif.js"></script>
 <script src="resto-chat.js"></script>
 <script src="resto-charts.js"></script>
 <script src="resto-qr.js"></script>
@@ -205,7 +205,7 @@ function homeGrid(){const pend=D.get().orders.filter(o=>o.restId==U.restId&&o.st
  const btns=order.map(k=>{const m=tabMeta[k];const badge=(k=='orders'&&pend)?` <span class="badge">${pend}</span>`:'';
   const cls=(k==='settings'||k==='sub')?'hg-btn full':'hg-btn';
   return `<button class="${cls}" onclick="tab='${k}';render()"><span class="ico">${m.ico}</span><span>${m.label}${badge}</span></button>`}).join('');
- return `<div class="home-grid-wrap"><div class="card"><h2 style="margin:0 0 14px;text-align:center">Service de Restauration</h2><div class="home-grid">${btns}<a class="hg-btn full" href="index.html#catalogue-public" style="text-decoration:none"><span class="ico">🌾</span><span>Voir les fournisseurs agricoles</span></a><a class="hg-btn" href="messagerie.html" style="text-decoration:none"><span class="ico">💬</span><span>Messagerie</span></a><button class="hg-btn" onclick="tab='wallet';render()"><span class="ico">👛</span><span>Portefeuille</span></button></div></div></div>`}
+ return `<div class="home-grid-wrap"><div class="card"><h2 style="margin:0 0 14px;text-align:center">Service de Restauration</h2><div class="home-grid">${btns}<a class="hg-btn full" href="index.html#catalogue-public" style="text-decoration:none"><span class="ico">🌾</span><span>Voir les fournisseurs agricoles</span></a><a class="hg-btn" href="messagerie.html" style="text-decoration:none"><span class="ico">💬</span><span>Messagerie</span></a></div></div></div>`}
 function proUI(r,s){
  const e=s.end?new Date(s.end).toLocaleDateString():'';
  // Formulaire de paiement reçu du propriétaire
@@ -255,9 +255,9 @@ function banner(r,s){const go=` <a href="#" onclick="tab='sub';render();return f
  if(s.state=='trial')return `<div class="card warn">🎁 <b>Essai gratuit</b> : ${s.days} jour(s) restant(s).${go}</div>`;
  if(s.state=='pro'&&s.ok)return `<div class="card okc"><b>Pro actif</b> : ${s.days} jour(s) restant(s).</div>`;
  return ''}
-function render(){const r=R(),s=subInfo(r);if(tab==='hotel'&&!isHotelAccount())tab=null;const wallet=document.getElementById('walletPanel');if(wallet)wallet.hidden=true;
+function render(){const r=R(),s=subInfo(r);if(tab==='hotel'&&!isHotelAccount())tab=null;const wallet=document.getElementById('walletPanel');if(wallet){wallet.hidden=true;if(wallet.parentNode!==document.body)document.body.appendChild(wallet)}
  const title=tab&&tabMeta[tab]?tabMeta[tab].label:r.name;
- hdr(title);nav.innerHTML='<a class="znav-action" href="index.html#catalogue-public">🌾 Fournisseurs proches</a><a class="znav-action" href="messagerie.html">💬 Messagerie</a><a class="znav-action" href="#walletPanel">👛 Portefeuille</a>';
+ hdr(title);nav.innerHTML='<a class="znav-action" href="index.html#catalogue-public">🌾 Fournisseurs proches</a><a class="znav-action" href="messagerie.html">💬 Messagerie</a>';
  // Bouton retour dans l'en-tête quand on est dans une section
  if(tab){
   const lo=document.getElementById('lo');
@@ -272,7 +272,7 @@ function render(){const r=R(),s=subInfo(r);if(tab==='hotel'&&!isHotelAccount())t
  if(!s.ok){m.innerHTML=tab==='account'?passwordCard():tab==='support'?RGChat.userView(U):proUI(r,s)+`<div class="row" style="gap:8px"><button type="button" class="sec" onclick="tab='support';render()">💬 Support</button><button type="button" class="sec" onclick="tab='account';render()">🔑 Paramètres du compte</button></div>`;return}
  if(!tab){m.innerHTML=banner(r,s)+homeGrid();return}
  const back=`<div class="back-row"><button type="button" class="back-btn" onclick="tab=null;render()">← Retour à l'accueil</button></div>`;
- if(tab==='wallet'){m.innerHTML=back+'<h2>Portefeuille ZUMUYA</h2>';if(wallet){wallet.hidden=false;m.appendChild(wallet)}return}m.innerHTML=back+(V[tab])(r)}
+ if(tab==='wallet'){m.innerHTML=back;if(wallet){wallet.hidden=false;m.appendChild(wallet);if(window.RGWalletLoad)window.RGWalletLoad()}return}m.innerHTML=back+(V[tab])(r)}
 function getOwnerPlans(){
  const d=D.get();const op=d.ownerPay||{};
  const cur=op.defaultCurrency||'XOF';
@@ -485,4 +485,4 @@ render();
     <div><button class="btn" type="submit">Envoyer la demande</button></div>
   </form>
   <h3>Historique des opérations</h3><div id="walletLedger" class="wallet-ledger"><p class="muted">Chargement…</p></div>
-</section><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="wallet.js"></script></body></html>
+</section><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="wallet.js?v=2"></script></body></html>

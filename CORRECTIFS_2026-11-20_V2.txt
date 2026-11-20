@@ -1,0 +1,32 @@
+ZUMUYA GROUP — CORRECTIFS DU 20/11/2026 (V2)
+
+1. SYNCHRONISATION (erreur 401 / 42501 « Synchronisation impossible »)
+   - resto-db.js envoyait toutes les requêtes avec la clé publique anonyme : la base refusait l'écriture.
+     Il utilise maintenant le jeton de connexion de l'utilisateur (session Supabase du portail).
+   - Les nouvelles lignes sont insérées, les lignes existantes sont mises à jour (PATCH), conformément aux règles RLS.
+   - Les identifiants attendus par les règles RLS (authId, ownerAuthId, clientAuthId...) sont ajoutés à l'envoi.
+   - Les données déjà présentes sur le téléphone (restaurants, menus) sont envoyées à la base au premier chargement
+     si la base est vide.
+
+2. PORTEFEUILLE (comptes restaurant et hôtel, livreur)
+   - Une seule entrée « Portefeuille » dans la grille ; le doublon dans la barre du haut est supprimé.
+   - Le titre en double au-dessus du portefeuille est supprimé.
+   - Le panneau portefeuille n'est plus détruit au changement d'écran (il disparaissait après le premier retour).
+   - La règle [hidden] est forcée : le panneau ne s'affiche plus en bas de l'accueil.
+   - Demande de retrait : le moyen de paiement saisi dans le formulaire est enregistré automatiquement.
+
+3. COMPTE PRODUCTEUR / FOURNISSEUR AGRICOLE (agro.html)
+   - En-tête allégé : marque, nom du compte, déconnexion.
+   - Fonctionnalités regroupées en onglets sur une seule rangée défilante (non fixe, ne masque plus l'écran) :
+     Mon catalogue · Demandes · Coopération · Messagerie · Portefeuille · Mon compte.
+   - « Mon compte » regroupe Paramètres, Gestion RestoGest et Déconnexion.
+   - Les statistiques ne s'affichent que dans l'onglet catalogue.
+
+4. CATALOGUES PUBLICS (accueil)
+   - Sélecteur de catégorie : Restaurants · Hôtels · Produits agricoles. Un seul catalogue est affiché à la fois,
+     avec le nombre d'éléments de chaque catégorie. La catégorie choisie est mémorisée pendant la session.
+
+DÉPLOIEMENT
+   - Remplacer les fichiers du dépôt GitHub Pages par ceux de cette archive (à la racine), puis recharger le site.
+   - Aucun script SQL à exécuter : la base Supabase a déjà été corrigée (droits, règles de lecture publique).
+   - Sur Android : fermer l'application installée et recharger le site (le cache a été versionné : zumuya-v15).

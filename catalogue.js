@@ -5,6 +5,9 @@ const root=document.getElementById('pubCatalog');if(!root||!window.ZS)return;
 const esc=ZS.esc,ZC=window.ZC||{ctl:()=>'',headBtn:()=>'',init(){},setData(){}};
 let rests=[],pos=null,q='',sort='near',open={},err='',loading=true,agroProducts=[],agroCart=readAgroCart();
 const $=s=>root.querySelector(s);
+let cat=(()=>{try{const v=sessionStorage.getItem('zg_cat');return ['resto','hotel','agro'].includes(v)?v:'resto'}catch(_){return 'resto'}})();
+function catBar(){const nh=rests.filter(r=>ZS.isHotel(r)).length,nr=rests.length-nh,na=agroProducts.filter(p=>p.availability!=='unavailable').length;
+ return '<div class="pc-cats" role="tablist" aria-label="Catégorie de catalogue">'+[['resto','🍽️ Restaurants',nr],['hotel','🏨 Hôtels',nh],['agro','🌾 Produits agricoles',na]].map(x=>'<button type="button" role="tab" data-cat="'+x[0]+'" class="'+(cat===x[0]?'on':'')+'" aria-selected="'+(cat===x[0])+'">'+x[1]+' <i>'+x[2]+'</i></button>').join('')+'</div>'}
 function dishCard(r,p,k,fee){
  const img=p.imgs&&p.imgs[0]?'<img loading="lazy" src="'+esc(p.imgs[0])+'" alt="">':'<div class="pc-ph">🍽️</div>',act=ZC.ctl(r.id,k,p.n);
  return '<div class="pc-dish">'+img+'<div class="pc-in"><b>'+esc(p.n)+'</b><span class="pc-d">'+esc(p.desc||'')+'</span><span class="pc-pr">'+ZS.money(p.p,r.currency)+'</span>'+
@@ -22,17 +25,17 @@ function card(x){
   (show.length?'<div class="pc-dishes">'+show.map(m=>dishCard(r,m.p,m.k,fee)).join('')+'</div>':'<p class="pc-mut" style="padding:14px 18px">'+(ql?'Aucun plat ne correspond.':'Catalogue bientôt disponible.')+'</p>')+
   (!all&&menu.length>4?'<button type="button" class="pc-more" data-open="'+esc(r.id)+'">Voir tout le catalogue ('+menu.length+' plats)</button>':'')+'</article>'}
 function draw(){
- const ql=q.toLowerCase();let list=rests.map(r=>({r,d:pos&&r.lat!=null&&r.lng!=null?ZS.km(pos,[r.lat,r.lng]):null}));
+ const ql=q.toLowerCase();let list=rests.filter(r=>cat==='hotel'?ZS.isHotel(r):cat==='resto'?!ZS.isHotel(r):false).map(r=>({r,d:pos&&r.lat!=null&&r.lng!=null?ZS.km(pos,[r.lat,r.lng]):null}));
  if(ql)list=list.filter(x=>(x.r.name||'').toLowerCase().includes(ql)||(x.r.menu||[]).some(p=>((p.n||'')+' '+(p.desc||'')).toLowerCase().includes(ql)));
  if(sort==='fee')list.sort((a,b)=>(ZS.fee(a.r,a.d)??1e12)-(ZS.fee(b.r,b.d)??1e12));else list.sort((a,b)=>(a.d??1e9)-(b.d??1e9));
  const keep=document.activeElement&&document.activeElement.id==='pcSearch'?document.activeElement.selectionStart:null;
- root.innerHTML='<div class="pc-bar"><input id="pcSearch" type="search" placeholder="Rechercher un restaurant ou un plat…" value="'+esc(q)+'" aria-label="Rechercher un restaurant ou un plat"><select id="pcSort" aria-label="Trier"><option value="near"'+(sort==='near'?' selected':'')+'>Les plus proches</option><option value="fee"'+(sort==='fee'?' selected':'')+'>Livraison la moins chère</option></select>'+(pos?'<span class="pc-b">📍 Position active</span>':'<button type="button" class="btn btn-gold" id="pcLoc">📍 Activer ma localisation</button>')+'</div>'+
+ root.innerHTML=catBar()+'<div class="pc-bar"><input id="pcSearch" type="search" placeholder="'+(cat==='agro'?'Rechercher un produit agricole…':cat==='hotel'?'Rechercher un hôtel ou un plat…':'Rechercher un restaurant ou un plat…')+'" value="'+esc(q)+'" aria-label="Rechercher un restaurant ou un plat">'+(cat==='agro'?'':'<select id="pcSort" aria-label="Trier"><option value="near"'+(sort==='near'?' selected':'')+'>Les plus proches</option><option value="fee"'+(sort==='fee'?' selected':'')+'>Livraison la moins chère</option></select>')+(pos?'<span class="pc-b">📍 Position active</span>':'<button type="button" class="btn btn-gold" id="pcLoc">📍 Activer ma localisation</button>')+'</div>'+
   (err?'<div class="pc-err">'+esc(err)+'</div>':'')+
-  (loading?'<p class="empty">Chargement des catalogues…</p>':list.length?list.map(card).join(''):'<p class="empty">Aucun restaurant ou hôtel partenaire disponible pour le moment.</p>')+agroHTML();
+  (cat==='agro'?agroHTML():(loading?'<p class="empty">Chargement des catalogues…</p>':list.length?list.map(card).join(''):'<p class="empty">Aucun '+(cat==='hotel'?'hôtel':'restaurant')+' partenaire disponible pour le moment.</p>'));
  const s=$('#pcSearch');s.oninput=e=>{q=e.target.value;draw()};if(keep!=null){s.focus();s.setSelectionRange(keep,keep)}
- $('#pcSort').onchange=e=>{sort=e.target.value;draw()};const l=$('#pcLoc');if(l)l.onclick=locate}
+ if($('#pcSort'))$('#pcSort').onchange=e=>{sort=e.target.value;draw()};const l=$('#pcLoc');if(l)l.onclick=locate}
 
-root.addEventListener('click',e=>{const b=e.target.closest('[data-open]');if(b){open[b.dataset.open]=1;draw()}});
+root.addEventListener('click',e=>{const c=e.target.closest('[data-cat]');if(c){cat=c.dataset.cat;try{sessionStorage.setItem('zg_cat',cat)}catch(_){}draw();return}const b=e.target.closest('[data-open]');if(b){open[b.dataset.open]=1;draw()}});
 
 function readAgroCart(){try{return JSON.parse(localStorage.getItem('zg_agro_cart')||'null')}catch(_){return null}}
 function writeAgroCart(){try{localStorage.setItem('zg_agro_cart',JSON.stringify(agroCart))}catch(_){}}
