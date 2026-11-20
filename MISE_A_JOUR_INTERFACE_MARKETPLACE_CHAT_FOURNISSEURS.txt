@@ -1,0 +1,16 @@
+ZUMUYA GROUP — MISE À JOUR INTERFACE
+
+- Marketplace / catalogues publics déplacés juste après la bannière d'accueil et avant les pôles « Nos services ».
+- Les catalogues restent visibles sur la page d'accueil, sans passer par un onglet « Découvrir ».
+- Messagerie et portefeuille retirés des boutons flottants qui masquaient les écrans.
+- Accès Messagerie / Portefeuille intégrés dans les barres de navigation.
+- Accès « Fournisseurs agricoles proches » ajouté au tableau de bord restaurant et hôtel.
+- Le portail d'approvisionnement accepte les comptes hôtel en les enregistrant sous le rôle DB déjà autorisé « restaurant ».
+- Accueil technologique enrichi d'une carte vectorielle stylisée du Niger.
+
+DÉPLOIEMENT :
+1. Remplacer les fichiers du dépôt par ceux de cette archive.
+2. Publier les changements sur l'hébergement du site.
+3. Fermer puis rouvrir le navigateur pour recharger les fichiers mis en cache.
+
+La proximité des fournisseurs repose sur la position GPS enregistrée dans le profil d'approvisionnement et sur les coordonnées GPS des fournisseurs.

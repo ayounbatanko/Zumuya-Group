@@ -111,7 +111,11 @@ nav:empty{display:none;padding:0;border:0;height:0;overflow:hidden}
   font-weight:700!important;box-shadow:0 4px 12px rgba(20,33,61,.35)!important;
 }
 .back-btn:hover{filter:brightness(1.1);transform:translateY(-1px)}
-</style></head><body><a href="messagerie.html" style="position:fixed;right:14px;bottom:76px;z-index:9999;background:#c59a42;color:#102b45;padding:12px 16px;border-radius:999px;text-decoration:none;font-weight:800;box-shadow:0 5px 20px #102b4540">💬 Messagerie</a><a href="#walletPanel" style="position:fixed;right:14px;bottom:18px;z-index:9999;background:#102b45;color:white;padding:12px 16px;border-radius:999px;text-decoration:none;font-weight:800;box-shadow:0 5px 20px #102b4540">👛 Portefeuille</a>
+</style><style>
+.znav-action{display:inline-flex;align-items:center;justify-content:center;white-space:nowrap;text-decoration:none;padding:9px 14px;border-radius:12px;border:1px solid var(--bd);background:var(--card);color:var(--ink);font-weight:800;font-size:13px}
+.znav-action:hover{border-color:var(--gold2);color:var(--navy2);background:rgba(255,183,3,.09)}
+@media(max-width:600px){nav{padding:9px 10px;gap:6px}.znav-action{padding:8px 10px;font-size:12px}}
+</style></head><body>
 <div id="hdr"></div><nav id="nav"></nav><main id="m"></main><div id="receipt"></div>
 <script src="config.js"></script><script src="resto-db.js"></script><script src="resto-portal-bridge.js?v=2"></script><script src="resto-notif.js"></script>
 <script src="resto-chat.js"></script>
@@ -201,7 +205,7 @@ function homeGrid(){const pend=D.get().orders.filter(o=>o.restId==U.restId&&o.st
  const btns=order.map(k=>{const m=tabMeta[k];const badge=(k=='orders'&&pend)?` <span class="badge">${pend}</span>`:'';
   const cls=(k==='settings'||k==='sub')?'hg-btn full':'hg-btn';
   return `<button class="${cls}" onclick="tab='${k}';render()"><span class="ico">${m.ico}</span><span>${m.label}${badge}</span></button>`}).join('');
- return `<div class="home-grid-wrap"><div class="card"><h2 style="margin:0 0 14px;text-align:center">Service de Restauration</h2><div class="home-grid">${btns}</div></div></div>`}
+ return `<div class="home-grid-wrap"><div class="card"><h2 style="margin:0 0 14px;text-align:center">Service de Restauration</h2><div class="home-grid">${btns}<a class="hg-btn full" href="agro.html" style="text-decoration:none"><span class="ico">🌾</span><span>Fournisseurs agricoles proches</span></a><a class="hg-btn" href="messagerie.html" style="text-decoration:none"><span class="ico">💬</span><span>Messagerie</span></a><a class="hg-btn" href="#walletPanel" style="text-decoration:none"><span class="ico">👛</span><span>Portefeuille</span></a></div></div></div>`}
 function proUI(r,s){
  const e=s.end?new Date(s.end).toLocaleDateString():'';
  // Formulaire de paiement reçu du propriétaire
@@ -253,7 +257,7 @@ function banner(r,s){const go=` <a href="#" onclick="tab='sub';render();return f
  return ''}
 function render(){const r=R(),s=subInfo(r);if(tab==='hotel'&&!isHotelAccount())tab=null;
  const title=tab&&tabMeta[tab]?tabMeta[tab].label:r.name;
- hdr(title);nav.innerHTML='';
+ hdr(title);nav.innerHTML='<a class="znav-action" href="agro.html">🌾 Fournisseurs proches</a><a class="znav-action" href="messagerie.html">💬 Messagerie</a><a class="znav-action" href="#walletPanel">👛 Portefeuille</a>';
  // Bouton retour dans l'en-tête quand on est dans une section
  if(tab){
   const lo=document.getElementById('lo');

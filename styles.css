@@ -218,3 +218,13 @@ footer>div{gap:13px}
 @keyframes networkPulse{0%,100%{transform:scale(.96);opacity:.7}50%{transform:scale(1.04);opacity:1}}
 @keyframes networkScan{0%{translate:-12% 0;opacity:.2}50%{opacity:1}100%{translate:12% 0;opacity:.2}}
 @media(prefers-reduced-motion:reduce){.hero-visual:before,.hero-visual:after{animation:none}}
+
+/* Marketplace prioritaire et carte stylisée du Niger */
+#catalogue-public{scroll-margin-top:90px}
+#catalogue-public .section-heading{margin-bottom:20px}
+.niger-map-card{position:absolute;right:3%;bottom:8%;width:min(220px,38%);padding:12px 14px;border:1px solid #43d9ca66;border-radius:18px;background:linear-gradient(145deg,#0a2944dd,#0e3b50dd);box-shadow:0 16px 42px #0005,inset 0 0 24px #28cbbb12;backdrop-filter:blur(10px);z-index:3}
+.niger-map-card>span{display:block;font:700 9px ui-monospace,monospace;letter-spacing:.16em;color:#76e9dc}
+.niger-map-card svg{display:block;width:100%;height:auto;max-height:130px;margin:3px auto}
+.niger-map-card>b{display:block;text-align:center;font:800 10px ui-monospace,monospace;letter-spacing:.12em;color:#f0cf88}
+@media(max-width:760px){.niger-map-card{right:2%;bottom:4%;width:34%;padding:8px}.niger-map-card svg{max-height:85px}.niger-map-card>b{font-size:8px}.niger-map-card>span{font-size:7px}}
+@media(max-width:520px){.niger-map-card{width:36%;bottom:3%}.hero-visual{min-height:430px}}

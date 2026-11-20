@@ -111,7 +111,7 @@ nav:empty{display:none;padding:0;border:0;height:0;overflow:hidden}
   font-weight:700!important;box-shadow:0 4px 12px rgba(20,33,61,.35)!important;
 }
 .back-btn:hover{filter:brightness(1.1);transform:translateY(-1px)}
-</style></head><body><a href="messagerie.html" style="position:fixed;right:14px;bottom:76px;z-index:9999;background:#c59a42;color:#102b45;padding:12px 16px;border-radius:999px;text-decoration:none;font-weight:800;box-shadow:0 5px 20px #102b4540">💬 Messagerie</a><a href="#walletPanel" style="position:fixed;right:14px;bottom:18px;z-index:9999;background:#102b45;color:white;padding:12px 16px;border-radius:999px;text-decoration:none;font-weight:800;box-shadow:0 5px 20px #102b4540">👛 Portefeuille</a>
+</style><style>.driver-nav-action{display:inline-flex;align-items:center;text-decoration:none;padding:9px 13px;border-radius:12px;border:1px solid var(--bd);background:var(--card);color:var(--ink);font-weight:800;font-size:13px}</style></head><body>
 <div id="hdr"></div><main id="m"></main>
 <script src="config.js"></script><script src="resto-db.js"></script><script src="resto-portal-bridge.js?v=2"></script><script src="resto-notif.js"></script>
 <script src="resto-chat.js"></script>
@@ -181,7 +181,7 @@ const stages=['préparée','colis récupéré','en route','arrivé','terminée']
 const nextStage={'préparée':'colis récupéré','colis récupéré':'en route','en route':'arrivé','arrivé':'terminée'};
 const stageLabel={'préparée':'À récupérer au restaurant','colis récupéré':'Colis récupéré','en route':'Commande en route 🛵','arrivé':'Commande arrivée 📍','terminée':'Livraison terminée'};
 function mapUrl(o){const dest=o.cLat!=null&&o.cLng!=null?o.cLat+','+o.cLng: o.addr;const origin=myPos?myPos.join(','):'';return 'https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(dest)+(origin?'&origin='+encodeURIComponent(origin):'')+'&travelmode=driving'}
-function driverBar(){return `<div class="row" style="gap:8px;flex-wrap:wrap;margin-bottom:10px">`+[['jobs','🚚 Livraisons'],['chat','💬 Support'],['acc','🔑 Paramètres du compte']].map(([k,l])=>`<button type="button" class="${dTab==k?'':'sec'}" onclick="dTab='${k}';render()">${l}</button>`).join('')+`</div>`}
+function driverBar(){return `<div class="row driver-tabs" style="gap:8px;flex-wrap:wrap;margin-bottom:10px">`+[['jobs','🚚 Livraisons'],['chat','💬 Support'],['acc','🔑 Paramètres du compte']].map(([k,l])=>`<button type="button" class="${dTab==k?'':'sec'}" onclick="dTab='${k}';render()">${l}</button>`).join('')+`<a class="driver-nav-action" href="messagerie.html">💬 Messagerie</a><a class="driver-nav-action" href="#walletPanel">👛 Portefeuille</a></div>`}
 function render(){const d=D.get(),rs=rest();hdr('Espace livreur — '+U.name+(rs?' · '+rs.name:''));const jobs=mine(),done=d.orders.filter(o=>o.driverId==U.id&&o.status=='terminée').reverse().slice(0,10);
  if(dTab=='acc'){m.innerHTML=driverBar()+passwordCard();return}
  if(dTab=='chat'){m.innerHTML=driverBar()+RGChat.userView(U);return}
