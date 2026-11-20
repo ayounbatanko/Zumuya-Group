@@ -1,3 +1,5 @@
+> **Version GitHub corrigée (20/11/2026)** : le type de compte est désormais demandé uniquement à l’inscription, la revalidation du mot de passe accepte l’identifiant e-mail ou téléphone déjà associé au compte, et le Service Worker précharge les ressources du dépôt avec un cache versionné. Voir `README_FIX_2026-11-20.txt` avant publication.
+
 # ZUMUYA GROUP — Plateforme web organisée
 
 Écosystème numérique multiservices né au Niger, pensé pour l’Afrique de l’Ouest.  

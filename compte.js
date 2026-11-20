@@ -3,7 +3,7 @@ const $=s=>document.querySelector(s);
 let sb=null,mode='in';
 const ROLE_TYPES=['restaurant','hotel','delivery','agro_producer','agro_trader','commerce','business'];
 const roleToPartner={restaurant:'restaurant',hotel:'hotel',delivery:'delivery',agro_producer:'agro',agro_trader:'agro_trader',commerce:'commerce',business:'business'};
-/* E-mail UNIQUEMENT pour toutes les catégories. */
+/* L'identifiant de connexion du portail reste l'adresse e-mail ; le rôle est détecté depuis le profil après connexion. */
 const EMAIL_RE=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const LABEL={customer:'Client',restaurant:'Restaurant partenaire',hotel:'Hôtel / hébergement',delivery:'Livreur',agro_producer:'Producteur agricole',agro_trader:'Commerçant agricole'};
 function updateIdentityFields(){$('#email').required=true}
@@ -15,7 +15,9 @@ function setMode(m,init){
   $('#tabIn').classList.toggle('active',!up);$('#tabUp').classList.toggle('active',up);
   $('#tabIn').setAttribute('aria-selected',String(!up));$('#tabUp').setAttribute('aria-selected',String(up));
   $('#nameWrap').hidden=!up;$('#confirmWrap').hidden=!up;$('#pwHelp').hidden=!up;
-  $('#accountCategory').disabled=false;updateIdentityFields();
+  const categoryWrap=$('#categoryWrap');
+  if(categoryWrap)categoryWrap.hidden=!up;
+  $('#accountCategory').disabled=!up;$('#accountCategory').required=up;updateIdentityFields();
   $('#displayName').required=up;$('#passwordConfirm').required=up;
   $('#password').autocomplete=up?'new-password':'current-password';
   $('#submitBtn').textContent=up?'Créer mon compte':'Se connecter';
@@ -44,7 +46,7 @@ async function showAccount(user){
   if(!owner&&type&&routes[type]&&!stay&&(type==='customer'||user.user_metadata?.organization_id)&&!sessionStorage.getItem('zumuya_redirected')){sessionStorage.setItem('zumuya_redirected','1');if(type==='restaurant'||type==='hotel')sessionStorage.setItem('zmy_portal','1');location.replace(routes[type]);return}
   sessionStorage.removeItem('zumuya_redirected');
   $('#auth').hidden=true;$('#account').hidden=false;$('#recovery').hidden=true;
-  $('#accPhone').textContent=user.email||'—';
+  $('#accPhone').textContent=user.email||user.phone||'—';
   $('#accName').textContent=(user.user_metadata&&user.user_metadata.name)||'—';
   const rt=routes[type],ready=rt&&(type==='customer'||user.user_metadata?.organization_id);
   const sp=$('#mySpace');sp.hidden=owner||!ready;if(ready)sp.href=rt;
@@ -250,7 +252,8 @@ $('#pwForm').addEventListener('submit',async e=>{
   if(a===o)return pwMsg('#pwMsg','Le nouveau mot de passe doit être différent de l’actuel.');
   $('#pwBtn').disabled=true;
   try{
-    const identity={email:currentUser.email};
+    const identity=currentUser.email?{email:currentUser.email}:currentUser.phone?{phone:currentUser.phone}:null;
+    if(!identity)throw new Error('Aucun identifiant de connexion vérifiable sur ce compte.');
     const r=await sb.auth.signInWithPassword({...identity,password:o});
     if(r.error)throw new Error('Mot de passe actuel incorrect.');
     const {error}=await sb.auth.updateUser({password:a});if(error)throw error;

@@ -166,7 +166,7 @@ function printCard(){const u=new URL('resto-index.html?resto='+r.slug,location.h
    }catch(e){}
  }
  checkVersion();setInterval(checkVersion,5*60*1000);
- if('serviceWorker' in navigator && location.protocol.startsWith('http')){navigator.serviceWorker.register('./sw.js').catch(()=>{})}
+ if('serviceWorker' in navigator && location.protocol.startsWith('http')){navigator.serviceWorker.register('./sw.js?v=9').catch(()=>{})}
 })();
 </script>
 </body></html>

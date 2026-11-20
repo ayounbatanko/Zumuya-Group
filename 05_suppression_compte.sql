@@ -1,43 +1,63 @@
--- ZUMUYA GROUP — Suppression de compte par l'utilisateur (tous types de comptes)
--- À exécuter UNE FOIS dans Supabase > SQL Editor (après le schéma principal).
--- La page parametres.html appelle cette fonction (bouton « Supprimer mon compte »).
+-- ZUMAYA GROUP — Suppression sécurisée du compte connecté.
+-- À exécuter une seule fois dans Supabase SQL Editor après le schéma principal.
+-- Ne supprime jamais le compte propriétaire de la plateforme.
 
-create or replace function public.rg_delete_my_account()
-returns void
-language plpgsql
-security definer
-set search_path = public, auth
-as $$
-declare
-  v_uid  uuid := auth.uid();
-  v_orgs text[];
-  v_loc  text[];
-begin
-  if v_uid is null then
-    raise exception 'Vous devez être connecté.';
-  end if;
-  if exists (select 1 from public.rg_platform_owners where user_id = v_uid) then
-    raise exception 'Le compte propriétaire de la plateforme ne peut pas être supprimé ici.';
-  end if;
+CREATE OR REPLACE FUNCTION public.rg_delete_my_account()
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = pg_catalog, public, auth
+AS $$
+DECLARE
+  v_uid uuid := auth.uid();
+  v_orgs uuid[];
+  v_local_users text[];
+  v_local_rests text[];
+BEGIN
+  IF v_uid IS NULL THEN
+    RAISE EXCEPTION 'Vous devez être connecté.';
+  END IF;
 
-  -- Organisations (restaurant, hôtel, livreur, commerce…) appartenant à l'utilisateur
-  select coalesce(array_agg(id::text), '{}') into v_orgs from public.rg_organizations where owner_id = v_uid;
+  IF EXISTS (SELECT 1 FROM public.rg_platform_owners WHERE user_id = v_uid) THEN
+    RAISE EXCEPTION 'Le compte propriétaire de la plateforme ne peut pas être supprimé ici.';
+  END IF;
 
-  -- Comptes locaux du Service de Restauration reliés à ce compte portail
-  select coalesce(array_agg(id), '{}') into v_loc from public.rg_users where data->>'portalId' = v_uid::text;
+  SELECT COALESCE(array_agg(o.id), ARRAY[]::uuid[])
+    INTO v_orgs
+    FROM public.rg_organizations AS o
+   WHERE o.owner_id = v_uid;
 
-  -- Commandes passées par ce client / ce livreur
-  delete from public.rg_orders where data->>'clientId' = any(v_loc) and id not like '\_\_chat\_%';
-  -- Fiches restaurant / hôtel (disparaissent du catalogue public)
-  delete from public.rg_rests where data->>'portalOrgId' = any(v_orgs);
-  delete from public.rg_users where id = any(v_loc);
+  SELECT COALESCE(array_agg(u.id), ARRAY[]::text[])
+    INTO v_local_users
+    FROM public.rg_users AS u
+   WHERE u.data->>'portalId' = v_uid::text;
 
-  delete from public.rg_partner_applications where user_id = v_uid;
-  delete from public.rg_organizations where owner_id = v_uid;
-  -- rg_profiles, rg_agro_profiles, rg_agro_products… sont supprimés en cascade avec le compte
-  delete from auth.users where id = v_uid;
-end;
+  SELECT COALESCE(array_agg(r.id), ARRAY[]::text[])
+    INTO v_local_rests
+    FROM public.rg_rests AS r
+   WHERE r.data->>'portalOrgId' = ANY(v_orgs::text[]);
+
+  -- Retire les commandes du client, du livreur ou des établissements de ce compte.
+  -- Les messages de chat stockés dans rg_orders sont volontairement préservés.
+  DELETE FROM public.rg_orders AS o
+   WHERE left(o.id, 7) <> '__chat_'
+     AND (o.data->>'clientId' = ANY(v_local_users)
+       OR o.data->>'driverId' = ANY(v_local_users)
+       OR o.data->>'restId' = ANY(v_local_rests));
+
+  DELETE FROM public.rg_rests AS r
+   WHERE r.data->>'portalOrgId' = ANY(v_orgs::text[]);
+
+  DELETE FROM public.rg_users AS u
+   WHERE u.data->>'portalId' = v_uid::text;
+
+  DELETE FROM public.rg_partner_applications WHERE user_id = v_uid;
+  DELETE FROM public.rg_organizations WHERE owner_id = v_uid;
+
+  -- Les profils et données reliés par ON DELETE CASCADE suivent le compte Auth.
+  DELETE FROM auth.users WHERE id = v_uid;
+END;
 $$;
 
-revoke all on function public.rg_delete_my_account() from public, anon;
-grant execute on function public.rg_delete_my_account() to authenticated;
+REVOKE ALL ON FUNCTION public.rg_delete_my_account() FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.rg_delete_my_account() TO authenticated;

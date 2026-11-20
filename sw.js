@@ -1,16 +1,107 @@
-/* ZUMUYA GROUP — service worker UNIQUE (portail + Service de Restauration).
-   Réseau d'abord, cache en secours hors ligne. Gère aussi les notifications push. */
-const CACHE='zumuya-v8';
-const FILES=['./','./index.html','./compte.html','./styles.css?v=7','./modules.js?v=6','./app.js?v=7','./zsession.js?v=3','./zservice.css?v=1','./restauration.html','./hotel.html','./livraison.html','./compte.css?v=6','./compte.js?v=9','./zguard.js','./catalogue.js?v=2','./zcart.js?v=1','./zcart.css?v=1','./parametres.html','./parametres.js?v=1','./logo.svg','./icon-192.png','./manifest.webmanifest','./config.js','./proprietaire.html','./proprietaire.css?v=2','./proprietaire.js?v=2','./resto-index.html','./resto-owner.html','./resto-restaurant.html','./resto-client.html','./resto-driver.html','./resto-card.html','./resto-manifest.webmanifest','./resto-icon-192.png','./resto-icon-512.png','./resto-version.json','./resto-db.js','./resto-notif.js','./resto-chat.js','./resto-owner-pro.js','./resto-splash.js','./resto-charts.js','./resto-qr.js','./resto-rest-report.js','./resto-ext-loader.js'];
-self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>Promise.all(FILES.map(f=>c.add(f).catch(()=>{})))));self.skipWaiting()});
-self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(x=>(x.startsWith('zumaya-portal-')||x.startsWith('restogest-static-')||x.startsWith('zumuya-'))&&x!==CACHE).map(x=>caches.delete(x)))).then(()=>self.clients.claim()))});
+/* ZUMUYA GROUP — service worker commun au portail et au module Restauration.
+   Cache versionné : toutes les pages et dépendances statiques du dépôt sont préchargées.
+   Stratégie réseau d’abord, cache en secours hors ligne. */
+const CACHE='zumuya-v9-20261120';
+const FILES=[
+  './agro-collaboration.js',
+  './agro.css',
+  './agro.html',
+  './agro.js',
+  './app.js',
+  './catalogue.js',
+  './client-espace.html',
+  './client-espace.js',
+  './compte.css',
+  './compte.html',
+  './compte.js',
+  './config.js',
+  './hotel.html',
+  './icon-180.png',
+  './icon-192.png',
+  './icon-512.png',
+  './icon-maskable-512.png',
+  './index.html',
+  './livraison.html',
+  './logo.svg',
+  './manifest.webmanifest',
+  './modules.js',
+  './parametres.html',
+  './parametres.js',
+  './proprietaire.css',
+  './proprietaire.html',
+  './proprietaire.js',
+  './restauration.html',
+  './resto-apercu-facebook.jpg',
+  './resto-card.html',
+  './resto-charts.js',
+  './resto-chat.js',
+  './resto-client.html',
+  './resto-db.js',
+  './resto-driver.html',
+  './resto-ext-core.js',
+  './resto-ext-dispatch.js',
+  './resto-ext-kds.js',
+  './resto-ext-loader.js',
+  './resto-ext-realtime.js',
+  './resto-ext-room-billing.js',
+  './resto-ext-tracking.js',
+  './resto-icon-192.png',
+  './resto-icon-512.png',
+  './resto-icon-maskable-192.png',
+  './resto-icon-maskable-512.png',
+  './resto-index.html',
+  './resto-manifest.webmanifest',
+  './resto-notif.js',
+  './resto-owner-pro.js',
+  './resto-owner.html',
+  './resto-portal-bridge.js',
+  './resto-qr.js',
+  './resto-rest-report.js',
+  './resto-restaurant.html',
+  './resto-splash.js',
+  './resto-version.json',
+  './styles.css',
+  './sw.js',
+  './zcart.css',
+  './zcart.js',
+  './zguard.js',
+  './zservice.css',
+  './zsession.js'
+];
+self.addEventListener('install',e=>{
+  e.waitUntil(caches.open(CACHE).then(c=>Promise.all(FILES.map(f=>c.add(f).catch(()=>null)))));
+  self.skipWaiting();
+});
+self.addEventListener('activate',e=>{
+  e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>(k.startsWith('zumaya-portal-')||k.startsWith('restogest-static-')||k.startsWith('zumuya-'))&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));
+});
 self.addEventListener('message',e=>{if(e.data&&e.data.type==='SKIP_WAITING')self.skipWaiting()});
 self.addEventListener('fetch',e=>{
-  const r=e.request,u=new URL(r.url);
-  if(r.method!=='GET'||u.origin!==location.origin)return;
-  const resto=/\/resto-[^/]*$/.test(u.pathname);
-  e.respondWith(fetch(r,{cache:'no-store'}).then(res=>{if(res&&res.ok){const copy=res.clone();caches.open(CACHE).then(c=>c.put(r,copy))}return res})
-    .catch(()=>caches.match(r).then(m=>m||(r.mode==='navigate'?caches.match(resto?'./resto-index.html':'./index.html'):Response.error()))));
+  const r=e.request;
+  if(r.method!=='GET')return;
+  const u=new URL(r.url);
+  if(u.origin!==self.location.origin)return;
+  e.respondWith(fetch(r,{cache:'no-store'}).then(res=>{
+    if(res&&res.ok){const copy=res.clone();caches.open(CACHE).then(c=>c.put(r,copy))}
+    return res;
+  }).catch(()=>caches.match(r).then(hit=>{
+    if(hit)return hit;
+    if(r.mode==='navigate'){
+      const path=u.pathname.split('/').pop()||'index.html';
+      const fallback=path.startsWith('resto-')?'./resto-index.html':'./index.html';
+      return caches.match(fallback);
+    }
+    return Response.error();
+  })));
 });
-self.addEventListener('notificationclick',e=>{e.notification.close();e.waitUntil(self.clients.matchAll({type:'window',includeUncontrolled:true}).then(l=>{for(const c of l){if('focus' in c)return c.focus()}return self.clients.openWindow('./resto-index.html')}))});
-self.addEventListener('push',e=>{let d={};try{d=e.data.json()}catch(_){}e.waitUntil(self.registration.showNotification(d.title||'Service de Restauration',{body:d.body||'',icon:'./resto-icon-192.png',badge:'./resto-icon-192.png',data:d}))});
+self.addEventListener('notificationclick',e=>{
+  e.notification.close();
+  e.waitUntil(self.clients.matchAll({type:'window',includeUncontrolled:true}).then(list=>{
+    for(const c of list){if('focus' in c)return c.focus()}
+    return self.clients.openWindow('./resto-index.html');
+  }));
+});
+self.addEventListener('push',e=>{
+  let d={};try{d=e.data.json()}catch(_){}
+  e.waitUntil(self.registration.showNotification(d.title||'ZUMUYA', {body:d.body||'',icon:'./icon-192.png',badge:'./icon-192.png',data:d}));
+});

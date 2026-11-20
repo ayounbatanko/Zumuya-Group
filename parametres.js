@@ -11,11 +11,11 @@ function tr(err){const m=(err&&err.message)||'';
   if(/already|registered/i.test(m))return 'Cette adresse e-mail est déjà utilisée par un autre compte.';
   if(/Token has expired|invalid/i.test(m))return 'Code invalide ou expiré.';
   return m||'Une erreur est survenue. Réessayez.'}
-async function verifyPw(pw){const r=await sb.auth.signInWithPassword({email:user.email,password:pw});if(r.error)throw new Error('Mot de passe incorrect.')}
+async function verifyPw(pw){const identity=user&&user.email?{email:user.email}:user&&user.phone?{phone:user.phone}:null;if(!identity)throw new Error('Aucun identifiant de connexion vérifiable sur ce compte.');const r=await sb.auth.signInWithPassword({...identity,password:pw});if(r.error)throw new Error('Mot de passe incorrect.')}
 
 function fill(){
   const md=user.user_metadata||{},type=md.account_type;
-  $('#pCat').textContent=CAT[type]||'—';$('#pPhone').textContent=user.email||'—';
+  $('#pCat').textContent=CAT[type]||'—';$('#pPhone').textContent=user.email||user.phone||'—';
   $('#pSince').textContent=user.created_at?new Date(user.created_at).toLocaleDateString('fr-FR'):'—';
   $('#pName').value=md.name||'';
   const sp=$('#spaceLink');if(SPACE[type]&&(type==='customer'||md.organization_id)){sp.hidden=false;sp.href=SPACE[type]}

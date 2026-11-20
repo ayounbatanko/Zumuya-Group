@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#102b45">
 <title>Mon compte — ZUMUYA GROUP</title>
 <link rel="icon" href="logo.svg" type="image/svg+xml">
-<link rel="stylesheet" href="compte.css?v=7">
+<link rel="stylesheet" href="compte.css?v=8">
 </head>
 <body>
 <header class="bar"><a class="brand" href="index.html"><img src="logo.svg" alt=""><span>ZUMUYA <b>GROUP</b></span></a><a class="back" href="index.html">← Retour au site</a></header>
@@ -19,7 +19,7 @@
     <button type="button" role="tab" id="tabUp" data-mode="up" aria-selected="false">Créer un compte</button>
   </div>
   <form id="authForm" novalidate>
-    <label>Catégorie du compte
+    <label id="categoryWrap">Type de compte (à l’inscription)
       <select id="accountCategory" required>
         <option value="customer">Client — achat en ligne</option>
         <option value="restaurant">Restaurant partenaire</option>
@@ -28,10 +28,10 @@
         <option value="agro_producer">Producteur agricole</option>
         <option value="agro_trader">Commerçant agricole</option>
       </select>
-      <small id="categoryHelp">Chaque catégorie ouvre uniquement son propre espace. Inscription et connexion avec votre adresse e-mail.</small>
+      <small id="categoryHelp">Choisissez votre espace uniquement lors de la création du compte. À la connexion, ZUMAYA reconnaît automatiquement votre compte.</small>
     </label>
     <label id="nameWrap" hidden>Nom complet<input id="displayName" type="text" autocomplete="name" placeholder="Ex. Aïssata Moussa"></label>
-    <label id="emailWrap">Adresse e-mail<input id="email" type="email" autocomplete="email" inputmode="email" placeholder="vous@exemple.com" required></label>
+    <label id="emailWrap">Adresse e-mail<input id="email" type="email" autocomplete="username" inputmode="email" placeholder="vous@exemple.com" required></label>
     <label>Mot de passe
       <span class="pw"><input id="password" type="password" autocomplete="current-password" required><button type="button" class="eye" data-eye="password" aria-label="Afficher le mot de passe">Afficher</button></span>
       <small id="pwHelp" hidden>8 caractères minimum.</small>
@@ -62,7 +62,7 @@
   <h1 id="accTitle">Mon compte</h1>
   <dl class="profile">
     <div><dt>Nom</dt><dd id="accName">—</dd></div>
-    <div><dt>Adresse e-mail</dt><dd id="accPhone">—</dd></div>
+    <div><dt>Identifiant de connexion</dt><dd id="accPhone">—</dd></div>
   </dl>
   <p class="notice" id="ownerNotice" hidden>Vous êtes <b>propriétaire de la plateforme</b> : vous gérez toute l'infrastructure ZUMUYA GROUP depuis l'espace propriétaire.</p>
   <div class="services">
@@ -111,6 +111,6 @@
 </main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
-<script src="compte.js?v=10"></script>
+<script src="compte.js?v=11"></script>
 </body>
 </html>

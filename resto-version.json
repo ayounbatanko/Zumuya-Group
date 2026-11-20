@@ -1,6 +1,6 @@
 {
-  "version": "2.4.0",
-  "message": "Restauration, Hôtel et Livraison mieux coordonnés : remise en chambre, livreurs rattachés, retrait au restaurant. Modules inutiles retirés.",
+  "version": "2.4.1",
+  "message": "Correctifs portail et paramètres : type de compte masqué à la connexion, revalidation e-mail/téléphone, suppression de compte renforcée et cache PWA actualisé.",
   "notify": true,
-  "updatedAt": "2026-11-19T20:00:00Z"
+  "updatedAt": "2026-11-20T13:40:00Z"
 }
