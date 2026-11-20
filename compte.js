@@ -55,8 +55,9 @@ async function showAccount(user){
   else if(type==='customer'){lead.hidden=false;lead.textContent='Compte client : consultez les restaurants proches, leurs menus, et passez commande depuis votre espace.'}
   else if(type&&!ready){lead.hidden=false;lead.textContent='Compte '+(LABEL[type]||'professionnel')+' : complétez la fiche de votre activité ci-dessous (« Devenir partenaire ») pour ouvrir votre espace.'}
   else{lead.hidden=true}
-  $('#partnerPanel').hidden=owner;
-  initPartner(user);
+  $('#partnerPanel').hidden=owner||ready;
+  if(!owner&&!ready) initPartner(user);
+  if(ready && type!=='customer') { const lead=$('#roleLead'); lead.hidden=false; lead.textContent='Votre espace professionnel est activé. Accédez directement aux outils réservés à votre catégorie.'; }
 }
 function showAuth(){$('#account').hidden=true;$('#recovery').hidden=true;$('#auth').hidden=false}
 
