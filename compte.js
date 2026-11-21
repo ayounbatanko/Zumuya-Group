@@ -1,11 +1,11 @@
 (()=>{'use strict';
 const $=s=>document.querySelector(s);
 let sb=null,mode='in',selectedCategory=null;
-const ROLE_TYPES=['restaurant','hotel','agro_producer','agro_trader','commerce','business'];
-const roleToPartner={restaurant:'restaurant',hotel:'hotel',delivery:'delivery',agro_producer:'agro',agro_trader:'agro_trader',commerce:'commerce',business:'business'};
+const ROLE_TYPES=['restaurant','hotel','agro_producer','agro_trader','marketplace','delivery_service','commerce','business'];
+const roleToPartner={restaurant:'restaurant',hotel:'hotel',delivery:'delivery',agro_producer:'agro',agro_trader:'agro_trader',marketplace:'marketplace',delivery:'delivery_service',commerce:'commerce',business:'business'};
 /* L'identifiant de connexion du portail reste l'adresse e-mail ; le rôle est détecté depuis le profil après connexion. */
 const EMAIL_RE=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const LABEL={customer:'Client',restaurant:'Restaurant partenaire',hotel:'Hôtel / hébergement',delivery:'Livreur (compte créé par un restaurant)',staff:'Employé (compte créé par un restaurant)',agro_producer:'Producteur agricole',agro_trader:'Commerçant agricole'};
+const LABEL={customer:'Client',restaurant:'Restaurant partenaire',hotel:'Hôtel / hébergement',delivery:'Livreur (compte créé par un restaurant)',staff:'Employé (compte créé par un restaurant)',agro_producer:'Producteur agricole',agro_trader:'Commerçant agricole',marketplace:'Vendeur Marketplace',delivery_service:'Service de livraison'};
 function updateIdentityFields(){$('#email').required=true}
 const MIN=8;
 
@@ -39,7 +39,7 @@ function updateMatch(){
 }
 async function showAccount(user){
   const type=user.user_metadata?.account_type;
-  const routes={customer:'client-espace.html',restaurant:'resto-restaurant.html',hotel:'resto-restaurant.html',staff:'resto-restaurant.html',delivery:'resto-driver.html',agro_producer:'agro.html',agro_trader:'agro.html'};
+  const routes={customer:'client-espace.html',restaurant:'resto-restaurant.html',hotel:'resto-restaurant.html',staff:'resto-restaurant.html',delivery:'resto-driver.html',agro_producer:'agro.html',agro_trader:'agro.html',marketplace:'marketplace.html',delivery_service:'livraison.html'};
   const managed=type==='delivery'||type==='staff';   /* comptes gérés : jamais de fiche partenaire */
   const stay=/parametres|stay/.test(location.hash);
   /* Retour au catalogue : un visiteur parti se connecter depuis le panier y revient (clients uniquement, valable 30 min). */
@@ -115,6 +115,8 @@ const F=(name,label,type='text',req=true,opts=null,full=false)=>({name,label,typ
 const CATS=[
  {id:'restaurant',icon:'🍽️',label:'Restaurant',desc:'Restaurants, maquis, fast-foods',fields:[F('organization_name','Nom du restaurant'),F('city','Ville'),F('address','Adresse',"text",false),F('cuisine','Type de cuisine'),F('seats','Nombre de places','number',false),F('registration','N° d’immatriculation (RCCM / NIF)','text',false)]},
  {id:'hotel',icon:'🏨',label:'Hôtel',desc:'Hôtels, auberges, résidences',fields:[F('organization_name','Nom de l’établissement'),F('city','Ville'),F('address','Adresse','text',false),F('hotel_type','Type d’hébergement','select',true,['Hôtel','Auberge','Résidence meublée','Maison d’hôtes']),F('rooms','Nombre de chambres','number'),F('registration','N° d’immatriculation (RCCM / NIF)','text',false)]},
+ {id:'marketplace',icon:'🛍️',label:'Vendeur Marketplace',desc:'Boutiques, commerçants, grossistes et vendeurs en ligne',fields:[F('organization_name','Nom de la boutique'),F('city','Ville'),F('address','Adresse','text',false),F('products','Produits vendus'),F('market','Type de clientèle','select',true,['Particuliers (B2C)','Professionnels (B2B)','Entre particuliers (C2C)','Tous']),F('registration','N° d’immatriculation (RCCM / NIF)','text',false)]},
+ {id:'delivery',icon:'📦',label:'Service de livraison',desc:'Sociétés de livraison et coursiers indépendants',fields:[F('organization_name','Nom de la société ou du coursier'),F('city','Ville'),F('zone','Zone de livraison'),F('vehicle','Moyen de livraison','select',true,['Moto','Vélo','Voiture','Camionnette','Camion']),F('availability','Disponibilité','select',true,['Temps plein','Temps partiel','Week-end uniquement']),F('registration','N° d’immatriculation (RCCM / NIF)','text',false)]},
  {id:'commerce',icon:'🏪',label:'Boutique / commerce',desc:'Boutiques, magasins, grossistes',fields:[F('organization_name','Nom de la boutique'),F('city','Ville'),F('address','Adresse','text',false),F('products','Produits vendus'),F('outlets','Nombre de points de vente','number',false),F('registration','N° d’immatriculation (RCCM / NIF)','text',false)]},
  {id:'transport',icon:'🚕',label:'Transport',desc:'Chauffeurs, taxis, transporteurs',fields:[F('organization_name','Nom complet ou de la société'),F('city','Ville'),F('vehicle','Type de véhicule','select',true,['Taxi','Moto-taxi','Minibus','Bus','Camion']),F('capacity','Capacité (places ou tonnage)'),F('experience','Années d’expérience','number',false)]},
  {id:'services',icon:'🧰',label:'Prestataire de services',desc:'Artisans, techniciens, indépendants',fields:[F('organization_name','Nom ou raison sociale'),F('city','Ville'),F('trade','Métier / type de prestation'),F('experience','Années d’expérience','number',false),F('description','Décrivez vos prestations','textarea',true,null,true)]},
@@ -124,7 +126,7 @@ const CATS=[
  {id:'travel',icon:'🧭',label:'Tourisme & voyages',desc:'Agences, guides, hébergements touristiques',fields:[F('organization_name','Nom de l’agence ou du guide'),F('city','Ville'),F('offer_type','Type d’offre','select',true,['Agence de voyages','Guide','Hébergement touristique','Excursions']),F('destinations','Destinations proposées')]},
  {id:'business',icon:'📊',label:'Entreprise / institution',desc:'Entreprises, institutions, partenaires techniques',fields:[F('organization_name','Nom de l’entreprise ou de l’institution'),F('city','Ville'),F('partner_kind','Type de partenariat','select',true,['Commercial','Institutionnel','Technique','Paiement']),F('website','Site web','url',false)]}
 ];
-const LIVE=['restaurant','hotel','agro','agro_trader'];   /* « delivery » retiré : les livreurs sont créés uniquement par un restaurant (Mon équipe) */
+const LIVE=['restaurant','hotel','agro','agro_trader','marketplace','delivery'];   /* « delivery » retiré : les livreurs sont créés uniquement par un restaurant (Mon équipe) */
 CATS.splice(0,CATS.length,...CATS.filter(c=>LIVE.includes(c.id)));
 const COLS=['organization_name','city'];
 const STATUS={pending:'En attente',approved:'Acceptée',rejected:'Refusée'};
