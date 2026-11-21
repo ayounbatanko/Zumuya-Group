@@ -286,6 +286,14 @@ $('#pwForm').addEventListener('submit',async e=>{
   finally{$('#pwBtn').disabled=false}
 });
 
+/* Onglets Connexion / Créer un compte et liens de bascule (délégation : les liens sont recréés par setMode) */
+document.addEventListener('click',e=>{
+  const b=e.target.closest&&e.target.closest('#auth [data-mode]');
+  if(!b)return;
+  e.preventDefault();
+  const m=b.getAttribute('data-mode');
+  if(m==='in'||m==='up')setMode(m);
+});
 $('#authForm').addEventListener('submit',submit);
 $('#password').addEventListener('input',updateMatch);
 $('#passwordConfirm').addEventListener('input',updateMatch);

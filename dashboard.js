@@ -4,7 +4,7 @@ const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 /* cats = catégories du formulaire partenaire ; orgs = types d'organisation qui rendent l'activité « configurée » ; page = espace de gestion ; browse = page publique du pôle */
 const MODS=[
- {code:'marketplace',ico:'🛍️',title:'Marketplace',desc:'Boutique, produits et commandes',cats:['marketplace'],orgs:['marketplace','commerce'],page:'marketplace.html',browse:'marketplace.html',def:'Ma boutique'},
+ {code:'marketplace',ico:'🛍️',title:'Marketplace',desc:'Boutique, produits et commandes',cats:['marketplace'],orgs:['marketplace','commerce'],page:'boutique.html',browse:'marketplace.html',def:'Ma boutique'},
  {code:'restauration',ico:'🍽️',title:'Restauration',desc:'Restaurant, menus et commandes',cats:['restaurant'],orgs:['restaurant'],page:'resto-restaurant.html',browse:'resto-client.html',def:'Mon restaurant'},
  {code:'agro',ico:'🌱',title:'Agro',desc:'Producteurs, fournisseurs et acheteurs',cats:['agro','agro_trader'],orgs:['agro','agro_trader'],page:'agro.html',browse:'agro.html',def:'Mon activité agricole'},
  {code:'hotel',ico:'🏨',title:'Hôtel',desc:'Chambres et service en chambre',cats:['hotel'],orgs:['hotel'],page:'resto-restaurant.html',browse:'hotel.html',def:'Mon hôtel'},
@@ -26,7 +26,7 @@ function status(m){
   if(o){
     /* Activation immédiate : aucune validation par un tiers. Seule une suspension décidée par la plateforme est signalée. */
     const sus=o.verification_status==='suspended';
-    return{on:true,name:o.public_name||o.legal_name||m.def,cls:sus?'bad':'ok',label:sus?'Suspendue':'Active',ico:sus?'!':'✔',manage:true};
+    return{on:true,name:o.public_name||o.legal_name||m.def,cls:sus?'bad':'ok',label:sus?'Suspendu':'Activé',ico:sus?'!':'✔',manage:true};
   }
   if(row)return{on:true,name:m.def,cls:'warn',label:'Informations à compléter',ico:'!',manage:false};
   return{on:false};
@@ -40,11 +40,11 @@ function renderCards(){
     else if(m.openOnly)btn=`<a class="dbtn gold" href="${m.page}">Ouvrir →</a>`;
     else if(s.on&&s.manage)btn=`<a class="dbtn gold" href="${m.page}">Ouvrir →</a>`;
     else btn=`<button type="button" class="dbtn" data-conf="${m.code}">Configurer →</button>`;
-    return `<article class="dcard"><div class="ico" aria-hidden="true">${m.ico}</div><div><h3>${esc(m.title)}</h3><p>${esc(m.desc)}</p>${btn}</div></article>`}).join('')||'<p class="dempty" style="grid-column:1/-1">Aucune activité ne correspond à votre recherche.</p>';
+    return `<article class="dcard${s.on?' is-'+s.cls:''}${s.on&&s.manage?' go':''}"${s.on&&s.manage?` data-go="${m.page}" tabindex="0" role="link" aria-label="Ouvrir ${esc(m.title)}"`:''}><div class="ico" aria-hidden="true">${m.ico}</div><div><h3>${esc(m.title)}</h3><p>${esc(m.desc)}</p>${s.on?`<span class="pill ${s.cls} dstate">${s.ico} ${esc(s.label)}</span>`:''}${btn}</div>${s.on?`<span class="dtick ${s.cls}" aria-hidden="true">${s.ico}</span>`:''}</article>`}).join('')||'<p class="dempty" style="grid-column:1/-1">Aucune activité ne correspond à votre recherche.</p>';
 }
 function renderList(){
   const rows=MODS.map(m=>({m,s:status(m)})).filter(x=>x.s.on);
-  $('#dList').innerHTML=rows.length?rows.map(({m,s})=>`<div class="drow"><span class="ico" aria-hidden="true">${m.ico}</span><span class="nm">${esc(s.name)}</span><span class="pill ${s.cls}">${s.ico} ${esc(s.label)}</span>${s.manage?`<a class="dbtn line" href="${m.page}">⚙ Gérer</a>`:`<button type="button" class="dbtn line" data-conf="${m.code}">⚙ Gérer</button>`}</div>`).join(''):'<p class="dempty">Aucune activité configurée pour le moment. Choisissez un pôle ci-dessus et cliquez sur « Configurer ».</p>';
+  $('#dList').innerHTML=rows.length?rows.map(({m,s})=>`<div class="drow${s.manage?' go':''}"${s.manage?` data-go="${m.page}" tabindex="0" role="link"`:''}><span class="ico" aria-hidden="true">${m.ico}</span><span class="nm">${esc(s.name)}</span><span class="pill ${s.cls}">${s.ico} ${esc(s.label)}</span>${s.manage?`<a class="dbtn line" href="${m.page}">⚙ Gérer</a>`:`<button type="button" class="dbtn line" data-conf="${m.code}">⚙ Gérer</button>`}</div>`).join(''):'<p class="dempty">Aucune activité configurée pour le moment. Choisissez un pôle ci-dessus et cliquez sur « Configurer ».</p>';
   const todo=rows.filter(x=>x.s.cls!=='ok').length;
   const b=$('#dBell');b.querySelector('i').textContent=todo;b.querySelector('i').hidden=!todo;
 }
@@ -80,6 +80,9 @@ function init(){
   $('#dAcc').addEventListener('click',e=>{e.stopPropagation();$('#dMenu').classList.toggle('open')});
   document.addEventListener('click',()=>$('#dMenu').classList.remove('open'));
   $('#dash').addEventListener('click',e=>{const b=e.target.closest('[data-conf]');if(b)configure(b.dataset.conf)});
+  const go=e=>{if(e.target.closest('a,button'))return;const c=e.target.closest('[data-go]');if(c&&/^[a-z0-9._-]+\.html(#[\w-]*)?$/i.test(c.dataset.go))location.href=c.dataset.go};
+  $('#dash').addEventListener('click',go);
+  $('#dash').addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.closest('[data-go]')&&!e.target.closest('a,button')){e.preventDefault();go(e)}});
   $('#dLogout').addEventListener('click',()=>{const l=document.getElementById('logout');if(l)l.click()});
   $('#dBack').addEventListener('click',()=>{if(window.ZPARTNER)window.ZPARTNER.close();view('overview')});
   document.addEventListener('zumaya:activity',async()=>{await load();view('overview');say('Activité enregistrée. Elle apparaît dans « Mes activités configurées ».',true)});
