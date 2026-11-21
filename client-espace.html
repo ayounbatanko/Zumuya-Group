@@ -1,72 +1,63 @@
 <!doctype html>
 <html lang="fr">
 <head>
-<script src="config.js"></script><script src="zguard.js" data-roles="customer"></script>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#14213d">
-<title>Mon espace client — ZUMUYA GROUP</title><link rel="icon" href="logo.svg" type="image/svg+xml"><link rel="stylesheet" href="compte.css">
-<style>
-body{background:#f3f5f8;color:#17243a}.wrap{max-width:1000px;margin:22px auto;padding:16px}.panel{background:#fff;border:1px solid #e1e6ed;border-radius:16px;padding:20px;margin:14px 0}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}label{display:block;margin:8px 0;font-size:.92rem}
-input,select,textarea{width:100%;padding:11px;border:1px solid #ccd4df;border-radius:9px;font:inherit}.btn{display:inline-flex;align-items:center;gap:6px;padding:11px 16px;border-radius:9px;background:#14213d;color:#fff;border:0;text-decoration:none;font-weight:700;cursor:pointer}.btn.secondary{background:#e8edf3;color:#14213d}.btn.gold{background:#c9a227;color:#14213d}.muted{color:#65738a}
-.entry{padding:12px;border:1px solid #e1e6ed;border-radius:10px;margin:8px 0;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.msg{padding:10px 12px;border-radius:8px;margin:8px 0}.msg.ok{background:#e8f5e9;color:#1b5e20}.msg.err{background:#ffebee;color:#b71c1c}
-.badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:.75rem;background:#e8edf3}
-header.bar{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:#14213d;color:#fff;gap:12px;flex-wrap:wrap}header.bar a.brand{color:#fff;text-decoration:none;font-weight:700}header .actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.tabs{display:flex;gap:8px;padding:8px;background:#fff;border:1px solid #e1e6ed;border-radius:14px;overflow:auto;position:sticky;top:8px;z-index:5;box-shadow:0 6px 20px #14213d0a}
-.tab{flex:0 0 auto;border:0;background:#f1f4f7;color:#344a5f;border-radius:10px;padding:12px 16px;font:inherit;font-weight:750;cursor:pointer;white-space:nowrap}.tab[aria-selected="true"]{background:#14213d;color:white}
-.tabcontent{display:none}.tabcontent.active{display:block}.hero{background:linear-gradient(120deg,#14213d,#284865);color:#fff;border-radius:18px;padding:22px;margin:12px 0 18px}.hero h1{margin:0 0 6px}.hero p{margin:0;color:#dbe6ee}
-.wallet-panel{border:1px solid #dce4eb;border-radius:18px;padding:20px;background:#fff;margin:0}.wallet-head{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}.wallet-kicker{font-size:.72rem;letter-spacing:.14em;font-weight:800;color:#a67c32}.wallet-head h2{margin:5px 0}.wallet-head strong{background:#102b45;color:white;border-radius:14px;padding:16px 20px;font-size:1.35rem}.wallet-actions{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0}.wallet-panel .btn{background:#102b45;color:white}.wallet-panel .btn.secondary{background:#e8edf3;color:#102b45}.wallet-panel form{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin:12px 0}.wallet-panel form label{display:flex;flex-direction:column;gap:6px}.wallet-ledger .credit{color:#167447;font-weight:800}.wallet-ledger .debit{color:#a33b35;font-weight:800}
-@media(max-width:600px){.wrap{padding:10px}.panel{padding:15px}.tabs{top:0;border-radius:0;margin:0 -10px}.tab{padding:11px 13px}}
-</style></head><body>
-<header class="bar"><a class="brand" href="index.html">ZUMUYA <b>GROUP</b></a><div class="actions"><a class="btn gold" href="resto-client.html">🍽️ Commander</a><a class="btn" href="messagerie.html">💬 Messages</a><button id="logout" class="btn secondary" type="button">Déconnexion</button></div></header>
-<main class="wrap"><div class="hero"><h1>Mon espace client</h1><p>Retrouvez chaque service dans son onglet, sans fonctionnalités dispersées.</p></div>
-<nav class="tabs" role="tablist" aria-label="Navigation du compte client">
-<button class="tab" role="tab" aria-selected="true" data-tab="home">🏠 Accueil</button>
-<button class="tab" role="tab" aria-selected="false" data-tab="orders">🛍️ Commandes</button>
-<button class="tab" role="tab" aria-selected="false" data-tab="wallet">👛 Portefeuille</button>
-<button class="tab" role="tab" aria-selected="false" data-tab="addresses">📍 Adresses</button>
-<button class="tab" role="tab" aria-selected="false" data-tab="favorites">❤️ Favoris</button>
-<button class="tab" role="tab" aria-selected="false" data-tab="profile">👤 Profil</button>
-<button class="tab" role="tab" aria-selected="false" data-tab="settings">⚙️ Paramètres</button>
-</nav>
-<div id="flash" class="msg" hidden></div>
-<section class="tabcontent active" id="tab-home"><div class="panel"><h2>Bienvenue dans votre espace</h2><p class="muted">Accédez directement à vos principaux services.</p><div class="grid">
-<a class="btn" href="resto-client.html">🍽️ Commander et suivre</a><a class="btn secondary" href="index.html#catalogue-public">📋 Explorer les menus</a><button class="btn secondary" type="button" data-open-tab="orders">🛍️ Mes commandes</button><button class="btn secondary" type="button" data-open-tab="wallet">👛 Mon portefeuille</button><button class="btn secondary" type="button" data-open-tab="addresses">📍 Mes adresses</button><button class="btn secondary" type="button" data-open-tab="favorites">❤️ Mes favoris</button></div></div><div class="panel"><h2>Commandes récentes</h2><p class="muted">Consultez vos commandes dans l’onglet dédié.</p><button class="btn" type="button" data-open-tab="orders">Voir mes commandes</button></div></section>
-<section class="tabcontent" id="tab-orders"><div class="panel"><h2>Mes commandes</h2><p class="muted">Historique récent et suivi des commandes.</p><div id="ordersList"><p class="muted">Chargement…</p></div><a class="btn" href="resto-client.html">Ouvrir le suivi complet</a></div></section>
-<section class="tabcontent" id="tab-wallet"><section class="panel wallet-panel" id="walletPanel">
-  <div class="wallet-head"><div><span class="wallet-kicker">PORTEFEUILLE ZUMUYA</span><h2>Mon portefeuille</h2><p class="muted">Solde, encaissements de ventes et retraits sécurisés.</p></div><strong id="walletBalance">Chargement…</strong></div>
-  <div class="wallet-actions"><button type="button" class="btn" id="walletDeposit">＋ Déposer de l’argent</button><button type="button" class="btn secondary" id="walletWithdrawToggle">↗ Demander un retrait</button></div>
-  <p class="muted" id="walletNotice">Les dépôts seront activés après raccordement du prestataire de paiement et de son webhook sécurisé.</p>
-  <form id="walletMethodForm" class="grid">
-    <label>Moyen de retrait enregistré<select name="method" required><option value="">Choisir</option><option value="mobile_money">Mobile Money</option><option value="bank">Virement bancaire</option></select></label>
-    <label>Numéro / référence du bénéficiaire<input name="destination" required placeholder="Numéro Mobile Money ou RIB"></label>
-    <div><button class="btn secondary" type="submit">Enregistrer mon moyen de retrait</button></div>
-  </form>
-  <form id="walletWithdrawForm" class="grid" hidden>
-    <label>Montant à retirer (FCFA)<input name="amount" type="number" min="1" step="1" required></label>
-    <div><button class="btn" type="submit">Envoyer la demande</button></div>
-  </form>
-  <h3>Historique des opérations</h3><div id="walletLedger" class="wallet-ledger"><p class="muted">Chargement…</p></div>
-</section></section>
-<section class="tabcontent" id="tab-addresses"><section class="panel">
-    <h2>Mes adresses de livraison</h2>
-    <form id="addressForm" class="grid">
-      <label>Nom de l’adresse<input name="label" placeholder="Maison, bureau…" required></label>
-      <label>Ville<input name="city" required></label>
-      <label>Quartier<input name="district"></label>
-      <label>Adresse détaillée<input name="address_details"></label>
-      <label>Téléphone du destinataire<input name="phone" type="tel"></label>
-      <label>Nom du destinataire<input name="recipient_name"></label>
-      <label style="display:flex;align-items:center;gap:8px"><input type="checkbox" name="is_default" style="width:auto"> Adresse par défaut</label>
-      <div style="grid-column:1/-1"><button class="btn" type="submit">Ajouter l’adresse</button></div>
-    </form>
-    <div id="addressList"></div>
-  </section></section>
-<section class="tabcontent" id="tab-favorites"><section class="panel">
-    <h2>Mes restaurants favoris</h2>
-    <p class="muted">Ajoutez des favoris depuis la fiche d’un restaurant ou le catalogue.</p>
-    <div id="favList"></div>
-  </section></section>
-<section class="tabcontent" id="tab-profile"><section class="panel">
+  <script src="config.js"></script>
+  <script src="zguard.js" data-roles="customer"></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#14213d">
+  <title>Mon espace client — ZUMUYA GROUP</title>
+  <link rel="icon" href="logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="compte.css">
+  <style>
+    body{background:#f3f5f8;color:#17243a}
+    .wrap{max-width:960px;margin:24px auto;padding:16px}
+    .panel{background:#fff;border:1px solid #e1e6ed;border-radius:16px;padding:20px;margin:14px 0}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+    label{display:block;margin:8px 0;font-size:.92rem}
+    input,select,textarea{width:100%;padding:11px;border:1px solid #ccd4df;border-radius:9px;font:inherit}
+    .btn{display:inline-flex;align-items:center;gap:6px;padding:11px 16px;border-radius:9px;background:#14213d;color:#fff;border:0;text-decoration:none;font-weight:700;cursor:pointer}
+    .btn.secondary{background:#e8edf3;color:#14213d}
+    .btn.gold{background:#c9a227;color:#14213d}
+    .muted{color:#65738a}
+    .entry{padding:12px;border:1px solid #e1e6ed;border-radius:10px;margin:8px 0;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+    .msg{padding:10px 12px;border-radius:8px;margin:8px 0}
+    .msg.ok{background:#e8f5e9;color:#1b5e20}
+    .msg.err{background:#ffebee;color:#b71c1c}
+    .quick{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin:18px 0}
+    .quick a{display:block;padding:18px;border-radius:14px;background:#fff;border:1px solid #e1e6ed;text-decoration:none;color:inherit;font-weight:600;transition:.15s}
+    .quick a:hover{border-color:#14213d;box-shadow:0 4px 14px rgba(20,33,61,.08)}
+    .quick a span{display:block;font-size:1.6rem;margin-bottom:6px}
+    .badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:.75rem;background:#e8edf3}
+    header.bar{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:#14213d;color:#fff}
+    header.bar a.brand{color:#fff;text-decoration:none;font-weight:700}
+    header.bar .actions{display:flex;gap:8px;align-items:center}
+  </style>
+</head>
+<body>
+<header class="bar">
+  <a class="brand" href="index.html">ZUMUYA <b>GROUP</b></a>
+  <div class="actions">
+    <a class="btn secondary" href="parametres.html" style="background:#e8edf3;color:#14213d">⚙️ Paramètres</a>
+    <button id="logout" class="btn" type="button">Déconnexion</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1>Mon espace client</h1>
+  <p class="muted">Profil, adresses, favoris et accès rapide aux commandes.</p>
+
+  <div class="quick">
+    <a href="resto-client.html"><span>🍽️</span>Commander / Suivre</a>
+    <a href="index.html#catalogue-public"><span>📋</span>Voir les menus</a>
+    <a href="compte.html#stay"><span>👤</span>Photo de profil et compte</a>
+    <a href="compte.html#stay"><span>🏪</span>Créer une boutique</a>
+    <a href="parametres.html"><span>⚙️</span>Paramètres du compte</a>
+  </div>
+
+  <div id="flash" class="msg" hidden></div>
+
+  <section class="panel">
     <h2>Mes informations</h2>
     <form id="profileForm" class="grid">
       <label>Nom complet<input name="full_name" required autocomplete="name"></label>
@@ -79,9 +70,37 @@ header.bar{display:flex;align-items:center;justify-content:space-between;padding
       </label>
       <div style="grid-column:1/-1"><button class="btn" type="submit">Enregistrer mon profil</button></div>
     </form>
-  </section></section>
-<section class="tabcontent" id="tab-settings"><div class="panel"><h2>Paramètres et sécurité</h2><p class="muted">Gérez la sécurité et les préférences générales de votre compte.</p><a class="btn" href="parametres.html">⚙️ Ouvrir les paramètres complets</a></div></section>
-</main><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="client-espace.js"></script><script src="wallet.js?v=2"></script>
-<script>
-(()=>{const tabs=[...document.querySelectorAll('.tab[data-tab]')];function openTab(id){tabs.forEach(t=>t.setAttribute('aria-selected',String(t.dataset.tab===id)));document.querySelectorAll('.tabcontent').forEach(p=>p.classList.toggle('active',p.id==='tab-'+id));}tabs.forEach(t=>t.addEventListener('click',()=>openTab(t.dataset.tab)));document.querySelectorAll('[data-open-tab]').forEach(b=>b.addEventListener('click',()=>openTab(b.dataset.openTab)));})();
-</script></body></html>
+  </section>
+
+  <section class="panel">
+    <h2>Mes adresses de livraison</h2>
+    <form id="addressForm" class="grid">
+      <label>Nom de l’adresse<input name="label" placeholder="Maison, bureau…" required></label>
+      <label>Ville<input name="city" required></label>
+      <label>Quartier<input name="district"></label>
+      <label>Adresse détaillée<input name="address_details"></label>
+      <label>Téléphone du destinataire<input name="phone" type="tel"></label>
+      <label>Nom du destinataire<input name="recipient_name"></label>
+      <label style="display:flex;align-items:center;gap:8px"><input type="checkbox" name="is_default" style="width:auto"> Adresse par défaut</label>
+      <div style="grid-column:1/-1"><button class="btn" type="submit">Ajouter l’adresse</button></div>
+    </form>
+    <div id="addressList"></div>
+  </section>
+
+  <section class="panel">
+    <h2>Mes restaurants favoris</h2>
+    <p class="muted">Ajoutez des favoris depuis la fiche d’un restaurant ou le catalogue.</p>
+    <div id="favList"></div>
+  </section>
+
+  <section class="panel">
+    <h2>Commandes récentes</h2>
+    <p class="muted">Les 5 dernières commandes. Pour le suivi détaillé, ouvrez « Commander / Suivre ».</p>
+    <div id="ordersList"><p class="muted">Chargement…</p></div>
+  </section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="client-espace.js"></script>
+</body>
+</html>

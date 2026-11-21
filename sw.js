@@ -1,7 +1,7 @@
 /* ZUMUYA GROUP — service worker commun au portail et au module Restauration.
    Cache versionné : toutes les pages et dépendances statiques du dépôt sont préchargées.
    Stratégie réseau d’abord, cache en secours hors ligne. */
-const CACHE='zumuya-v20-20261121';
+const CACHE='zumuya-v10-20261121';
 const FILES=[
   './agro-collaboration.js',
   './agro.css',
@@ -10,6 +10,9 @@ const FILES=[
   './app.js',
   './catalogue.js',
   './client-espace.html',
+  './boutique.html',
+  './boutique.css',
+  './boutique.js',
   './client-espace.js',
   './compte.css',
   './compte.html',
@@ -22,11 +25,6 @@ const FILES=[
   './icon-maskable-512.png',
   './index.html',
   './livraison.html',
-  './messagerie.html',
-  './marketplace.html',
-  './market.js',
-  './market.css',
-  './messagerie.js',
   './logo.svg',
   './manifest.webmanifest',
   './modules.js',
@@ -66,12 +64,9 @@ const FILES=[
   './resto-splash.js',
   './resto-version.json',
   './styles.css',
-  './wallet.js',
   './sw.js',
   './zcart.css',
   './zcart.js',
-  './zteam.js',
-  './zsupply.js',
   './zguard.js',
   './zservice.css',
   './zsession.js'

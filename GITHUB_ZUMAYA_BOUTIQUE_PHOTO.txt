@@ -1,0 +1,28 @@
+ZUMAYA GROUP — correctifs GitHub du 21/11/2026
+
+CONTENU AJOUTÉ / MODIFIÉ
+- compte.html / compte.js / compte.css : le client existant peut créer une boutique depuis son compte ; le rôle commerce est ensuite reconnu automatiquement.
+- boutique.html / boutique.js / boutique.css : nouvel espace commerçant avec création, modification, suppression de produits et gestion des stocks.
+- modules.js : ZUMUYA Commerce est déclaré disponible.
+- compte.html / compte.js / compte.css : ajout de la photo de profil pour les comptes autorisés.
+- 12_BOUTIQUE_IMMEDIATE_PHOTO_PROFIL.sql : migration Supabase pour les droits, profils, stockage photo et catalogue.
+- sw.js : ajout des nouveaux fichiers au cache et changement de version.
+
+RÈGLE D'ACCÈS
+- La création d'une boutique est immédiate.
+- La vérification administrative reste séparée et ne bloque pas l'accès du propriétaire à sa boutique.
+- Les comptes Restaurant et Hôtel n'ont pas de photo de profil personnelle.
+- Les autres types de comptes peuvent ajouter une photo.
+- Les droits propriétaire ZUMAYA restent séparés des droits commerçants.
+
+INSTALLATION
+1. Dans Supabase > SQL Editor, exécuter 12_BOUTIQUE_IMMEDIATE_PHOTO_PROFIL.sql.
+2. Décompresser cette archive.
+3. Envoyer tous les fichiers à la racine du dépôt GitHub ZUMAYA en conservant les noms.
+4. Accepter le remplacement des fichiers existants.
+5. Attendre la publication GitHub Pages, puis actualiser le site.
+
+IMPORTANT
+Le nouvel espace boutique gère réellement les fiches produits et les quantités de stock.
+L'onglet Commandes est préparé visuellement, mais le raccordement complet du paiement, des commandes multi-vendeurs et de la livraison nécessite les modules backend correspondants.
+Ne jamais publier une clé Supabase service_role dans les fichiers GitHub. Le fichier config.js existant utilise la clé publique anon/publishable.

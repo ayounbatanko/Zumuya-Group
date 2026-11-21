@@ -2,7 +2,7 @@
 <html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#102b45"><link rel="icon" href="logo.svg" type="image/svg+xml"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&family=Manrope:wght@700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="zservice.css?v=1"><title>ZUMUYA Livraison — service de livraison coordonné</title></head><body>
 <header class="zbar"><a class="zbrand" href="index.html"><img src="logo.svg" alt=""><span>ZUMUYA <b>GROUP</b></span></a>
 <nav><a href="index.html#services">Services</a><a href="restauration.html">Restauration</a><a href="hotel.html">Hôtel</a><a id="who" href="compte.html">Se connecter</a></nav></header>
-<section class="zhero"><span class="eyebrow">PÔLE 05 · LOGISTIQUE</span><h1>ZUMUYA <em>Livraison</em></h1><p>Un service à part, en coordination avec ZUMUYA Restauration et ZUMUYA Hôtel : la course est proposée au livreur libre le plus proche, suivie en direct jusqu’à la remise.</p></section>
+<section class="zhero"><span class="eyebrow">PÔLE 03 · LOGISTIQUE</span><h1>ZUMUYA <em>Livraison</em></h1><p>Un service à part, en coordination avec ZUMUYA Restauration et ZUMUYA Hôtel : la course est proposée au livreur libre le plus proche, suivie en direct jusqu’à la remise.</p></section>
 <main class="zwrap" id="app"></main>
 <script src="config.js"></script><script src="zsession.js?v=3"></script>
 <script>
@@ -13,7 +13,6 @@ const FLOW='<div class="flow"><div class="card step"><i>ÉTAPE 01</i><b>🍽️ 
 let role='';
 if(who&&who.role==='driver')role='<div class="card lock"><h2>Espace livreur</h2><p>Bonjour '+esc(who.name)+'. Ouvrez vos courses, acceptez les offres et publiez votre position.</p><a class="btn btn-gold" href="resto-driver.html">Ouvrir mes courses →</a></div>';
 else if(who&&(who.role==='restaurant')&&who.rest)role='<div id="board"></div>';
-else if(pw&&pw.type==='delivery_service')role='<div class="card lock"><span class="eyebrow" style="color:#0b7d6f">SERVICE DE LIVRAISON</span><h2>Bienvenue '+esc(pw.name)+'</h2><p>Votre compte de service de livraison est créé. Complétez la fiche de votre activité depuis <a href="compte.html#stay">Mon compte</a> ; ZUMUYA vérifie votre dossier puis vous met en relation avec les restaurants, hôtels et boutiques Marketplace de votre zone.</p><a class="btn btn-gold" href="compte.html#stay">Mon compte →</a></div>';
 else role='<div class="card lock"><span class="eyebrow" style="color:#0b7d6f">ACCÈS PAR RÔLE</span><h2>Livreurs, restaurants et hôtels</h2><p>Les livreurs ouvrent leurs courses ; les restaurants et les hôtels suivent leurs livraisons. Les comptes livreurs sont créés par le restaurant ou l’hôtel partenaire.</p><a class="btn btn-gold" href="resto-index.html">Me connecter</a><a class="btn btn-line" href="restauration.html">Voir les restaurants</a></div>';
 $('#app').innerHTML='<div class="kpis" id="net"></div><div class="sec-title"><h2>Comment fonctionne la coordination</h2></div>'+FLOW+role;
 async function load(){try{const [rs,os]=await Promise.all([ZS.rests(),ZS.orders()]);

@@ -26,18 +26,12 @@ function sync(){if(!cart||!loaded)return;const r=restOf(cart.rid);
  let changed=false;cart.cur=r.currency||cart.cur;
  cart.items=cart.items.filter(i=>{const p=(r.menu||[]).find(x=>x.n===i.n);if(!p){changed=true;return false}if((+p.p||0)!==i.p){i.p=+p.p||0;changed=true}return true});
  if(changed)say('Votre panier a été mis à jour : prix ou disponibilité modifiés par le restaurant.');write()}
-function isOpen(r){
- if(!r||r.onlineOrders===false)return false;
- const a=r.openAt||'08:00',b=r.closeAt||'22:00';if(!/^\d{2}:\d{2}$/.test(a)||!/^\d{2}:\d{2}$/.test(b))return true;
- const now=new Date(),n=now.getHours()*60+now.getMinutes(),start=+a.slice(0,2)*60+(+a.slice(3)),end=+b.slice(0,2)*60+(+b.slice(3));
- return start===end?true:(start<end?n>=start&&n<end:n>=start||n<end);
-}
 function add(rid,i,d){
  const w=ZS.portal();
  if(!w){try{const pg=location.pathname.split('/').pop()||'index.html';localStorage.setItem('zg_back',pg+($('catalogue-public')?'#catalogue-public':'')+'|'+Date.now())}catch(e){}
   return say('Connectez-vous avec un compte <b>Client</b> pour ajouter des plats à votre panier. <a href="compte.html">Se connecter</a> · <a href="compte.html?mode=signup">Créer un compte</a>')}
  if(w.type!=='customer')return say('Les commandes en ligne sont réservées aux comptes <b>Client</b>. Votre compte est un compte professionnel : utilisez un compte Client pour commander.');
- const r=restOf(rid),p=r&&(r.menu||[])[i];if(!p)return;if(!isOpen(r))return say('Ce restaurant est actuellement fermé. Les commandes seront disponibles à partir de '+(r.openAt||'08:00')+'.');
+ const r=restOf(rid),p=r&&(r.menu||[])[i];if(!p)return;
  if(cart&&cart.rid!==rid){
   if(!confirm('Votre panier contient déjà des plats de « '+cart.name+' ».\nUn panier ne peut contenir que les plats d’un seul restaurant.\n\nLe vider et commencer avec « '+r.name+' » ?'))return;
   cart=null}
@@ -47,7 +41,7 @@ function add(rid,i,d){
  cart.items=cart.items.filter(x=>x.q>0);write();refresh()}
 function checkout(){
  if(!isClient())return say('Connectez-vous avec un compte <b>Client</b> pour passer commande. <a href="compte.html">Se connecter</a>');
- if(!cart)return;const r=restOf(cart.rid);if(!isOpen(r))return say('Impossible d’envoyer la commande : ce restaurant est fermé. Ouverture à '+(r?.openAt||'08:00')+'.');try{localStorage.setItem('rg_target',cart.slug)}catch(e){}location.href='resto-client.html'}
+ if(!cart)return;try{localStorage.setItem('rg_target',cart.slug)}catch(e){}location.href='resto-client.html'}
 function track(){try{localStorage.setItem('rg_tab','myorders')}catch(e){}location.href='resto-client.html'}
 
 /* ---------- affichage ---------- */
@@ -93,7 +87,7 @@ addEventListener('pageshow',()=>{cart=read();refresh()});
 
 window.ZC={
  /* onChange : fonction de la page qui redessine le catalogue après un changement de panier */
- isOpen,init(o){onChange=(o&&o.onChange)||onChange;dock()},
+ init(o){onChange=(o&&o.onChange)||onChange;dock()},
  /* à appeler après chaque chargement des restaurants (et quand la position change) */
  setData(list,position){rests=list||[];pos=position||null;loaded=true;sync();dock();const p=$('pcPanel');if(p&&!p.hidden)panel()},
  ctl,headBtn,count

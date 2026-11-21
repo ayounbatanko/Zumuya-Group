@@ -39,9 +39,7 @@ Chaque compte ouvre **uniquement** son propre espace (contrôlé par `zguard.js`
 | Acceptation / refus | Commandes en ligne | ✅ |
 | Préparation | Passage au statut « préparée » | ✅ |
 | Caisse hors-ligne | Ticket de caisse | ✅ |
-| Livreurs | Création, suspension, suppression : seul le restaurant crée ses livreurs | ✅ |
-| Mon équipe | Comptes employés avec rubriques autorisées + journal | ✅ |
-| Approvisionnement agricole | Commandes aux producteurs / commerçants | ✅ |
+| Livreurs | Association et suivi | ✅ |
 | Paramètres | Logo, GPS, devise, tarif/km, paiements, horaires | ✅ |
 | Carte de visite + QR | Partageable | ✅ |
 | Rapports | Historique des ventes | ✅ |
@@ -70,8 +68,7 @@ Chaque compte ouvre **uniquement** son propre espace (contrôlé par `zguard.js`
 
 | Fonctionnalité | Description | Statut |
 |----------------|-------------|--------|
-| Compte | Créé uniquement par un restaurant (pas d'inscription publique) | ✅ |
-| Courses proposées | Uniquement celles du restaurant rattaché | ✅ |
+| Courses proposées | Liste avec distance et montant | ✅ |
 | Acceptation / refus | Prise en charge | ✅ |
 | Étapes de livraison | Récupéré → en route → arrivé → livré | ✅ |
 | GPS en direct | Position transmise | ✅ |

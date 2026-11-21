@@ -67,3 +67,19 @@ select:focus,textarea:focus{outline:3px solid #e4ad4c66;border-color:var(--gold)
 #pwForm{margin-top:14px}#forgotBtn{justify-self:center;font-size:14px}
 
 .phone-row{display:grid;grid-template-columns:minmax(130px,42%) 1fr;gap:8px}.phone-row select,.phone-row input{min-width:0;width:100%;box-sizing:border-box}
+
+
+/* Photo de profil */
+.profile-photo{display:flex;align-items:center;gap:16px;padding:14px;margin:14px 0;border:1px solid var(--line);border-radius:13px;background:#fbfcfd}
+.profile-photo-preview{width:76px;height:76px;flex:0 0 76px;border-radius:50%;overflow:hidden;background:#edf2f5;display:grid;place-items:center}
+.profile-photo-preview img{width:100%;height:100%;object-fit:cover}
+.profile-photo form{flex:1;min-width:0;gap:8px}
+.profile-photo input{min-height:42px;padding:8px}
+.profile-photo .msg{margin:0}
+@media(max-width:560px){.profile-photo{align-items:flex-start;gap:10px;padding:10px}.profile-photo-preview{width:60px;height:60px;flex-basis:60px}.profile-photo .btn{width:100%}}
+
+/* Onglets et barres de navigation compacts sur petits écrans */
+.tabs{display:flex;gap:5px;overflow-x:auto;overflow-y:hidden;white-space:nowrap;scrollbar-width:thin;-webkit-overflow-scrolling:touch;padding:4px;margin-bottom:14px}
+.tabs button{flex:1 0 auto;min-height:36px;padding:7px 10px;font-size:13px}
+.bar{min-height:48px;padding:7px max(12px,4vw)}
+@media(max-width:560px){.bar{min-height:44px;padding:5px 10px;gap:8px}.brand img{width:30px;height:30px}.back{font-size:12px;white-space:nowrap}main{padding:14px 9px}.card{padding:17px 13px;border-radius:13px}.tabs button{min-height:33px;padding:6px 8px;font-size:12px}}

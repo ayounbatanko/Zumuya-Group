@@ -15,8 +15,7 @@ compte.html
    │
    ├─ Client ──────────────────► client-espace.html / resto-client.html
    ├─ Restaurant / Hôtel ──────► (compléter fiche partenaire) → resto-restaurant.html
-   ├─ Livreur ─────────────────► compte créé UNIQUEMENT par un restaurant (Mon équipe) → resto-driver.html
-   ├─ Employé ─────────────────► compte créé par un restaurant, droits personnalisés → resto-restaurant.html
+   ├─ Livreur ─────────────────► (compléter fiche) → resto-driver.html
    ├─ Producteur / Commerçant ─► agro.html
    └─ Propriétaire (rôle serveur) ► proprietaire.html
 ```
@@ -72,11 +71,3 @@ Chaque page privée déclare les rôles autorisés :
 | `agro.js` | Espace agro |
 | `proprietaire.js` | Back-office |
 
-
-## Équipes, livreurs et approvisionnement (v16)
-
-- `rg_team_members` : employés (`staff`) et livreurs (`driver`) rattachés à une organisation ; permissions par module ; statut actif / suspendu / désactivé.
-- Création uniquement via l'Edge Function `team-admin` ; un trigger sur `auth.users` interdit l'auto-inscription `delivery` / `staff`.
-- `rg_audit_log` : journal des actions sensibles (lecture : compte principal).
-- `rg_supply_orders` / `rg_supply_order_items` : achats entre professionnels, séparés de `rg_orders`; fonctions `rg_supply_*`.
-- Modules d'interface : `zteam.js`, `zsupply.js`.

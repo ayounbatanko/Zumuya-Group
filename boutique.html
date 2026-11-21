@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#102b45"><title>Ma boutique — ZUMAYA</title>
+<link rel="icon" href="logo.svg" type="image/svg+xml"><link rel="stylesheet" href="boutique.css?v=1">
+</head>
+<body>
+<header class="topbar"><a class="brand" href="index.html"><img src="logo.svg" alt=""><span>ZUMAYA <b>COMMERCE</b></span></a><div class="top-actions"><a href="compte.html">Mon compte</a><button id="logoutBtn" type="button">Déconnexion</button></div></header>
+<main class="wrap">
+  <section class="welcome"><div><p class="eyebrow">ESPACE COMMERÇANT</p><h1 id="storeName">Ma boutique</h1><p id="storeMeta">Chargement de votre boutique…</p></div><span class="status" id="storeStatus">Active</span></section>
+  <nav class="tabs" aria-label="Navigation boutique"><button class="active" data-tab="overview">Vue d’ensemble</button><button data-tab="products">Produits</button><button data-tab="stock">Stocks</button><button data-tab="orders">Commandes</button><button data-tab="settings">Paramètres</button></nav>
+  <section class="panel" id="tab-overview"><div class="stats"><article><span>Produits enregistrés</span><b id="statProducts">0</b></article><article><span>Produits actifs</span><b id="statActive">0</b></article><article><span>Unités en stock</span><b id="statStock">0</b></article></div><div class="intro"><h2>Bienvenue dans votre espace commerçant</h2><p>Votre boutique est créée et votre espace est disponible immédiatement. Vous pouvez commencer à ajouter vos produits et à gérer vos stocks.</p><button class="primary" data-go="products">Ajouter mon premier produit</button></div></section>
+  <section class="panel" id="tab-products" hidden><div class="section-head"><div><h2>Mes produits</h2><p>Ajoutez et gérez les articles de votre boutique.</p></div><button class="primary" id="addProduct">+ Ajouter un produit</button></div><div id="productList" class="product-list"><p class="empty">Chargement…</p></div></section>
+  <section class="panel" id="tab-stock" hidden><h2>Gestion des stocks</h2><p>Consultez les quantités disponibles et modifiez les stocks depuis la fiche de chaque produit.</p><div id="stockList" class="stock-list"></div></section>
+  <section class="panel" id="tab-orders" hidden><h2>Commandes</h2><p class="empty">Votre espace est prêt. Le raccordement des commandes marketplace sera activé avec le module de paiement et de livraison.</p></section>
+  <section class="panel" id="tab-settings" hidden><h2>Paramètres de la boutique</h2><dl class="settings"><div><dt>Nom</dt><dd id="settingName">—</dd></div><div><dt>Ville</dt><dd id="settingCity">—</dd></div><div><dt>Adresse</dt><dd id="settingAddress">—</dd></div><div><dt>Vérification</dt><dd>La vérification administrative peut intervenir séparément et ne bloque pas la gestion de votre boutique.</dd></div></dl></section>
+</main>
+<dialog id="productDialog"><form id="productForm"><div class="dialog-head"><h2 id="dialogTitle">Ajouter un produit</h2><button type="button" id="closeDialog" class="close">✕</button></div><input type="hidden" id="productId"><label>Nom du produit<input id="productTitle" maxlength="160" required></label><label>Description<textarea id="productDescription" maxlength="2000" rows="3"></textarea></label><div class="two"><label>Prix (XOF)<input id="productPrice" type="number" min="0" step="1" required></label><label>Quantité en stock<input id="productStock" type="number" min="0" step="1" value="0" required></label></div><label class="check"><input id="productActive" type="checkbox" checked> Produit visible dans ma boutique</label><p id="formMessage" role="alert"></p><button class="primary full" id="saveProduct" type="submit">Enregistrer le produit</button></form></dialog>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js"></script><script src="boutique.js?v=1"></script>
+</body></html>
