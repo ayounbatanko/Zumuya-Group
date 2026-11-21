@@ -1,0 +1,5 @@
+-- Déjà appliqué sur le projet « Gestion resto » (migration 15). Conservé ici comme source.
+-- Résumé : le serveur force verification_status='verified' à la création d'un pôle par un utilisateur,
+-- valide type/pays/nom/GPS, interdit de modifier statut/type/pays/propriétaire, impose 1 pôle par catégorie et par utilisateur,
+-- et restreint la lecture des profils agro inactifs.
+-- Pour rejouer : voir le contenu de la migration dans Supabase > Database > Migrations.
