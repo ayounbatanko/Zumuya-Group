@@ -1,21 +1,63 @@
-<!doctype html>
-<html lang="fr">
-<head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#102b45"><title>Ma boutique — ZUMAYA</title>
-<link rel="icon" href="logo.svg" type="image/svg+xml"><link rel="stylesheet" href="boutique.css?v=1">
-</head>
-<body>
-<header class="topbar"><a class="brand" href="index.html"><img src="logo.svg" alt=""><span>ZUMAYA <b>COMMERCE</b></span></a><div class="top-actions"><a href="compte.html">Mon compte</a><button id="logoutBtn" type="button">Déconnexion</button></div></header>
-<main class="wrap">
-  <section class="welcome"><div><p class="eyebrow">ESPACE COMMERÇANT</p><h1 id="storeName">Ma boutique</h1><p id="storeMeta">Chargement de votre boutique…</p></div><span class="status" id="storeStatus">Active</span></section>
-  <nav class="tabs" aria-label="Navigation boutique"><button class="active" data-tab="overview">Vue d’ensemble</button><button data-tab="products">Produits</button><button data-tab="stock">Stocks</button><button data-tab="orders">Commandes</button><button data-tab="settings">Paramètres</button></nav>
-  <section class="panel" id="tab-overview"><div class="stats"><article><span>Produits enregistrés</span><b id="statProducts">0</b></article><article><span>Produits actifs</span><b id="statActive">0</b></article><article><span>Unités en stock</span><b id="statStock">0</b></article></div><div class="intro"><h2>Bienvenue dans votre espace commerçant</h2><p>Votre boutique est créée et votre espace est disponible immédiatement. Vous pouvez commencer à ajouter vos produits et à gérer vos stocks.</p><button class="primary" data-go="products">Ajouter mon premier produit</button></div></section>
-  <section class="panel" id="tab-products" hidden><div class="section-head"><div><h2>Mes produits</h2><p>Ajoutez et gérez les articles de votre boutique.</p></div><button class="primary" id="addProduct">+ Ajouter un produit</button></div><div id="productList" class="product-list"><p class="empty">Chargement…</p></div></section>
-  <section class="panel" id="tab-stock" hidden><h2>Gestion des stocks</h2><p>Consultez les quantités disponibles et modifiez les stocks depuis la fiche de chaque produit.</p><div id="stockList" class="stock-list"></div></section>
-  <section class="panel" id="tab-orders" hidden><h2>Commandes</h2><p class="empty">Votre espace est prêt. Le raccordement des commandes marketplace sera activé avec le module de paiement et de livraison.</p></section>
-  <section class="panel" id="tab-settings" hidden><h2>Paramètres de la boutique</h2><dl class="settings"><div><dt>Nom</dt><dd id="settingName">—</dd></div><div><dt>Ville</dt><dd id="settingCity">—</dd></div><div><dt>Adresse</dt><dd id="settingAddress">—</dd></div><div><dt>Vérification</dt><dd>La vérification administrative peut intervenir séparément et ne bloque pas la gestion de votre boutique.</dd></div></dl></section>
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#10283d"><title>Ma boutique — ZUMAYA MARKET</title><link rel="stylesheet" href="market.css"><link rel="stylesheet" href="boutique.css"></head><body>
+<header class="top"><a class="brand" href="index.html">ZUMAYA <span>MARKET</span></a><nav><a href="index.html">Accueil ZUMAYA</a><a href="marketplace.html">Marketplace</a><a href="messagerie.html">💬 Messagerie</a></nav></header>
+<main class="bq">
+<div id="notice" class="notice" role="status">Chargement…</div>
+
+<section id="gate" class="card" hidden><h2>Connectez-vous pour gérer votre boutique</h2><p class="muted">La connexion est partagée avec le portail ZUMAYA. Connectez-vous depuis l’accueil, puis revenez ici.</p><a class="btn" href="index.html">Se connecter</a></section>
+
+<section id="create" class="card" hidden><h2>🏪 Créer ma boutique</h2><p class="muted">Votre boutique est activée immédiatement. Vous pourrez publier vos produits juste après.</p>
+<form id="createForm" class="form"><label>Nom de la boutique<input name="store_name" required minlength="2" maxlength="120"></label>
+<label>Type<select name="store_type"><option value="merchant">Commerçant</option><option value="supermarket">Supermarché</option><option value="wholesaler">Grossiste / distributeur</option><option value="online_seller">Vendeur en ligne</option><option value="company">Entreprise / marque</option><option value="individual">Particulier vendeur</option></select></label>
+<label>Marché<select name="market_type"><option value="all">B2C + B2B + C2C</option><option value="b2c">Particuliers (B2C)</option><option value="b2b">Professionnels (B2B)</option><option value="c2c">Entre particuliers (C2C)</option></select></label>
+<div class="two"><label>Ville<input name="city" maxlength="80" placeholder="Abidjan"></label><label>Téléphone<input name="phone" inputmode="tel" maxlength="30"></label></div>
+<label>Description<textarea name="description" rows="3" maxlength="600" placeholder="Présentez votre boutique…"></textarea></label>
+<button class="btn primary" type="submit">Créer ma boutique</button></form><p id="createState" class="muted"></p></section>
+
+<section id="app" hidden>
+ <div class="store-head card"><div class="store-id"><img id="storeLogo" alt="" hidden><div><small>MA BOUTIQUE</small><h1 id="storeName"></h1><div class="meta"><span id="storeBadge" class="chip"></span> <span id="storeCity"></span></div></div></div>
+ <div class="store-actions"><select id="storeSelect" aria-label="Changer de boutique"></select><a id="viewShop" class="btn ghost" target="_blank" rel="noopener">Voir ma vitrine ↗</a><button id="newStore" class="btn ghost" type="button">＋ Nouvelle boutique</button></div></div>
+ <nav class="tabs" role="tablist"><button class="tab active" data-pane="overview">📊 Aperçu</button><button class="tab" data-pane="products">📦 Produits</button><button class="tab" data-pane="edit">＋ Publier</button><button class="tab" data-pane="orders">🧾 Commandes <b id="pendingBadge" hidden></b></button><button class="tab" data-pane="stats">📈 Statistiques</button><button class="tab" data-pane="profile">⚙️ Boutique</button></nav>
+
+ <div class="pane active" id="pane-overview">
+  <div class="period"><span>Période</span><button data-p="7">7 j</button><button data-p="30" class="on">30 j</button><button data-p="90">90 j</button></div>
+  <div class="kpis" id="kpis"></div>
+  <div class="grid2"><div class="card"><h3>Chiffre d’affaires</h3><div class="chart" id="chRevenue"></div></div><div class="card"><h3>Visites des produits</h3><div class="chart" id="chViews"></div></div></div>
+  <div class="grid2"><div class="card"><h3>Commandes par jour</h3><div class="chart" id="chOrders"></div></div><div class="card"><h3>Statut des commandes</h3><div id="donut"></div></div></div>
+  <div class="grid2"><div class="card"><h3>Produits les plus rentables</h3><div id="topProducts"></div></div><div class="card"><h3>À surveiller</h3><div id="alerts"></div></div></div>
+ </div>
+
+ <div class="pane" id="pane-products"><div class="row-between"><h2>Mes produits</h2><button class="btn primary" id="addProduct" type="button">＋ Nouveau produit</button></div><div id="productList" class="plist"></div></div>
+
+ <div class="pane" id="pane-edit"><h2 id="editTitle">Publier un produit</h2>
+  <form id="productForm" class="form card"><input type="hidden" name="id">
+   <label>Nom du produit<input name="title" required minlength="2" maxlength="180"></label>
+   <label>Description<textarea name="description" rows="4" maxlength="4000" placeholder="Caractéristiques, avantages, détails…"></textarea></label>
+   <div class="two"><label>Catégorie<select name="category_id" id="productCategory"><option value="">Sans catégorie</option></select></label><label>Marché<select name="market_type"><option value="all">Tous</option><option value="b2c">B2C</option><option value="b2b">B2B</option><option value="c2c">C2C</option></select></label></div>
+   <div class="two"><label>Prix (FCFA)<input name="price" type="number" min="0" step="1" required></label><label>Stock<input name="stock_quantity" type="number" min="0" step="1" value="1" required></label></div>
+   <label>Visibilité<select name="status"><option value="active">Publié (visible par les clients)</option><option value="draft">Brouillon (masqué)</option><option value="archived">Archivé</option></select></label>
+   <label>Photos (jusqu’à 8)<input id="productImages" type="file" accept="image/*" multiple></label><div id="imageList" class="media-grid"></div>
+   <label>Vidéos de présentation (jusqu’à 3, 50 Mo max)<input id="productVideos" type="file" accept="video/*" multiple></label><div id="videoList" class="media-grid"></div>
+   <div class="row-between"><button class="btn ghost" id="cancelEdit" type="button">Annuler</button><button class="btn primary" type="submit" id="saveProduct">Publier mon produit</button></div>
+  </form><p id="productState" class="muted"></p></div>
+
+ <div class="pane" id="pane-orders"><div class="row-between"><h2>Commandes reçues</h2><button class="btn ghost" id="reloadOrders" type="button">Actualiser</button></div><div class="chips" id="orderFilter"></div><div id="orders"></div></div>
+
+ <div class="pane" id="pane-stats"><div class="row-between"><h2>Performance</h2><select id="statProduct" aria-label="Produit"></select></div>
+  <div class="period"><span>Période</span><button data-p="7">7 j</button><button data-p="30" class="on">30 j</button><button data-p="90">90 j</button></div>
+  <div class="kpis" id="kpis2"></div>
+  <div class="grid2"><div class="card"><h3>Chiffre d’affaires</h3><div class="chart" id="chRevenue2"></div></div><div class="card"><h3>Visites</h3><div class="chart" id="chViews2"></div></div></div>
+  <div class="card"><h3>Détail par produit</h3><div class="tablewrap"><table class="tbl" id="perfTable"></table></div><p class="muted">Touchez un produit pour voir ses graphiques de performance.</p></div></div>
+
+ <div class="pane" id="pane-profile"><h2>Profil de la boutique</h2>
+  <form id="profileForm" class="form card"><label>Nom de la boutique<input name="store_name" required minlength="2" maxlength="120"></label>
+   <label>Type<select name="store_type"><option value="merchant">Commerçant</option><option value="supermarket">Supermarché</option><option value="wholesaler">Grossiste / distributeur</option><option value="online_seller">Vendeur en ligne</option><option value="company">Entreprise / marque</option><option value="individual">Particulier vendeur</option></select></label>
+   <label>Marché<select name="market_type"><option value="all">B2C + B2B + C2C</option><option value="b2c">B2C</option><option value="b2b">B2B</option><option value="c2c">C2C</option></select></label>
+   <div class="two"><label>Ville<input name="city" maxlength="80"></label><label>Téléphone<input name="phone" inputmode="tel" maxlength="30"></label></div>
+   <label>Description<textarea name="description" rows="3" maxlength="600"></textarea></label>
+   <label>Logo<input id="logoFile" type="file" accept="image/*"></label>
+   <label class="check"><input type="checkbox" name="is_active"> Boutique ouverte (visible dans le marketplace)</label>
+   <button class="btn primary" type="submit">Enregistrer</button></form><p id="profileState" class="muted"></p></div>
+</section>
 </main>
-<dialog id="productDialog"><form id="productForm"><div class="dialog-head"><h2 id="dialogTitle">Ajouter un produit</h2><button type="button" id="closeDialog" class="close">✕</button></div><input type="hidden" id="productId"><label>Nom du produit<input id="productTitle" maxlength="160" required></label><label>Description<textarea id="productDescription" maxlength="2000" rows="3"></textarea></label><div class="two"><label>Prix (XOF)<input id="productPrice" type="number" min="0" step="1" required></label><label>Quantité en stock<input id="productStock" type="number" min="0" step="1" value="0" required></label></div><label class="check"><input id="productActive" type="checkbox" checked> Produit visible dans ma boutique</label><p id="formMessage" role="alert"></p><button class="primary full" id="saveProduct" type="submit">Enregistrer le produit</button></form></dialog>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js"></script><script src="boutique.js?v=1"></script>
-</body></html>
+<footer>© ZUMAYA GROUP — Un seul écosystème, mille opportunités.</footer>
+<script src="config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="boutique.js"></script></body></html>

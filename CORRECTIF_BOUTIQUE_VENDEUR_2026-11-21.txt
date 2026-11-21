@@ -1,0 +1,15 @@
+CORRECTIF 2026-11-21 — Bucket introuvable + Espace boutique vendeur
+
+CAUSE : le script 12_marketplace_media.sql n'avait jamais été exécuté sur le projet « Gestion resto » :
+ - bucket « commerce-media » absent, colonnes media_urls/video_urls absentes ;
+ - les boutiques étaient toutes en « pending » (le trigger forçait pending) => produits invisibles.
+DÉJÀ APPLIQUÉ sur le projet Supabase (migration 13_boutique_vendeur.sql, relançable).
+
+NOUVEAUTÉS
+ - boutique.html / boutique.js / boutique.css : espace vendeur (Aperçu + KPI + graphiques, Produits,
+   Publier/Modifier avec photos & vidéos, Commandes, Statistiques par produit, Profil boutique).
+ - marketplace.html / market.js : fiche produit (galerie photos/vidéos), suivi des visites, page boutique
+   (marketplace.html?store=ID), bouton « Ma boutique ».
+ - sw.js : cache v22.
+
+DÉPLOIEMENT : remplacer/ajouter ces fichiers sur GitHub Pages, puis recharger le site.
