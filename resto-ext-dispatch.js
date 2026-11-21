@@ -1,4 +1,4 @@
-/* Pôle 3 — Attribution des courses. L'attribution (livreur libre le plus proche, délai 90 s, puis suivant) est faite CÔTÉ SERVEUR
+/* Pôle 5 — Attribution des courses. L'attribution (livreur libre le plus proche, délai 90 s, puis suivant) est faite CÔTÉ SERVEUR
    (supabase-setup.sql : rg_dispatch_tick + déclencheur + pg_cron), donc elle marche même appli du restaurant fermée.
    Repli : si le script SQL n'est pas installé, l'ancien mécanisme (navigateur du restaurant) reste actif. */
 (function(){var X=window.RGX;if(!X)return;

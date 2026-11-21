@@ -416,7 +416,7 @@ function mountPro(r){
  const org=ORGID(),log=(a,t,dt)=>{if(window.ZTeam)ZTeam.log(org,a,t,dt)};
  let el=document.getElementById('proDrivers');
  if(el&&window.ZTeam)ZTeam.mount(el,{kind:'driver',orgId:org,
-   onCreated:x=>{upd((rr,d)=>{d.users.push({id:uid(),role:'driver',name:x.name,phone:x.email,email:x.email,contact:x.phone||'',vehicle:x.vehicle||'',portalId:x.user_id,authId:x.user_id,restId:rr.id,managed:true,created:Date.now()})})},
+   onCreated:x=>{const sync=()=>{if(D.refresh)D.refresh();render()};sync();setTimeout(sync,1500);setTimeout(sync,4000)},
    onStatus:(m,st)=>localDriverSet(m.user_id,{disabled:st!=='active'}),
    onDeleted:m=>{const d=D.get();d.users=d.users.filter(u=>u.portalId!=m.user_id);D.save(d)}});
  el=document.getElementById('proTeam');if(el&&window.ZTeam)ZTeam.mount(el,{kind:'staff',orgId:org});

@@ -1,0 +1,8 @@
+Mise à jour du 21/11/2026
+- Pôles : 01 Restauration, 02 Hôtel, 03 Agro commerçants, 04 Marketplace, 05 Livraison, 06 Transport, 07 Prestations, 08 Événements, 09 Commerce, 10 Voyage, 11 Paiement, 12 Entreprise.
+- Marketplace : modules/commerce-market/ (tables commerce_* déjà créées dans Supabase). Une boutique est « en attente » jusqu'à vérification par le propriétaire plateforme :
+  update commerce_stores set verification_status='verified' where id='...';
+- Livreurs créés par un restaurant : ils apparaissent maintenant dans l'attribution des courses (synchronisation serveur rg_team_members -> rg_users).
+- Agro : le formulaire « Ajouter un produit » n'apparaît qu'au clic ; le catalogue reste visible.
+- Messagerie : tables rg_market_* créées dans Supabase (script 08 qui n'avait pas été exécuté).
+Publiez tous les fichiers sur GitHub Pages (le cache de l'appli passe en v17).
