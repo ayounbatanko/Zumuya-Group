@@ -6,7 +6,8 @@
 <meta name="theme-color" content="#102b45">
 <title>Mon compte — ZUMUYA GROUP</title>
 <link rel="icon" href="logo.svg" type="image/svg+xml">
-<link rel="stylesheet" href="compte.css?v=8">
+<link rel="stylesheet" href="compte.css?v=9">
+<link rel="stylesheet" href="dashboard.css?v=1">
 <style>
 </style>
 </head>
@@ -107,9 +108,65 @@
   <button class="btn ghost" type="button" id="logout">Se déconnecter</button>
 </section>
 </main>
+
+<div id="dash" hidden>
+  <header class="dtop">
+    <button type="button" class="dburger" id="dBurger" aria-label="Ouvrir le menu">☰</button>
+    <a class="dbrand" href="index.html"><img src="logo.svg" alt=""><span>ZUMAYA <b>GROUP</b></span></a>
+    <label class="dsearch"><input id="dSearch" type="search" placeholder="Rechercher un service ou une activité…" aria-label="Rechercher un service ou une activité"></label>
+    <div class="dtop-r">
+      <a class="dbell" id="dBell" href="messagerie.html" aria-label="Notifications">🔔<i hidden>0</i></a>
+      <div class="dacc" id="dAcc"><button type="button" aria-haspopup="true"><span class="dav" id="dAv">Z</span><span class="t">Mon compte ▾</span></button>
+        <div class="dmenu" id="dMenu"><div class="who" id="dWho"></div><a href="parametres.html">⚙️ Paramètres du compte</a><a href="messagerie.html">💬 Messagerie</a><button type="button" id="dLogout">⏻ Se déconnecter</button></div></div>
+    </div>
+  </header>
+  <aside class="dside" id="dSide" aria-label="Menu principal">
+    <a href="#" class="on" data-view="overview"><span class="ic">▦</span>Vue d’ensemble</a>
+    <a href="#" data-view="activities"><span class="ic">🧩</span>Mes activités</a>
+    <a href="marketplace.html"><span class="ic">🛍️</span>Marketplace</a>
+    <a href="resto-client.html"><span class="ic">🍴</span>Restauration</a>
+    <a href="hotel.html"><span class="ic">🛏️</span>Hôtel</a>
+    <a href="agro.html"><span class="ic">🌿</span>Agro</a>
+    <a href="livraison.html"><span class="ic">🛵</span>Livraison</a>
+    <a href="index.html#services"><span class="ic">🛠️</span>Prestations</a>
+    <hr>
+    <a href="parametres.html"><span class="ic">⚙️</span>Paramètres</a>
+    <div class="dsig"><div class="af" aria-hidden="true">🌍</div><b>ZUMAYA <i>GROUP</i></b><em>Un seul écosystème, mille opportunités.</em></div>
+  </aside>
+  <div class="dscrim" id="dScrim"></div>
+  <main class="dmain">
+    <section class="dhero">
+      <div class="dart" aria-hidden="true"><svg viewBox="0 0 640 260" preserveAspectRatio="xMaxYMid slice"><defs><linearGradient id="dsky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#dcecf2"/><stop offset="1" stop-color="#f6f1e4"/></linearGradient></defs><rect width="640" height="260" fill="url(#dsky)"/>
+        <g fill="#cfd9de"><rect x="40" y="150" width="46" height="110"/><rect x="92" y="130" width="38" height="130"/><rect x="136" y="160" width="52" height="100"/><rect x="200" y="140" width="40" height="120"/></g>
+        <g fill="#b9c6cc" opacity=".8"><rect x="50" y="158" width="6" height="8"/><rect x="64" y="158" width="6" height="8"/><rect x="50" y="176" width="6" height="8"/><rect x="64" y="176" width="6" height="8"/><rect x="100" y="140" width="6" height="8"/><rect x="114" y="140" width="6" height="8"/><rect x="100" y="160" width="6" height="8"/><rect x="114" y="160" width="6" height="8"/></g>
+        <g fill="#d9c9a4"><path d="M330 260 L360 70 L372 20 L388 70 L420 260 Z"/><path d="M400 260 L430 110 L440 70 L452 110 L480 260 Z" opacity=".9"/><path d="M270 260 L300 120 L310 90 L322 120 L350 260 Z" opacity=".9"/></g>
+        <g fill="none" stroke="#b8a678" stroke-width="3"><path d="M372 20 V8"/><path d="M300 260 Q372 130 452 260"/></g>
+        <path d="M0 232 Q160 218 320 232 T640 228 V260 H0Z" fill="#e9dcc0"/>
+        <g fill="#4f8a3c"><circle cx="540" cy="190" r="34"/><circle cx="580" cy="205" r="28"/><circle cx="500" cy="212" r="22"/></g><g fill="#6b4a2b"><rect x="536" y="205" width="8" height="40"/><rect x="576" y="218" width="7" height="30"/></g></svg></div>
+      <h1>Bonjour, bienvenue sur ZUMAYA</h1>
+      <p class="sub">Un seul compte pour toutes vos activités.</p>
+      <div class="dok"><span class="ck">✓</span><div><b>Compte unique actif</b><span>Vous pouvez activer plusieurs activités</span></div></div>
+    </section>
+    <div id="vOverview">
+      <h2 class="dh2">🚀 Explorez et activez vos activités</h2>
+      <div class="dgrid" id="dCards"></div>
+      <p id="dashMsg" role="status" aria-live="polite"></p>
+      <div class="dbottom">
+        <div><h2 class="dh2">💼 Mes activités configurées</h2><div class="dlist" id="dList"></div></div>
+        <aside class="dhelp"><div class="face" aria-hidden="true">🎧</div><div><h3>Besoin d’aide ?</h3><p>Configurez uniquement les activités qui correspondent à vos besoins.</p><a class="dbtn" href="mailto:zumuyagroup@gmail.com?subject=Assistance%20ZUMAYA">❓ Assistance</a></div></aside>
+      </div>
+    </div>
+    <div id="vConfig" hidden>
+      <h2 class="dh2">🧩 Configurer une activité</h2>
+      <button type="button" class="dbtn line" id="dBack">← Retour à la vue d’ensemble</button>
+      <div class="dpanel" id="dPartnerSlot"></div>
+    </div>
+  </main>
+</div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 <script src="module-manager.js?v=1"></script>
-<script src="compte.js?v=12"></script>
+<script src="dashboard.js?v=1"></script>
+<script src="compte.js?v=13"></script>
 </body>
 </html>

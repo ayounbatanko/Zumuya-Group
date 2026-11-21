@@ -63,9 +63,9 @@ async function showAccount(user){
   else{lead.hidden=true}
   $('#partnerPanel').hidden=owner||managed;
   if(!owner&&!managed) initPartner(user);
-  if(universal){lead.hidden=false;lead.textContent='Votre compte unique est actif. Activez et gérez plusieurs activités depuis le même compte.';$('#moduleManager').hidden=false;$('#partnerPanel').hidden=true;if(window.ZUMAYA_MODULE_MANAGER)window.ZUMAYA_MODULE_MANAGER.init(sb,user);}else if($('#moduleManager')){$('#moduleManager').hidden=true;}
+  if(universal){lead.hidden=false;lead.textContent='Votre compte unique est actif. Activez et gérez plusieurs activités depuis le même compte.';$('#moduleManager').hidden=true;$('#partnerPanel').hidden=true;if(window.ZDASH)window.ZDASH.show(sb,user);else{$('#moduleManager').hidden=false;if(window.ZUMAYA_MODULE_MANAGER)window.ZUMAYA_MODULE_MANAGER.init(sb,user)}}else{if($('#moduleManager'))$('#moduleManager').hidden=true;if(window.ZDASH)window.ZDASH.hide()}
 }
-function showAuth(){$('#account').hidden=true;$('#recovery').hidden=true;$('#auth').hidden=false}
+function showAuth(){if(window.ZDASH)window.ZDASH.hide();$('#account').hidden=true;$('#recovery').hidden=true;$('#auth').hidden=false}
 
 async function submit(e){
   e.preventDefault();showMsg('');
@@ -128,7 +128,7 @@ const LIVE=['restaurant','hotel','agro','agro_trader','marketplace','delivery'];
 CATS.splice(0,CATS.length,...CATS.filter(c=>LIVE.includes(c.id)));
 const COLS=['organization_name','city'];
 const STATUS={pending:'En attente',approved:'Acceptée',rejected:'Refusée'};
-let apps=[],countries=[['NE','Niger']],currentCat=null,currentUser=null;
+let apps=[],countries=[['NE','Niger']],currentCat=null,currentUser=null,catFilter=null;
 
 function pShow(t,type='error'){const m=$('#pMsg');m.textContent=t;m.className='msg '+type;m.hidden=!t}
 function activeFor(id){return apps.find(a=>a.category===id&&(a.status==='pending'||a.status==='approved'))}
@@ -139,7 +139,7 @@ function renderApps(){
     return `<article class="app"><div><b>${c.icon} ${esc(c.label)} — ${esc(a.organization_name)}</b><small>Envoyée le ${new Date(a.created_at).toLocaleDateString('fr-FR')} · ${esc(a.city)}</small>${a.status==='rejected'&&a.review_note?`<div class="why">Motif : ${esc(a.review_note)}</div>`:''}</div><span class="badge ${esc(a.status)}">${STATUS[a.status]||esc(a.status)}</span></article>`}).join('');
 }
 function renderCats(){
-  $('#catGrid').innerHTML=CATS.map(c=>{const a=activeFor(c.id);
+  $('#catGrid').innerHTML=CATS.filter(c=>!catFilter||catFilter.includes(c.id)).map(c=>{const a=activeFor(c.id);
     return `<button type="button" class="cat" data-cat="${c.id}" ${a?'disabled':''}><span class="ic">${c.icon}</span><span><b>${esc(c.label)}</b><small>${a?'Demande '+(a.status==='approved'?'acceptée':'en attente'):esc(c.desc)}</small></span></button>`}).join('');
 }
 function fieldHtml(f){
@@ -160,7 +160,7 @@ function openForm(id){
   pShow('');$('#stepCat').hidden=true;$('#partnerForm').hidden=false;
   $('#formFields select').focus();
 }
-function closeFlow(){$('#partnerFlow').hidden=true;$('#startPartner').hidden=false;$('#partnerForm').hidden=true;$('#stepCat').hidden=false;currentCat=null}
+function closeFlow(){catFilter=null;$('#partnerFlow').hidden=true;$('#startPartner').hidden=false;$('#partnerForm').hidden=true;$('#stepCat').hidden=false;currentCat=null}
 async function loadApps(){
   try{
     const {data,error}=await sb.from('rg_partner_applications').select('id,category,organization_name,city,status,review_note,created_at').order('created_at',{ascending:false});
@@ -209,6 +209,7 @@ async function submitPartner(e){
     $('#appList').innerHTML='<p class="empty">Activité configurée avec succès. Vous pouvez ajouter une autre activité ou explorer les autres pôles.</p>';
     currentUser={...currentUser,user_metadata:{...(currentUser.user_metadata||{}),account_type:'universal',enabled_modules:[...new Set([...(currentUser.user_metadata?.enabled_modules||[]),currentCat.id])],organization_ids:[...new Set([...(currentUser.user_metadata?.organization_ids||[]),org.id])],organization_id:org.id}};
     await initPartner(currentUser);
+    document.dispatchEvent(new Event('zumaya:activity'));
     if(currentCat.id==='restaurant'||currentCat.id==='hotel')sessionStorage.setItem('zmy_portal','1');
     $('#roleLead').hidden=false;$('#roleLead').textContent='Activité activée. Votre compte conserve l’accès à tous les pôles ZUMAYA.';
   }catch(err){
@@ -219,7 +220,18 @@ $('#startPartner').addEventListener('click',()=>{renderCats();$('#partnerFlow').
 $('#catGrid').addEventListener('click',e=>{const b=e.target.closest('[data-cat]');if(b&&!b.disabled)openForm(b.dataset.cat)});
 $('#backCat').addEventListener('click',()=>{$('#partnerForm').hidden=true;$('#stepCat').hidden=false});
 document.addEventListener('click',e=>{if(e.target&&e.target.id==='partnerLocate'){if(!navigator.geolocation)return pShow('La géolocalisation n’est pas disponible sur cet appareil.');e.target.disabled=true;navigator.geolocation.getCurrentPosition(pos=>{document.querySelector('#partnerLat').value=pos.coords.latitude;document.querySelector('#partnerLng').value=pos.coords.longitude;pShow('Position GPS enregistrée.','success');e.target.disabled=false},()=>{pShow('Autorisez la localisation GPS pour continuer.');e.target.disabled=false},{enableHighAccuracy:true,timeout:15000})}});
-$('#pCancel').addEventListener('click',closeFlow);
+window.ZPARTNER={
+  async open(ids){
+    ids=[].concat(ids||[]).filter(Boolean);
+    if(!currentUser&&sb){const {data:{user}}=await sb.auth.getUser();if(user)await initPartner(user)}
+    closeFlow();catFilter=ids.length?ids:null;renderCats();
+    $('#partnerFlow').hidden=false;$('#startPartner').hidden=true;$('#stepCat').hidden=false;$('#partnerForm').hidden=true;
+    const free=(catFilter?CATS.filter(c=>catFilter.includes(c.id)):CATS).filter(c=>!activeFor(c.id));
+    if(free.length===1)openForm(free[0].id);
+  },
+  close(){closeFlow()}
+};
+$('#pCancel').addEventListener('click',()=>{closeFlow();if(window.ZDASH&&document.body.classList.contains('dash-on'))document.querySelector('#dBack')?.click()});
 $('#partnerForm').addEventListener('submit',submitPartner);
 
 /* ===== Propriétaire, mot de passe ===== */
