@@ -24,8 +24,9 @@ function status(m){
   const o=orgs.find(x=>m.orgs.includes(x.organization_type));
   const row=mods.find(x=>x.module_code===m.code&&x.status!=='paused'&&x.status!=='suspended');
   if(o){
-    const v=o.verification_status;
-    return{on:true,name:o.public_name||o.legal_name||m.def,cls:v==='pending'?'warn':v==='rejected'?'bad':'ok',label:v==='pending'?'En validation':v==='rejected'?'Refusée':'Active',ico:v==='pending'?'⏳':v==='rejected'?'!':'✔',manage:true};
+    /* Activation immédiate : aucune validation par un tiers. Seule une suspension décidée par la plateforme est signalée. */
+    const sus=o.verification_status==='suspended';
+    return{on:true,name:o.public_name||o.legal_name||m.def,cls:sus?'bad':'ok',label:sus?'Suspendue':'Active',ico:sus?'!':'✔',manage:true};
   }
   if(row)return{on:true,name:m.def,cls:'warn',label:'Informations à compléter',ico:'!',manage:false};
   return{on:false};

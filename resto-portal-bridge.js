@@ -18,6 +18,21 @@ function portal(){try{for(var i=0;i<localStorage.length;i++){var k=localStorage.
    if(s&&s.access_token&&s.user&&s.user.id)return s}}}catch(e){}return null}
 var s=portal();if(!s)return;
 var pu=s.user,md=pu.user_metadata||{},type=md.account_type;
+/* Compte unique (universal) : si l'utilisateur a activé le pôle Restauration ou Hôtel, on retrouve son établissement côté serveur
+   et on le traite comme un compte restaurant / hôtel. Sans cela, le Service ouvrait un écran de connexion (session perdue). */
+if(type==='universal'){
+  var mods=md.enabled_modules||[],om=md.org_map||{},want=md.portal_type||(om.restaurant?'restaurant':om.hotel?'hotel':'');
+  if(want||mods.indexOf('restaurant')>-1||mods.indexOf('restauration')>-1||mods.indexOf('hotel')>-1||md.organization_id){
+    try{var C0=window.ZUMAYA_CONFIG,x0=new XMLHttpRequest();
+      x0.open('GET',C0.SUPABASE_URL+'/rest/v1/rg_organizations?owner_id=eq.'+encodeURIComponent(pu.id)+'&organization_type=in.(restaurant,hotel)&select=id,organization_type,public_name,legal_name,city,address,contact_phone,latitude,longitude',false);
+      x0.setRequestHeader('apikey',C0.SUPABASE_ANON_KEY);x0.setRequestHeader('Authorization','Bearer '+s.access_token);x0.send();
+      if(x0.status===200){var os=JSON.parse(x0.responseText)||[];
+        var og=os.filter(function(o){return o.organization_type===want})[0]||os.filter(function(o){return o.id===md.organization_id})[0]||os[0];
+        if(og){type=og.organization_type;
+          md=Object.assign({},md,{organization_id:og.id,organization_name:og.public_name||og.legal_name||md.organization_name,org_city:og.city||md.org_city,org_address:og.address||md.org_address,org_phone:og.contact_phone||md.org_phone,org_lat:og.latitude!=null?og.latitude:md.org_lat,org_lng:og.longitude!=null?og.longitude:md.org_lng})}}
+    }catch(e){}
+  }
+}
 var ROLE={restaurant:'restaurant',hotel:'restaurant',staff:'restaurant',customer:'client',delivery:'driver'}[type];
 if(!ROLE)return;
 var isStaff=type==='staff';

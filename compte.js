@@ -190,7 +190,7 @@ async function submitPartner(e){
   try{
     const {data:org,error}=await sb.from('rg_organizations').insert({
       legal_name:fd.organization_name.trim(),public_name:fd.organization_name.trim(),country_code:fd.country_code||'CI',
-      organization_type:currentCat.id,verification_status:'pending',owner_id:currentUser.id,
+      organization_type:currentCat.id,verification_status:'verified',owner_id:currentUser.id,
       city:fd.city.trim(),address:fd.address||null,latitude:fd.latitude?Number(fd.latitude):null,longitude:fd.longitude?Number(fd.longitude):null,
       contact_phone:fd.contact_phone.trim(),details
     }).select('id').single();
@@ -198,7 +198,12 @@ async function submitPartner(e){
     const oldMeta=currentUser.user_metadata||{};
     const modules=[...new Set([...(oldMeta.enabled_modules||[]),currentCat.id])];
     const orgs=[...new Set([...(oldMeta.organization_ids||[]),org.id])];
-    const {error:metaError}=await sb.auth.updateUser({data:{account_type:'universal',account_model:'multi_module',enabled_modules:modules,organization_ids:orgs,organization_id:org.id,organization_name:fd.organization_name.trim(),org_city:fd.city.trim(),org_address:fd.address||'',org_phone:fd.contact_phone.trim(),org_lat:fd.latitude?Number(fd.latitude):null,org_lng:fd.longitude?Number(fd.longitude):null}});
+    const isRH=currentCat.id==='restaurant'||currentCat.id==='hotel';
+    const orgMap={...(oldMeta.org_map||{}),[currentCat.id]:org.id};
+    /* L'établissement restaurant / hôtel pilote la liaison avec le Service de Restauration : une autre activité ne l'écrase pas. */
+    const meta={account_type:'universal',account_model:'multi_module',enabled_modules:modules,organization_ids:orgs,org_map:orgMap};
+    if(isRH||!oldMeta.organization_id){Object.assign(meta,{organization_id:org.id,organization_name:fd.organization_name.trim(),org_city:fd.city.trim(),org_address:fd.address||'',org_phone:fd.contact_phone.trim(),org_lat:fd.latitude?Number(fd.latitude):null,org_lng:fd.longitude?Number(fd.longitude):null});if(isRH)meta.portal_type=currentCat.id}
+    const {error:metaError}=await sb.auth.updateUser({data:meta});
     if(metaError)throw metaError;
     if(['restaurant','agro','agro_trader'].includes(currentCat.id)){
       const agroRole=currentCat.id==='restaurant'?'restaurant':currentCat.id==='agro'?'agro_producer':'agro_trader';
