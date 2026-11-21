@@ -94,6 +94,7 @@ window.ZDASH={
     mount();say('');
     document.body.classList.add('dash-on');$('#dash').hidden=false;$('#account').hidden=true;
     view('overview');load();
+    if(window.RGWalletLoad)window.RGWalletLoad();
   },
   hide(){document.body.classList.remove('dash-on');const d=$('#dash');if(d)d.hidden=true}
 };

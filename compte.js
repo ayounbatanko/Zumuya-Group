@@ -190,7 +190,7 @@ async function submitPartner(e){
   try{
     const {data:org,error}=await sb.from('rg_organizations').insert({
       legal_name:fd.organization_name.trim(),public_name:fd.organization_name.trim(),country_code:fd.country_code||'CI',
-      organization_type:currentCat.id,verification_status:'verified',owner_id:currentUser.id,
+      organization_type:currentCat.id,owner_id:currentUser.id,
       city:fd.city.trim(),address:fd.address||null,latitude:fd.latitude?Number(fd.latitude):null,longitude:fd.longitude?Number(fd.longitude):null,
       contact_phone:fd.contact_phone.trim(),details
     }).select('id').single();
@@ -218,7 +218,7 @@ async function submitPartner(e){
     if(currentCat.id==='restaurant'||currentCat.id==='hotel')sessionStorage.setItem('zmy_portal','1');
     $('#roleLead').hidden=false;$('#roleLead').textContent='Activité activée. Votre compte conserve l’accès à tous les pôles ZUMAYA.';
   }catch(err){
-    pShow(/duplicate|unique/i.test(err.message||'')?'Vous avez déjà une demande active dans cette catégorie.':'Votre demande n’a pas pu être envoyée. Réessayez dans un instant.');
+    const m=err.message||'';pShow(/duplicate|unique/i.test(m)?'Vous avez déjà un compte actif dans cette catégorie.':/pays n.est pas/i.test(m)?'Ce pays n’est pas encore disponible.':/Nom invalide/i.test(m)?'Le nom doit contenir entre 2 et 120 caractères.':/Type de pôle/i.test(m)?'Catégorie invalide.':'Votre demande n’a pas pu être envoyée. Réessayez dans un instant.');
   }finally{btn.disabled=false}
 }
 $('#startPartner').addEventListener('click',()=>{renderCats();$('#partnerFlow').hidden=false;$('#startPartner').hidden=true;$('#stepCat').hidden=false;$('#partnerForm').hidden=true});

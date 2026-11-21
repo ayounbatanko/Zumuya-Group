@@ -6,8 +6,8 @@
 <meta name="theme-color" content="#102b45">
 <title>Mon compte — ZUMUYA GROUP</title>
 <link rel="icon" href="logo.svg" type="image/svg+xml">
-<link rel="stylesheet" href="compte.css?v=9">
-<link rel="stylesheet" href="dashboard.css?v=1">
+<link rel="stylesheet" href="compte.css?v=10">
+<link rel="stylesheet" href="dashboard.css?v=2">
 <style>
 </style>
 </head>
@@ -150,6 +150,20 @@
     <div id="vOverview">
       <h2 class="dh2">🚀 Explorez et activez vos activités</h2>
       <div class="dgrid" id="dCards"></div>
+      <h2 class="dh2">👛 Mon portefeuille unique</h2>
+      <p class="dwalletnote">Un seul portefeuille pour toutes vos activités : ventes, commissions et retraits arrivent ici.</p>
+      <div class="dwallet"><section class="panel wallet-panel" id="walletPanel">
+  <div class="wallet-head"><div><span class="wallet-kicker">PORTEFEUILLE ZUMUYA</span><h2>Mon portefeuille</h2><p class="muted">Solde, encaissements de ventes et retraits sécurisés.</p></div><strong id="walletBalance">Chargement…</strong></div>
+  <div class="wallet-actions"><button type="button" class="btn" id="walletDeposit">＋ Déposer de l’argent</button><button type="button" class="btn secondary" id="walletWithdrawToggle">↗ Demander un retrait</button></div>
+  <p class="muted" id="walletNotice">Les dépôts seront activés après raccordement du prestataire de paiement et de son webhook sécurisé.</p>
+  <form id="walletWithdrawForm" class="grid" hidden>
+    <label>Montant à retirer (FCFA)<input name="amount" type="number" min="1" step="1" required></label>
+    <label>Moyen de paiement<select name="method" required><option value="">Choisir</option><option value="mobile_money">Mobile Money</option><option value="bank">Virement bancaire</option></select></label>
+    <label>Numéro / référence du bénéficiaire<input name="destination" required placeholder="Numéro Mobile Money ou RIB"></label>
+    <div><button class="btn" type="submit">Envoyer la demande</button></div>
+  </form>
+  <h3>Historique des opérations</h3><div id="walletLedger" class="wallet-ledger"><p class="muted">Chargement…</p></div>
+</section></div>
       <p id="dashMsg" role="status" aria-live="polite"></p>
       <div class="dbottom">
         <div><h2 class="dh2">💼 Mes activités configurées</h2><div class="dlist" id="dList"></div></div>
@@ -166,7 +180,8 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 <script src="module-manager.js?v=1"></script>
-<script src="dashboard.js?v=2"></script>
+<script src="wallet.js?v=3"></script>
+<script src="dashboard.js?v=3"></script>
 <script src="compte.js?v=14"></script>
 </body>
 </html>
