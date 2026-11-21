@@ -247,3 +247,8 @@ footer>div{gap:13px}
 .tnode .live{width:6px;height:6px;border-radius:50%;background:#34e39a;box-shadow:0 0 8px #34e39a;animation:blink 1.6s steps(2) infinite;margin-left:2px}
 @media(max-width:650px){.hero-visual.tech{height:380px}.tnode{gap:5px;padding:7px 8px;font-size:10px}.tnode em{font-size:8px;padding:1px 4px}.tnode .ti{font-size:12px}.tread.r2{font-size:8px;right:2%}}
 @media(prefers-reduced-motion:reduce){.tech-lines circle.halo,.tnode .live{animation:none}}
+
+/* Catalogue d'accueil : onglet « Tout » et Marketplace */
+.pc-cats{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;flex-wrap:nowrap}.pc-cats button{flex:0 0 auto}
+.pc-sec{margin:18px 0 8px;font-size:18px}
+.market-buy{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:8px;flex-wrap:wrap}

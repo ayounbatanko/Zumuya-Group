@@ -8,3 +8,4 @@ Mise à jour du 21/11/2026
 Publiez tous les fichiers sur GitHub Pages (le cache de l'appli passe en v17).
 - Marketplace : fichiers marketplace.html, market.js et market.css à la RACINE du site (plus de dossier modules/).
 - Nouveaux comptes à l'inscription : « Vendeur Marketplace » et « Service de livraison » (fiche partenaire incluse).
+- Accueil : catalogue unifié (Tout / Restaurants / Hôtels / Produits agricoles / Marketplace). Correction du bug « reset » à la création de boutique.
