@@ -1,0 +1,5 @@
+ZUMUYA GROUP — Correctif marketplace
+1) Déployer les fichiers du ZIP.
+2) Supabase SQL Editor : exécuter 12_marketplace_media.sql.
+3) Boutique créée directement en statut verified et is_active=true à la validation du formulaire.
+4) Bucket commerce-media recréé/configuré par le script SQL.
