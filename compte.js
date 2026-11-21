@@ -1,6 +1,6 @@
 (()=>{'use strict';
 const $=s=>document.querySelector(s);
-let sb=null,mode='in',selectedCategory=null;
+let sb=null,mode='in';
 const ROLE_TYPES=['restaurant','hotel','agro_producer','agro_trader','marketplace','delivery_service','commerce','business'];
 const roleToPartner={restaurant:'restaurant',hotel:'hotel',delivery:'delivery',agro_producer:'agro',agro_trader:'agro_trader',marketplace:'marketplace',delivery:'delivery_service',commerce:'commerce',business:'business'};
 /* L'identifiant de connexion du portail reste l'adresse e-mail ; le rôle est détecté depuis le profil après connexion. */
@@ -15,12 +15,10 @@ function setMode(m,init){
   $('#tabIn').classList.toggle('active',!up);$('#tabUp').classList.toggle('active',up);
   $('#tabIn').setAttribute('aria-selected',String(!up));$('#tabUp').setAttribute('aria-selected',String(up));
   $('#nameWrap').hidden=!up;$('#confirmWrap').hidden=!up;$('#pwHelp').hidden=!up;
-  const picker=$('#categoryPicker'),form=$('#authForm');
-  if(up){selectedCategory=null;picker.hidden=false;form.hidden=true;$('#categoryBack').hidden=true;}
-  else{picker.hidden=true;form.hidden=false;}
+  const form=$('#authForm');form.hidden=false;
   const categoryWrap=$('#categoryWrap');
   if(categoryWrap)categoryWrap.hidden=true;
-  $('#accountCategory').disabled=!up;$('#accountCategory').required=up;updateIdentityFields();
+  updateIdentityFields();
   $('#displayName').required=up;$('#passwordConfirm').required=up;
   $('#password').autocomplete=up?'new-password':'current-password';
   $('#submitBtn').textContent=up?'Créer mon compte':'Se connecter';
@@ -40,21 +38,22 @@ function updateMatch(){
 async function showAccount(user){
   const type=user.user_metadata?.account_type;
   const routes={customer:'client-espace.html',restaurant:'resto-restaurant.html',hotel:'resto-restaurant.html',staff:'resto-restaurant.html',delivery:'resto-driver.html',agro_producer:'agro.html',agro_trader:'agro.html',marketplace:'marketplace.html',delivery_service:'livraison.html'};
-  const managed=type==='delivery'||type==='staff';   /* comptes gérés : jamais de fiche partenaire */
+  const managed=type==='delivery'||type==='staff';
+  const universal=type==='universal'||!type;   /* comptes gérés : jamais de fiche partenaire */
   const stay=/parametres|stay/.test(location.hash);
   /* Retour au catalogue : un visiteur parti se connecter depuis le panier y revient (clients uniquement, valable 30 min). */
   try{const b=(localStorage.getItem('zg_back')||'').split('|');localStorage.removeItem('zg_back');
     if(!stay&&type==='customer'&&b[0]&&Date.now()-(+b[1]||0)<18e5&&/^[a-z0-9._-]+\.html(#[\w-]*)?$/i.test(b[0])){location.replace(b[0]);return}}catch(e){}
   let owner=false;try{const {data}=await sb.rpc('rg_is_platform_owner');owner=data===true}catch(e){}
   if(owner&&!stay&&!sessionStorage.getItem('zumuya_redirected')){sessionStorage.setItem('zumuya_redirected','1');location.replace('proprietaire.html');return}
-  if(!owner&&type&&routes[type]&&!stay&&!sessionStorage.getItem('zumuya_redirected')){sessionStorage.setItem('zumuya_redirected','1');if(type==='restaurant'||type==='hotel')sessionStorage.setItem('zmy_portal','1');location.replace(routes[type]);return}
+  if(!owner&&type&&type!=='universal'&&routes[type]&&!stay&&!sessionStorage.getItem('zumuya_redirected')){sessionStorage.setItem('zumuya_redirected','1');if(type==='restaurant'||type==='hotel')sessionStorage.setItem('zmy_portal','1');location.replace(routes[type]);return}
   sessionStorage.removeItem('zumuya_redirected');
   $('#auth').hidden=true;$('#account').hidden=false;$('#recovery').hidden=true;
   $('#accPhone').textContent=user.email||user.phone||'—';
   $('#accName').textContent=(user.user_metadata&&user.user_metadata.name)||'—';
   const rt=routes[type],ready=rt&&(type==='customer'||user.user_metadata?.organization_id);
   const sp=$('#mySpace');sp.hidden=owner||!ready;if(ready)sp.href=rt;
-  $('#clientOrder').hidden=owner||type!=='customer';
+  $('#clientOrder').hidden=owner||(!universal&&type!=='customer');
   $('#ownerLink').hidden=!owner;$('#ownerResto').hidden=!owner;$('#ownerNotice').hidden=!owner;
   const lead=$('#roleLead');
   if(owner){lead.hidden=true}
@@ -62,19 +61,18 @@ async function showAccount(user){
   else if(managed&&!ready){lead.hidden=false;lead.textContent='Ce compte est géré par un restaurant partenaire, mais il n’est rattaché à aucun établissement. Contactez votre responsable.'}
   else if(type&&!ready){lead.hidden=false;lead.textContent='Compte '+(LABEL[type]||'professionnel')+' : complétez la fiche de votre activité ci-dessous (« Devenir partenaire ») pour ouvrir votre espace.'}
   else{lead.hidden=true}
-  $('#partnerPanel').hidden=owner||ready||managed;
-  if(!owner&&!ready&&!managed) initPartner(user);
-  if(ready && type!=='customer') { const lead=$('#roleLead'); lead.hidden=false; lead.textContent='Votre espace professionnel est activé. Accédez directement aux outils réservés à votre catégorie.'; }
+  $('#partnerPanel').hidden=owner||managed;
+  if(!owner&&!managed) initPartner(user);
+  if(universal){lead.hidden=false;lead.textContent='Votre compte unique est actif. Activez et gérez plusieurs activités depuis le même compte.';$('#moduleManager').hidden=false;$('#partnerPanel').hidden=true;if(window.ZUMAYA_MODULE_MANAGER)window.ZUMAYA_MODULE_MANAGER.init(sb,user);}else if($('#moduleManager')){$('#moduleManager').hidden=true;}
 }
 function showAuth(){$('#account').hidden=true;$('#recovery').hidden=true;$('#auth').hidden=false}
 
 async function submit(e){
   e.preventDefault();showMsg('');
   const password=$('#password').value,name=$('#displayName').value.trim(),confirm=$('#passwordConfirm').value;
-  const email=$('#email').value.trim().toLowerCase(),accountType=$('#accountCategory').value;
+  const email=$('#email').value.trim().toLowerCase();
   if(!EMAIL_RE.test(email))return showMsg('Saisissez une adresse e-mail valide.');
   if(mode==='up'){
-    if(!selectedCategory)return showMsg('Choisissez d’abord une catégorie de compte.');
     if(!name)return showMsg('Saisissez votre nom complet.');
     if(password.length<MIN)return showMsg('Le mot de passe doit contenir au moins '+MIN+' caractères.');
     if(password!==confirm){updateMatch();return showMsg('Les deux saisies du mot de passe ne sont pas identiques.')}
@@ -83,7 +81,7 @@ async function submit(e){
   const btn=$('#submitBtn');btn.disabled=true;
   try{
     if(mode==='up'){
-      const {data,error}=await sb.auth.signUp({email,password,options:{data:{name,account_type:accountType,requested_account_type:accountType},emailRedirectTo:location.origin+location.pathname}});
+      const {data,error}=await sb.auth.signUp({email,password,options:{data:{name,account_type:'universal',enabled_modules:[],account_model:'multi_module'},emailRedirectTo:location.origin+location.pathname}});
       if(error)throw error;
       if(data.user&&Array.isArray(data.user.identities)&&data.user.identities.length===0)throw new Error('Un compte existe déjà avec cette adresse e-mail. Connectez-vous.');
       $('#password').value='';$('#passwordConfirm').value='';updateMatch();
@@ -190,8 +188,6 @@ async function submitPartner(e){
   currentCat.fields.forEach(f=>{if(!COLS.includes(f.name)){const v=(fd[f.name]||'').trim();if(v)details[f.name]=f.type==='number'?Number(v):v}});
   const btn=$('#pSubmit');btn.disabled=true;
   try{
-    const roleMap={restaurant:'restaurant',hotel:'hotel',agro:'agro_producer',agro_trader:'agro_trader',commerce:'commerce',business:'business'};
-    const accountType=roleMap[currentCat.id]||'business';
     const {data:org,error}=await sb.from('rg_organizations').insert({
       legal_name:fd.organization_name.trim(),public_name:fd.organization_name.trim(),country_code:fd.country_code||'CI',
       organization_type:currentCat.id,verification_status:'pending',owner_id:currentUser.id,
@@ -199,7 +195,10 @@ async function submitPartner(e){
       contact_phone:fd.contact_phone.trim(),details
     }).select('id').single();
     if(error)throw error;
-    const {error:metaError}=await sb.auth.updateUser({data:{account_type:accountType,organization_id:org.id,organization_name:fd.organization_name.trim(),org_city:fd.city.trim(),org_address:fd.address||'',org_phone:fd.contact_phone.trim(),org_lat:fd.latitude?Number(fd.latitude):null,org_lng:fd.longitude?Number(fd.longitude):null}});
+    const oldMeta=currentUser.user_metadata||{};
+    const modules=[...new Set([...(oldMeta.enabled_modules||[]),currentCat.id])];
+    const orgs=[...new Set([...(oldMeta.organization_ids||[]),org.id])];
+    const {error:metaError}=await sb.auth.updateUser({data:{account_type:'universal',account_model:'multi_module',enabled_modules:modules,organization_ids:orgs,organization_id:org.id,organization_name:fd.organization_name.trim(),org_city:fd.city.trim(),org_address:fd.address||'',org_phone:fd.contact_phone.trim(),org_lat:fd.latitude?Number(fd.latitude):null,org_lng:fd.longitude?Number(fd.longitude):null}});
     if(metaError)throw metaError;
     if(['restaurant','agro','agro_trader'].includes(currentCat.id)){
       const agroRole=currentCat.id==='restaurant'?'restaurant':currentCat.id==='agro'?'agro_producer':'agro_trader';
@@ -207,10 +206,11 @@ async function submitPartner(e){
       if(agroError)console.warn('Profil agricole non enregistré (table rg_agro_profiles absente ?) :',agroError.message);   /* non bloquant : l'espace restaurant / hôtel / livreur n'en dépend pas */
     }
     closeFlow();
-    $('#appList').innerHTML='<p class="empty">Compte professionnel activé. Votre espace est disponible.</p>';
-    const destinations={restaurant:'resto-restaurant.html',hotel:'resto-restaurant.html',agro:'agro.html',agro_trader:'agro.html'};
+    $('#appList').innerHTML='<p class="empty">Activité configurée avec succès. Vous pouvez ajouter une autre activité ou explorer les autres pôles.</p>';
+    currentUser={...currentUser,user_metadata:{...(currentUser.user_metadata||{}),account_type:'universal',enabled_modules:[...new Set([...(currentUser.user_metadata?.enabled_modules||[]),currentCat.id])],organization_ids:[...new Set([...(currentUser.user_metadata?.organization_ids||[]),org.id])],organization_id:org.id}};
+    await initPartner(currentUser);
     if(currentCat.id==='restaurant'||currentCat.id==='hotel')sessionStorage.setItem('zmy_portal','1');
-    if(destinations[currentCat.id])location.href=destinations[currentCat.id];
+    $('#roleLead').hidden=false;$('#roleLead').textContent='Activité activée. Votre compte conserve l’accès à tous les pôles ZUMAYA.';
   }catch(err){
     pShow(/duplicate|unique/i.test(err.message||'')?'Vous avez déjà une demande active dans cette catégorie.':'Votre demande n’a pas pu être envoyée. Réessayez dans un instant.');
   }finally{btn.disabled=false}
@@ -269,24 +269,11 @@ $('#pwForm').addEventListener('submit',async e=>{
   finally{$('#pwBtn').disabled=false}
 });
 
-document.addEventListener('click',e=>{
-  const cat=e.target.closest('[data-account-type]');
-  if(cat){
-    selectedCategory=cat.dataset.accountType;$('#accountCategory').value=selectedCategory;
-    $('#categoryPicker').hidden=true;$('#authForm').hidden=false;$('#categoryBack').hidden=false;
-    $('#authTitle').textContent='Créer votre compte — '+(LABEL[selectedCategory]||'Compte professionnel');
-    $('#authLead').textContent='Renseignez vos informations pour créer votre compte.';
-    $('#displayName').focus();return;
-  }
-  if(e.target.closest('#categoryBack')){$('#categoryPicker').hidden=false;$('#authForm').hidden=true;$('#categoryBack').hidden=true;return}
-  const t=e.target.closest('[data-mode]');if(t){setMode(t.dataset.mode);return}
-  const eye=e.target.closest('[data-eye]');
-  if(eye){const i=document.getElementById(eye.dataset.eye),show=i.type==='password';i.type=show?'text':'password';eye.textContent=show?'Masquer':'Afficher'}
-});
 $('#authForm').addEventListener('submit',submit);
 $('#password').addEventListener('input',updateMatch);
 $('#passwordConfirm').addEventListener('input',updateMatch);
 $('#logout').addEventListener('click',async()=>{if(sb)await sb.auth.signOut();showAuth();setMode('in')});
+$('#moduleRefresh')?.addEventListener('click',()=>window.ZUMAYA_MODULE_MANAGER?.refresh());
 
 (async()=>{
   setMode(new URLSearchParams(location.search).get('mode')==='signup'?'up':'in',true);updateIdentityFields();

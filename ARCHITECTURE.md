@@ -2,9 +2,9 @@
 
 ## Principes
 
-1. **Un compte = une catégorie = un espace**
+1. **Un compte unique = plusieurs pôles configurables**
 2. Authentification centralisée via Supabase Auth
-3. Métadonnées utilisateur : `account_type`, `organization_id`, `name`…
+3. Métadonnées utilisateur : `account_type=universal`, `enabled_modules[]`, `organization_ids[]`, `organization_id` (compatibilité), `name`…
 4. Protection d’interface via `zguard.js` (la vraie sécurité = RLS Supabase)
 5. Un seul projet Supabase pour portail + services métier
 

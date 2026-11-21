@@ -23,29 +23,25 @@ async function loadBanner(){
 }
 async function loadProducts(){
   const term=$('#search').value.trim();
-  let q=sb.from('commerce_products').select('id,store_id,title,description,price,currency,stock_quantity,image_url,media_urls,video_urls,market_type,category_id,created_at')
-    .eq('status','active').gt('stock_quantity',0).order('created_at',{ascending:false}).limit(100);
+  let q=sb.from('commerce_products').select('id,store_id,title,description,price,stock_quantity,image_url,media_urls,video_urls,market_type,commerce_stores!inner(store_name,city,phone,verification_status,is_active)').eq('status','active').eq('commerce_stores.verification_status','verified').eq('commerce_stores.is_active',true).gt('stock_quantity',0).order('created_at',{ascending:false}).limit(80);
   if(storeFilter)q=q.eq('store_id',storeFilter);
   if(term)q=q.ilike('title','%'+term.replace(/[%_,()]/g,'')+'%');
   if($('#category').value)q=q.eq('category_id',$('#category').value);
   if($('#market').value!=='all')q=q.in('market_type',[$('#market').value,'all']);
-  const [{data:products,error:productError},{data:stores,error:storeError},{data:categories,error:categoryError}]=await Promise.all([
-    q,
-    sb.from('commerce_stores').select('id,store_name,city,phone,verification_status,is_active').eq('verification_status','verified').eq('is_active',true),
-    sb.from('commerce_categories').select('id,name').eq('is_active',true)
-  ]);
-  if(productError)throw productError;if(storeError)throw storeError;
-  const storeMap=new Map((stores||[]).map(x=>[String(x.id),x]));
-  const categoryMap=new Map((categories||[]).map(x=>[String(x.id),x]));
-  items=(products||[]).filter(p=>storeMap.has(String(p.store_id))).map(p=>({...p,commerce_stores:storeMap.get(String(p.store_id)),commerce_categories:categoryMap.get(String(p.category_id))||null}));
+  const {data,error}=await q;if(error)throw error;items=data||[];
   const root=$('#products');root.innerHTML='';
   items.forEach(p=>{const card=document.createElement('article');card.className='product';card.dataset.id=p.id;
     const img=https(p.image_url)||https((p.media_urls||[])[0]);
-    card.innerHTML=`<div class="ph">${img?`<img src="${esc(img)}" alt="${esc(p.title)}" loading="lazy" onerror="this.style.display='none'">`:''}</div><div class="body"><span class="kicker">${esc(p.commerce_categories?.name||'MARKETPLACE')}</span><h3>${esc(p.title)}</h3><p>${esc(p.description||'')}</p><div class="meta">🏪 ${esc(p.commerce_stores.store_name)}${p.commerce_stores.city?' · '+esc(p.commerce_stores.city):''}</div><strong>${money(p.price)}</strong><button type="button" class="btn" data-open="${esc(p.id)}">Voir le produit</button></div>`;
-    card.addEventListener('click',e=>{if(e.target.closest('[data-open]'))openProduct(p.id)});root.append(card);
-  });
-  if(!items.length)root.innerHTML='<p class="empty">Aucun produit public disponible pour le moment.</p>';
+    card.innerHTML=`<div class="ph">${img?`<img src="${esc(img)}" alt="${esc(p.title)}" loading="lazy" onerror="this.style.display='none'">`:''}</div><div class="body"><h3>${esc(p.title)}</h3><div class="price">${money(p.price)}</div><div class="meta">${esc(p.commerce_stores.store_name)} · ${esc(p.commerce_stores.city||'')}</div><div class="meta">Stock : ${p.stock_quantity}${(p.video_urls||[]).length?' · 🎥':''}</div><button type="button" data-buy="${p.id}" data-store="${p.store_id}">Commander</button></div>`;
+    root.append(card)});
+  if(!items.length)root.innerHTML='<p class="muted">Aucun produit disponible pour cette recherche.</p>';
 }
+$('#products').addEventListener('click',e=>{
+  const b=e.target.closest('[data-buy]');
+  if(b){e.stopPropagation();return buy(b.dataset.store,b.dataset.buy)}
+  const c=e.target.closest('.product');if(c)openProduct(c.dataset.id);
+});
+function sessionKey(){try{let k=sessionStorage.getItem('zm_sk');if(!k){k=(crypto.randomUUID?crypto.randomUUID():Math.random().toString(36).slice(2))+'';sessionStorage.setItem('zm_sk',k)}return k}catch(_){return null}}
 function openProduct(id){
   const p=items.find(x=>x.id===id);if(!p)return;
   const imgs=((p.media_urls||[]).length?p.media_urls:[p.image_url]).map(https).filter(Boolean),vids=(p.video_urls||[]).map(https).filter(Boolean);

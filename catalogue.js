@@ -52,33 +52,11 @@ function agroHTML(hideEmpty){
 function marketHTML(hideEmpty){
  const ql=q.toLowerCase(),items=mktProducts.filter(p=>!ql||((p.title||'')+' '+(p.description||'')+' '+(p.commerce_stores?.store_name||'')+' '+(p.commerce_categories?.name||'')).toLowerCase().includes(ql));
  if(!items.length)return hideEmpty?'':'<section class="market-section"><h3>🛍️ Marketplace</h3><p class="pc-mut">Aucun produit Marketplace disponible pour le moment.</p></section>';
- return '<section class="market-section"><div class="market-heading"><div><span class="market-kicker">PÔLE MARKETPLACE</span><h3>Produits des boutiques partenaires</h3><p>Boutiques, commerçants et grossistes disponibles sur ZUMAYA.</p></div><span class="market-count">'+items.length+' produits</span></div><div class="market-grid">'+items.map(p=>'<article class="market-product">'+(p.image_url?'<img loading="lazy" src="'+esc(p.image_url)+'" alt="">':'<div class="market-photo">🛍️</div>')+'<div class="market-product-body"><span class="market-kicker">'+esc(p.commerce_categories?.name||'MARKETPLACE')+'</span><h4>'+esc(p.title)+'</h4><p>'+esc(p.description||'')+'</p><div class="market-owner">🏪 '+esc(p.commerce_stores?.store_name||'Boutique')+(p.commerce_stores?.city?' · '+esc(p.commerce_stores.city):'')+'</div><div class="market-buy"><b>'+ZS.money(p.price,p.currency||'XOF')+'</b><a class="btn btn-gold" href="marketplace.html">Voir / commander →</a></div></div></article>').join('')+'</div></section>'}
+ return '<section class="market-section"><div class="market-heading"><div><span class="market-kicker">PÔLE MARKETPLACE</span><h3>Produits des boutiques partenaires</h3><p>Boutiques, commerçants et grossistes vérifiés.</p></div><span class="market-count">'+items.length+' produits</span></div><div class="market-grid">'+items.map(p=>'<article class="market-product">'+(p.image_url?'<img loading="lazy" src="'+esc(p.image_url)+'" alt="">':'<div class="market-photo">🛍️</div>')+'<div class="market-product-body"><span class="market-kicker">'+esc(p.commerce_categories?.name||'MARKETPLACE')+'</span><h4>'+esc(p.title)+'</h4><p>'+esc(p.description||'')+'</p><div class="market-owner">🏪 '+esc(p.commerce_stores?.store_name||'Boutique')+(p.commerce_stores?.city?' · '+esc(p.commerce_stores.city):'')+'</div><div class="market-buy"><b>'+ZS.money(p.price,p.currency||'XOF')+'</b><a class="btn btn-gold" href="marketplace.html">Voir / commander →</a></div></div></article>').join('')+'</div></section>'}
 async function loadMarket(){
  const c=window.ZUMAYA_CONFIG||{};if(!c.SUPABASE_URL||!c.SUPABASE_ANON_KEY)return;
- const headers={apikey:c.SUPABASE_ANON_KEY,Authorization:'Bearer '+c.SUPABASE_ANON_KEY};
- try{
-  // Deux lectures simples évitent qu'une relation PostgREST imbriquée mal détectée
-  // fasse disparaître tout le catalogue sans afficher d'erreur.
-  const base=c.SUPABASE_URL.replace(/\/$/,'')+'/rest/v1/';
-  const [pr,sr,cr]=await Promise.all([
-   fetch(base+'commerce_products?select=id,title,description,price,currency,image_url,media_urls,stock_quantity,store_id,category_id,status,created_at&status=eq.active&stock_quantity=gt.0&order=created_at.desc&limit=100',{headers}),
-   fetch(base+'commerce_stores?select=id,store_name,city,is_active,verification_status&is_active=eq.true&verification_status=in.(pending,verified)',{headers}),
-   fetch(base+'commerce_categories?select=id,name&is_active=eq.true',{headers})
-  ]);
-  const responseError=async r=>{let body='';try{body=await r.text()}catch(_){};return new Error('Supabase ('+r.status+') : '+(body||r.statusText||'lecture refusée'))};
-  if(!pr.ok)throw await responseError(pr);
-  if(!sr.ok)throw await responseError(sr);
-  // Les catégories sont facultatives pour afficher les produits.
-  const [products,stores,categories]=await Promise.all([pr.json(),sr.json(),cr.ok?cr.json():Promise.resolve([])]);
-  const storeMap=new Map((stores||[]).map(x=>[String(x.id),x]));
-  const catMap=new Map((categories||[]).map(x=>[String(x.id),x]));
-  mktProducts=(products||[]).filter(p=>storeMap.has(String(p.store_id))).map(p=>({...p,commerce_stores:storeMap.get(String(p.store_id)),commerce_categories:catMap.get(String(p.category_id))||null}));
-  // Ne pas écraser une erreur éventuelle du catalogue restaurant/agricole.
-  if(err.startsWith('Marketplace :'))err='';
-  draw();
- }catch(e){
-  mktProducts=[];err='Marketplace : '+(e.message||'chargement impossible. Vérifiez les droits de lecture publics Supabase.');draw();
- }
+ try{const r=await fetch(c.SUPABASE_URL+'/rest/v1/commerce_products?select=id,title,description,price,currency,image_url,stock_quantity,store_id,commerce_stores(store_name,city),commerce_categories(name)&status=eq.active&stock_quantity=gt.0&order=created_at.desc&limit=60',{headers:{apikey:c.SUPABASE_ANON_KEY,Authorization:'Bearer '+c.SUPABASE_ANON_KEY}});
+  if(!r.ok)return;mktProducts=await r.json();draw()}catch(_){}
 }
 async function loadAgro(){
  const c=window.ZUMAYA_CONFIG||{};if(!c.SUPABASE_URL||!c.SUPABASE_ANON_KEY)return;

@@ -1,0 +1,11 @@
+ZUMAYA GROUP — REFONTE DU COMPTE UNIQUE
+
+- Suppression du choix de catégorie lors de l’inscription.
+- Un compte universel est créé avec account_type=universal.
+- Après connexion, l’utilisateur peut explorer les pôles et configurer plusieurs activités depuis « Devenir partenaire ».
+- Les fiches de chaque activité conservent les formulaires, champs obligatoires, GPS et règles spécifiques existantes.
+- L’activation d’une activité n’écrase plus le type de compte universel et ne redirige plus automatiquement vers un espace unique.
+- Les comptes historiques de livreurs/employés et l’espace propriétaire gardent leurs contrôles existants.
+- Le garde-fou d’interface autorise le compte universel à ouvrir les modules privés ; les politiques RLS Supabase restent indispensables pour les données et opérations sensibles.
+
+IMPORTANT : ce correctif d’interface ne remplace pas les politiques RLS. Vérifier que chaque table métier contrôle bien auth.uid(), owner_id, organization_id et les permissions de l’équipe.

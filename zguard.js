@@ -19,6 +19,7 @@ function isOwner(){
    .then(r=>r.ok?r.json():false).then(v=>{const o=v===true;try{sessionStorage.setItem('zg_owner_'+s.user.id,o?'1':'0')}catch(e){}return o}).catch(()=>false)}
 function decide(owner){
   if(ROLES.includes('any'))return;
+  if(md.account_type==='universal' && !ROLES.includes('owner'))return;
   if(owner){if(!ROLES.includes('owner'))go('proprietaire.html');return}
   if(ROLES.includes('owner')&&!ROLES.includes(type)){go(HOME[type]||'compte.html');return}
   if(!ROLES.includes(type)){go(HOME[type]||'compte.html');return}
@@ -30,6 +31,7 @@ if(ROLES.includes('owner')){/* page réservée au propriétaire : on attend la r
 }else{
   /* décision immédiate pour les catégories ; le propriétaire (rôle serveur) est vérifié ensuite */
   if(ROLES.includes('any'))return;
+  if(md.account_type==='universal' && !ROLES.includes('owner'))return;
   if(ROLES.includes(type)){decide(false);isOwner().then(o=>{if(o)go('proprietaire.html')})}
   else isOwner().then(decide);
 }

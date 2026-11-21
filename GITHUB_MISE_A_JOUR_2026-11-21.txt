@@ -1,0 +1,29 @@
+ZUMAYA GROUP — MISE A JOUR GITHUB
+Version : compte universel + catalogue des pôles
+
+CONTENU
+- config.js : connexion au bon projet Supabase azfunhfjmybekzakhtbu avec la clé publishable (publique).
+- module-manager.js : chargement du catalogue, activation et mise en pause des pôles.
+- compte.html / compte.js / compte.css : affichage du gestionnaire d'activités dans le compte universel.
+- Les autres fichiers du projet sont conservés.
+
+INSTALLATION SUR GITHUB (IMPORTANT)
+1. Ouvrir le dépôt GitHub du site ZUMAYA GROUP.
+2. Décompresser cette archive sur le téléphone.
+3. Envoyer les fichiers et dossiers contenus dans l'archive à la RACINE du dépôt, en conservant les noms et dossiers existants.
+4. Accepter le remplacement des fichiers portant le même nom.
+5. Attendre la publication GitHub Pages puis recharger le site. Sur Android, faire un rechargement forcé ou vider le cache si l'ancienne version reste affichée.
+
+SUPABASE
+Le frontend pointe vers : https://azfunhfjmybekzakhtbu.supabase.co
+Il utilise une clé publishable, conçue pour être utilisée dans un navigateur. Ne jamais placer une clé service_role ou une clé secrète dans GitHub.
+Le catalogue rg_module_catalog et la table rg_user_modules doivent déjà exister dans Supabase et leurs politiques RLS doivent être actives. Cette mise à jour GitHub ne réexécute pas les migrations SQL déjà appliquées.
+
+FONCTIONNEMENT
+- L'inscription reste sans choix de catégorie.
+- Un compte universel voit le catalogue des pôles dans « Mes activités ZUMAYA ».
+- Les pôles disponibles peuvent être activés puis mis en pause.
+- Les pôles annoncés « Bientôt disponible » restent non activables jusqu'à leur mise en service.
+
+NOTE
+Cette mise à jour connecte le gestionnaire de pôles aux tables du catalogue et des activations. Elle ne prétend pas que tous les services métiers (transport, paiement, voyage, etc.) sont déjà développés.
