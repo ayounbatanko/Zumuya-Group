@@ -1,7 +1,7 @@
 /* ZUMUYA GROUP — service worker commun au portail et au module Restauration.
    Cache versionné : toutes les pages et dépendances statiques du dépôt sont préchargées.
    Stratégie réseau d’abord, cache en secours hors ligne. */
-const CACHE='zumuya-v15-20261120';
+const CACHE='zumuya-v16-20261120';
 const FILES=[
   './agro-collaboration.js',
   './agro.css',
@@ -67,6 +67,8 @@ const FILES=[
   './sw.js',
   './zcart.css',
   './zcart.js',
+  './zteam.js',
+  './zsupply.js',
   './zguard.js',
   './zservice.css',
   './zsession.js'

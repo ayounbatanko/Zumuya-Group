@@ -18,9 +18,9 @@ function stamp(t,row){
   var uid=me();if(!uid||!row||!row.data)return {id:row.id,data:row.data,isNew:row.isNew};
   var o=JSON.parse(JSON.stringify(row.data)),U=cache.users||[],R=cache.rests||[];
   function ownerOf(restId){var r=R.find(function(y){return y.id==restId});if(r&&r.ownerAuthId)return r.ownerAuthId;
-    var u=U.find(function(y){return y.restId==restId&&y.role==='restaurant'&&y.portalId});return u?u.portalId:null}
+    var u=U.find(function(y){return y.restId==restId&&y.role==='restaurant'&&y.portalId&&!y.staff});return u?u.portalId:null}   /* jamais un employé : le propriétaire reste le compte principal */
   if(t==='users'){if(o.portalId&&!o.authId)o.authId=o.portalId}
-  else if(t==='rests'){if(!o.ownerAuthId){var ow=ownerOf(o.id);if(!ow){var cu=U.find(function(y){return y.portalId===uid&&y.restId==o.id});if(cu)ow=uid}if(ow)o.ownerAuthId=ow}}
+  else if(t==='rests'){if(!o.ownerAuthId){var ow=ownerOf(o.id);if(!ow){var cu=U.find(function(y){return y.portalId===uid&&y.restId==o.id&&!y.staff});if(cu)ow=uid}if(ow)o.ownerAuthId=ow}}
   else if(t==='orders'){
     var c=U.find(function(y){return y.id==o.clientId});if(!o.clientAuthId&&c&&c.portalId)o.clientAuthId=c.portalId;
     if(!o.restaurantOwnerAuthId){var ro=ownerOf(o.restId);if(ro)o.restaurantOwnerAuthId=ro}

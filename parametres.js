@@ -1,8 +1,8 @@
 (()=>{'use strict';
 const $=s=>document.querySelector(s);
 const MIN=8,EMAIL_RE=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const CAT={customer:'Client',restaurant:'Restaurant partenaire',hotel:'Hôtel / hébergement',delivery:'Livreur',agro_producer:'Producteur agricole',agro_trader:'Commerçant agricole'};
-const SPACE={customer:'client-espace.html',restaurant:'resto-restaurant.html',hotel:'resto-restaurant.html',delivery:'resto-driver.html',agro_producer:'agro.html',agro_trader:'agro.html'};
+const CAT={customer:'Client',restaurant:'Restaurant partenaire',hotel:'Hôtel / hébergement',delivery:'Livreur',staff:'Employé',agro_producer:'Producteur agricole',agro_trader:'Commerçant agricole'};
+const SPACE={customer:'client-espace.html',restaurant:'resto-restaurant.html',hotel:'resto-restaurant.html',staff:'resto-restaurant.html',delivery:'resto-driver.html',agro_producer:'agro.html',agro_trader:'agro.html'};
 let sb=null,user=null;
 function msg(id,t,type='error'){const m=$(id);m.textContent=t;m.className='msg '+type;m.hidden=!t}
 function tr(err){const m=(err&&err.message)||'';

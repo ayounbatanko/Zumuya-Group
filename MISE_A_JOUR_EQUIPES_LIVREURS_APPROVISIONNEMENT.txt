@@ -1,0 +1,24 @@
+ZUMUYA GROUP — MISE À JOUR : ÉQUIPES, LIVREURS RATTACHÉS, APPROVISIONNEMENT (v16)
+
+CE QUI CHANGE
+1. Livreurs : le formulaire « Livreur » est retiré du portail (compte.html / compte.js). Un livreur n'existe que s'il est créé par un
+   restaurant ou un hôtel (Espace restaurant > Gestion des livreurs). Il est rattaché à ce restaurant et ne reçoit que ses courses
+   (répartition serveur ET client corrigées : avant, une course pouvait être proposée à n'importe quel livreur du réseau).
+2. Mon équipe : le compte principal crée des comptes employés (Responsable, Caissier, Cuisinier, Stock, Comptable, Serveur, Personnalisé),
+   choisit les rubriques accessibles, suspend / réactive, réinitialise le mot de passe, supprime. Journal des actions (compte principal).
+3. Approvisionnement agricole : restaurants, hôtels et commerçants commandent aux producteurs / commerçants (catalogue -> panier par fournisseur
+   -> confirmation ou refus -> livraison -> réception confirmée). Table séparée des commandes clients. Prix et stocks vérifiés par la base.
+4. Espace producteur / commerçant : nouvel onglet « Commandes pro ».
+
+DÉPLOIEMENT (dans cet ordre)
+A. Supabase > SQL Editor : exécuter 11_equipes_livreurs_approvisionnement.sql (rejouable). Nécessite 00_RESET… et 07_… déjà installés.
+B. Déployer l'Edge Function :   supabase functions deploy team-admin      (fichier supabase/functions/team-admin/index.ts)
+   Sans elle, la création de comptes livreur / employé affichera « fonction non déployée ».
+C. Remplacer les fichiers du dépôt GitHub Pages par ceux de cette archive, recharger le site (cache versionné : zumuya-v16).
+
+À SAVOIR
+- Les anciens livreurs auto-inscrits n'ont plus accès tant que leur restaurant ne les a pas recréés (Mon équipe). Voir le bloc OPTIONNEL du SQL.
+- Sécurité : les NOUVEAUX modules (équipe, permissions, audit, approvisionnement) sont protégés par RLS / fonctions serveur.
+  Les anciennes tables du service (rg_users, rg_rests, rg_orders, rg_chats) ont, dans 00_RESET…, une règle « tout le monde peut tout lire/écrire ».
+  Les rubriques historiques (caisse, menu, commandes clients…) ne sont donc masquées aux employés que dans l'interface, pas verrouillées en base.
+  À traiter ensuite : restreindre ces 4 tables (lecture/écriture selon propriétaire, employé rattaché, livreur assigné, client).

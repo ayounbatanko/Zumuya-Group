@@ -7,7 +7,7 @@ function rpc(fn,args){return fetch(window.RGX_SUPABASE_URL+'/rest/v1/rpc/'+fn,{m
 /* détection du mode serveur */
 rpc('rg_dispatch_tick').then(function(r){server=r.ok},function(){server=false});
 
-function drivers(d,restId){return d.users.filter(function(u){return u.role==='driver'&&!u.disabled&&!u.inactive&&(!u.restId||u.restId==restId)})}
+function drivers(d,restId){return d.users.filter(function(u){return u.role==='driver'&&!u.disabled&&!u.inactive&&!!u.restId&&u.restId==restId})}
 function busy(d,id){return d.orders.some(function(o){return o.driverId==id&&!['terminée','annulée','refusée'].includes(o.status)})}
 X.pickDriver=function(d,o){var r=d.rests.find(function(x){return x.id==o.restId});if(!r)return null;var tried=o.offerTried||[];
   var c=drivers(d,o.restId).filter(function(u){return !busy(d,u.id)&&tried.indexOf(u.id)<0});

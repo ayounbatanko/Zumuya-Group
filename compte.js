@@ -1,11 +1,11 @@
 (()=>{'use strict';
 const $=s=>document.querySelector(s);
 let sb=null,mode='in',selectedCategory=null;
-const ROLE_TYPES=['restaurant','hotel','delivery','agro_producer','agro_trader','commerce','business'];
+const ROLE_TYPES=['restaurant','hotel','agro_producer','agro_trader','commerce','business'];
 const roleToPartner={restaurant:'restaurant',hotel:'hotel',delivery:'delivery',agro_producer:'agro',agro_trader:'agro_trader',commerce:'commerce',business:'business'};
 /* L'identifiant de connexion du portail reste l'adresse e-mail ; le rôle est détecté depuis le profil après connexion. */
 const EMAIL_RE=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const LABEL={customer:'Client',restaurant:'Restaurant partenaire',hotel:'Hôtel / hébergement',delivery:'Livreur',agro_producer:'Producteur agricole',agro_trader:'Commerçant agricole'};
+const LABEL={customer:'Client',restaurant:'Restaurant partenaire',hotel:'Hôtel / hébergement',delivery:'Livreur (compte créé par un restaurant)',staff:'Employé (compte créé par un restaurant)',agro_producer:'Producteur agricole',agro_trader:'Commerçant agricole'};
 function updateIdentityFields(){$('#email').required=true}
 const MIN=8;
 
@@ -39,7 +39,8 @@ function updateMatch(){
 }
 async function showAccount(user){
   const type=user.user_metadata?.account_type;
-  const routes={customer:'client-espace.html',restaurant:'resto-restaurant.html',hotel:'resto-restaurant.html',delivery:'resto-driver.html',agro_producer:'agro.html',agro_trader:'agro.html'};
+  const routes={customer:'client-espace.html',restaurant:'resto-restaurant.html',hotel:'resto-restaurant.html',staff:'resto-restaurant.html',delivery:'resto-driver.html',agro_producer:'agro.html',agro_trader:'agro.html'};
+  const managed=type==='delivery'||type==='staff';   /* comptes gérés : jamais de fiche partenaire */
   const stay=/parametres|stay/.test(location.hash);
   /* Retour au catalogue : un visiteur parti se connecter depuis le panier y revient (clients uniquement, valable 30 min). */
   try{const b=(localStorage.getItem('zg_back')||'').split('|');localStorage.removeItem('zg_back');
@@ -58,10 +59,11 @@ async function showAccount(user){
   const lead=$('#roleLead');
   if(owner){lead.hidden=true}
   else if(type==='customer'){lead.hidden=false;lead.textContent='Compte client : consultez les restaurants proches, leurs menus, et passez commande depuis votre espace.'}
+  else if(managed&&!ready){lead.hidden=false;lead.textContent='Ce compte est géré par un restaurant partenaire, mais il n’est rattaché à aucun établissement. Contactez votre responsable.'}
   else if(type&&!ready){lead.hidden=false;lead.textContent='Compte '+(LABEL[type]||'professionnel')+' : complétez la fiche de votre activité ci-dessous (« Devenir partenaire ») pour ouvrir votre espace.'}
   else{lead.hidden=true}
-  $('#partnerPanel').hidden=owner||ready;
-  if(!owner&&!ready) initPartner(user);
+  $('#partnerPanel').hidden=owner||ready||managed;
+  if(!owner&&!ready&&!managed) initPartner(user);
   if(ready && type!=='customer') { const lead=$('#roleLead'); lead.hidden=false; lead.textContent='Votre espace professionnel est activé. Accédez directement aux outils réservés à votre catégorie.'; }
 }
 function showAuth(){$('#account').hidden=true;$('#recovery').hidden=true;$('#auth').hidden=false}
@@ -113,7 +115,6 @@ const F=(name,label,type='text',req=true,opts=null,full=false)=>({name,label,typ
 const CATS=[
  {id:'restaurant',icon:'🍽️',label:'Restaurant',desc:'Restaurants, maquis, fast-foods',fields:[F('organization_name','Nom du restaurant'),F('city','Ville'),F('address','Adresse',"text",false),F('cuisine','Type de cuisine'),F('seats','Nombre de places','number',false),F('registration','N° d’immatriculation (RCCM / NIF)','text',false)]},
  {id:'hotel',icon:'🏨',label:'Hôtel',desc:'Hôtels, auberges, résidences',fields:[F('organization_name','Nom de l’établissement'),F('city','Ville'),F('address','Adresse','text',false),F('hotel_type','Type d’hébergement','select',true,['Hôtel','Auberge','Résidence meublée','Maison d’hôtes']),F('rooms','Nombre de chambres','number'),F('registration','N° d’immatriculation (RCCM / NIF)','text',false)]},
- {id:'delivery',icon:'📦',label:'Livreur',desc:'Livreurs indépendants ou sociétés de livraison',fields:[F('organization_name','Nom complet ou de la société'),F('city','Ville'),F('zone','Zone de livraison'),F('vehicle','Moyen de livraison','select',true,['Moto','Vélo','Voiture','Camionnette','Camion']),F('availability','Disponibilité','select',true,['Temps plein','Temps partiel','Week-end uniquement']),F('experience','Années d’expérience','number',false)]},
  {id:'commerce',icon:'🏪',label:'Boutique / commerce',desc:'Boutiques, magasins, grossistes',fields:[F('organization_name','Nom de la boutique'),F('city','Ville'),F('address','Adresse','text',false),F('products','Produits vendus'),F('outlets','Nombre de points de vente','number',false),F('registration','N° d’immatriculation (RCCM / NIF)','text',false)]},
  {id:'transport',icon:'🚕',label:'Transport',desc:'Chauffeurs, taxis, transporteurs',fields:[F('organization_name','Nom complet ou de la société'),F('city','Ville'),F('vehicle','Type de véhicule','select',true,['Taxi','Moto-taxi','Minibus','Bus','Camion']),F('capacity','Capacité (places ou tonnage)'),F('experience','Années d’expérience','number',false)]},
  {id:'services',icon:'🧰',label:'Prestataire de services',desc:'Artisans, techniciens, indépendants',fields:[F('organization_name','Nom ou raison sociale'),F('city','Ville'),F('trade','Métier / type de prestation'),F('experience','Années d’expérience','number',false),F('description','Décrivez vos prestations','textarea',true,null,true)]},
@@ -123,7 +124,7 @@ const CATS=[
  {id:'travel',icon:'🧭',label:'Tourisme & voyages',desc:'Agences, guides, hébergements touristiques',fields:[F('organization_name','Nom de l’agence ou du guide'),F('city','Ville'),F('offer_type','Type d’offre','select',true,['Agence de voyages','Guide','Hébergement touristique','Excursions']),F('destinations','Destinations proposées')]},
  {id:'business',icon:'📊',label:'Entreprise / institution',desc:'Entreprises, institutions, partenaires techniques',fields:[F('organization_name','Nom de l’entreprise ou de l’institution'),F('city','Ville'),F('partner_kind','Type de partenariat','select',true,['Commercial','Institutionnel','Technique','Paiement']),F('website','Site web','url',false)]}
 ];
-const LIVE=['restaurant','hotel','delivery','agro','agro_trader'];
+const LIVE=['restaurant','hotel','agro','agro_trader'];   /* « delivery » retiré : les livreurs sont créés uniquement par un restaurant (Mon équipe) */
 CATS.splice(0,CATS.length,...CATS.filter(c=>LIVE.includes(c.id)));
 const COLS=['organization_name','city'];
 const STATUS={pending:'En attente',approved:'Acceptée',rejected:'Refusée'};
@@ -187,7 +188,7 @@ async function submitPartner(e){
   currentCat.fields.forEach(f=>{if(!COLS.includes(f.name)){const v=(fd[f.name]||'').trim();if(v)details[f.name]=f.type==='number'?Number(v):v}});
   const btn=$('#pSubmit');btn.disabled=true;
   try{
-    const roleMap={restaurant:'restaurant',hotel:'hotel',delivery:'delivery',agro:'agro_producer',agro_trader:'agro_trader',commerce:'commerce',business:'business'};
+    const roleMap={restaurant:'restaurant',hotel:'hotel',agro:'agro_producer',agro_trader:'agro_trader',commerce:'commerce',business:'business'};
     const accountType=roleMap[currentCat.id]||'business';
     const {data:org,error}=await sb.from('rg_organizations').insert({
       legal_name:fd.organization_name.trim(),public_name:fd.organization_name.trim(),country_code:fd.country_code||'CI',
@@ -205,7 +206,7 @@ async function submitPartner(e){
     }
     closeFlow();
     $('#appList').innerHTML='<p class="empty">Compte professionnel activé. Votre espace est disponible.</p>';
-    const destinations={restaurant:'resto-restaurant.html',hotel:'resto-restaurant.html',delivery:'resto-driver.html',agro:'agro.html',agro_trader:'agro.html'};
+    const destinations={restaurant:'resto-restaurant.html',hotel:'resto-restaurant.html',agro:'agro.html',agro_trader:'agro.html'};
     if(currentCat.id==='restaurant'||currentCat.id==='hotel')sessionStorage.setItem('zmy_portal','1');
     if(destinations[currentCat.id])location.href=destinations[currentCat.id];
   }catch(err){
