@@ -1,0 +1,20 @@
+CORRECTIF ZUMAYA — AFFICHAGE DES PRODUITS MARKETPLACE
+
+Fichiers corrigés :
+- catalogue.js : le catalogue d'accueil charge séparément les produits, les boutiques publiques et les catégories. Une erreur REST n'est plus masquée ; elle est affichée.
+- market.js : la page Marketplace charge séparément les produits, boutiques et catégories, puis associe les produits à leur boutique publique.
+- index.html / marketplace.html : versions des scripts actualisées pour éviter un ancien cache navigateur.
+- sw.js : version du cache PWA incrémentée.
+- 14_CORRECTIF_CATALOGUE_MARKETPLACE_PUBLIC.sql : migration SQL additive pour les droits SELECT publics des produits actifs en stock, boutiques actives vérifiées et catégories actives.
+
+IMPORTANT — BASE DE DONNEES
+Exécuter le fichier SQL 14_CORRECTIF_CATALOGUE_MARKETPLACE_PUBLIC.sql dans le SQL Editor du projet indiqué dans config.js :
+dusznqvwhrklcqhmbylu
+
+La migration ne supprime aucune boutique ni aucun produit. Elle ne modifie aucun prix, stock, statut, propriétaire ou média. Elle conserve les politiques d'écriture existantes.
+
+CONDITIONS D'AFFICHAGE PUBLIC
+- Produit : status = active et stock_quantity > 0.
+- Boutique : is_active = true et verification_status = verified.
+
+Après déploiement GitHub et exécution SQL, recharger le site en vidant le cache si nécessaire. Le catalogue affiche désormais les erreurs Supabase au lieu de les cacher.

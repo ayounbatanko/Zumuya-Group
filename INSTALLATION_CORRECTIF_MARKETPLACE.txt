@@ -1,0 +1,8 @@
+CORRECTIF ZUMAYA MARKETPLACE — 21/11/2026
+
+1. Décompressez cette archive sur votre téléphone.
+2. Ouvrez le dossier 8 et copiez TOUS ses fichiers à la racine du dépôt GitHub Zumuya-Group. Remplacez les fichiers existants portant le même nom. Ne téléversez pas le dossier 8 lui-même.
+3. Dans Supabase, ouvrez le projet azfunhfjmybekzakhtbu puis SQL Editor. Exécutez une seule fois le fichier 15_CORRECTIF_VISIBILITE_BOUTIQUES_PENDING.sql.
+4. Attendez la fin du déploiement GitHub Pages puis actualisez le site. Sur Android, faites un rechargement forcé ou videz le cache du site si l’ancienne version reste affichée.
+
+Ce correctif autorise l’affichage public des produits actifs appartenant aux boutiques actives dont le statut est pending ou verified. Il ne modifie ni ne supprime les boutiques ou produits. Il ne peut toutefois pas afficher un produit absent des tables commerce_products / commerce_stores du projet Supabase configuré dans config.js.
