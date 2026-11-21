@@ -6,13 +6,13 @@
 
 <div id="shell" class="shell" hidden>
 <aside class="side" id="side"><a href="index.html" class="brand"><img src="logo.svg" alt=""><span>ZUMUYA <b>GROUP</b><small>ESPACE PROPRIÉTAIRE</small></span></a>
-<nav id="tabs"><a href="#overview" data-t="overview">▦ Vue d’ensemble</a><a href="#services" data-t="services">🍽️ Services</a><a href="#partners" data-t="partners">🤝 Partenaires <i id="pBadge" hidden></i></a><a href="#countries" data-t="countries">🌍 Pays</a><a href="#orgs" data-t="orgs">🏢 Organisations</a><a href="#payments" data-t="payments">💳 Transactions</a><a href="#activity" data-t="activity">⚡ Activité</a></nav>
+<nav id="tabs"><a href="#overview" data-t="overview">▦ Vue d’ensemble</a><a href="#services" data-t="services">🍽️ Services</a><a href="#partners" data-t="partners">🤝 Partenaires <i id="pBadge" hidden></i></a><a href="#countries" data-t="countries">🌍 Pays</a><a href="#orgs" data-t="orgs">🏢 Organisations</a><a href="#payments" data-t="payments">💳 Transactions</a><a href="#wallet" data-t="wallet">👛 Portefeuille & commissions</a><a href="messagerie.html">💬 Messagerie</a><a href="#activity" data-t="activity">⚡ Activité</a></nav>
 <div class="sidefoot"><span class="secure">✓ Accès propriétaire vérifié</span><div id="who"></div><a href="compte.html">Mon compte / mot de passe</a><button id="logout" class="btn ghost">Déconnexion</button></div></aside>
 <main class="main">
 <header class="top"><div><span class="eyebrow">SUPERVISION RÉGIONALE</span><h1 id="title">Vue d’ensemble</h1></div><div class="topact"><span class="live" id="live">● Connecté</span><button class="btn ghost mob" id="logout2">Déconnexion</button><button class="btn ghost" id="refresh">↻ Actualiser</button></div></header>
 <div id="err" class="alert" hidden></div>
 
-<section data-p="overview"><div id="stats" class="stats"></div>
+<section data-p="overview"><div id="stats" class="stats"></div><div class="card owner-insight"><div class="ch"><h2>Indicateurs de pilotage</h2><span>Vue synthétique</span></div><div id="ownerInsights" class="stats"></div></div>
 <div class="grid2"><div class="card"><div class="ch"><h2>Commandes — 7 derniers jours</h2><span id="ordTotal"></span></div><div id="chart"></div></div>
 <div class="card"><div class="ch"><h2>Répartition des services</h2><span>Pôles 01 · 02 · 03</span></div><div id="split"></div></div></div>
 <div class="card"><div class="ch"><h2>Demandes de partenariat à traiter</h2><a href="#partners">Tout voir →</a></div><div id="pendingList"></div></div></section>
@@ -23,6 +23,12 @@
 <section data-p="partners" hidden><div class="card"><div class="ch"><h2>Partenaires</h2><span>Validation des demandes</span></div><div id="partners"></div></div></section>
 <section data-p="countries" hidden><div class="card"><div class="ch"><h2>Déploiement par pays</h2><span>Activation contrôlée</span></div><div id="countries" class="cgrid"></div></div></section>
 <section data-p="orgs" hidden><div class="card"><div class="ch"><h2>Organisations enregistrées</h2><span id="orgCount"></span></div><div class="tw"><table><thead><tr><th>Organisation</th><th>Pays</th><th>Type</th><th>Vérification</th><th>Action</th><th>Créée le</th></tr></thead><tbody id="orgs"></tbody></table></div></div></section>
+<section data-p="wallet" hidden>
+<div class="card"><div class="ch"><h2>Portefeuille propriétaire</h2><span>Commissions et revenus de la plateforme</span></div>
+<div class="stats"><div class="stat"><small>Solde du portefeuille</small><strong id="ownerWalletBalance">—</strong></div><div class="stat"><small>Commission actuelle</small><strong id="ownerCommissionCurrent">—</strong></div></div>
+<form id="commissionForm" class="tools"><label for="commissionPercent">Commission sur chaque vente (%)</label><input id="commissionPercent" type="number" min="0" max="30" step="0.25" required style="max-width:150px"><button class="btn primary" type="submit">Enregistrer le taux</button></form>
+<div id="ownerWithdrawals" class="entries" style="margin-top:18px"></div><p class="muted">Taux initial : 5 %. La commission est appliquée côté serveur uniquement après confirmation du paiement. Le traitement réel des ventes nécessite un webhook de paiement vérifié.</p>
+<div id="commissionMsg" role="status"></div></div></section>
 <section data-p="payments" hidden><div class="card"><div class="ch"><h2>Transactions enregistrées</h2><span>Lecture seule — statuts modifiés par webhook serveur</span></div><div class="tw"><table><thead><tr><th>Date</th><th>Pôle</th><th>Montant (unités mineures)</th><th>Devise</th><th>Prestataire</th><th>Statut</th></tr></thead><tbody id="payments"></tbody></table></div></div></section>
 <section data-p="activity" hidden><div class="card"><div class="ch"><h2>Activité métier</h2><span>Derniers enregistrements</span></div><div class="tw"><table><thead><tr><th>Date</th><th>Organisation</th><th>Pôle</th><th>Type</th><th>Statut</th></tr></thead><tbody id="activity"></tbody></table></div></div></section>
 <p class="footnote">Ce tableau de bord n’active pas à lui seul un prestataire de paiement ni une présence commerciale dans un pays. Les actions sensibles sont contrôlées par les règles RLS et les fonctions serveur.</p>

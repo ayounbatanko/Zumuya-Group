@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="fr"><head><script src="config.js"></script><script src="zguard.js" data-roles="restaurant,hotel"></script><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="manifest" href="resto-manifest.webmanifest"><meta name="theme-color" content="#14213d"><link rel="icon" type="image/png" href="resto-icon-192.png?v=3"><link rel="apple-touch-icon" href="resto-icon-192.png?v=3"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Restauration"><meta property="og:type" content="website">
+<!DOCTYPE html><html lang="fr"><head><script src="config.js"></script><script src="zguard.js" data-roles="restaurant,hotel,staff"></script><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="manifest" href="resto-manifest.webmanifest"><meta name="theme-color" content="#14213d"><link rel="icon" type="image/png" href="resto-icon-192.png?v=3"><link rel="apple-touch-icon" href="resto-icon-192.png?v=3"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Restauration"><meta property="og:type" content="website">
 <meta property="og:locale" content="fr_FR">
 <meta property="og:site_name" content="Service de Restauration">
 <meta property="og:title" content="Service de Restauration - Gestion intelligente du restaurant">
@@ -15,7 +15,7 @@
 <meta name="twitter:image" content="resto-apercu-facebook.jpg">
 <title>Restaurant</title><style>:root{--bg:#f4f5f9;--card:#fff;--ink:#16213e;--mut:#6a7390;--bd:#e3e6ef;--navy:#14213d;--navy2:#26417a;--gold:#ffb703;--gold2:#fb8500;--ok:#12a36b;--bad:#e5383b;--acc:#fb8500;--kpi:#26417a;--sh:0 6px 22px rgba(20,33,61,.08)}
 @media(prefers-color-scheme:dark){:root{--bg:#0d1325;--card:#161f38;--ink:#eef1fb;--mut:#93a0c4;--bd:#27345a;--kpi:#ffc93c;--sh:0 6px 22px rgba(0,0,0,.35)}}
-*{box-sizing:border-box}
+*{box-sizing:border-box}[hidden]{display:none!important}
 body{margin:0;font:15px/1.55 "Segoe UI",system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--ink)}
 h2,h3{margin:.2em 0 .4em;letter-spacing:-.2px}
 #hdr{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 20px;background:linear-gradient(120deg,#0f1a33,#26417a);color:#fff;position:sticky;top:0;z-index:5;box-shadow:0 4px 16px rgba(0,0,0,.2)}
@@ -111,9 +111,13 @@ nav:empty{display:none;padding:0;border:0;height:0;overflow:hidden}
   font-weight:700!important;box-shadow:0 4px 12px rgba(20,33,61,.35)!important;
 }
 .back-btn:hover{filter:brightness(1.1);transform:translateY(-1px)}
+</style><style>
+.znav-action{display:inline-flex;align-items:center;justify-content:center;white-space:nowrap;text-decoration:none;padding:9px 14px;border-radius:12px;border:1px solid var(--bd);background:var(--card);color:var(--ink);font-weight:800;font-size:13px}
+.znav-action:hover{border-color:var(--gold2);color:var(--navy2);background:rgba(255,183,3,.09)}
+@media(max-width:600px){nav{padding:9px 10px;gap:6px}.znav-action{padding:8px 10px;font-size:12px}}
 </style></head><body>
 <div id="hdr"></div><nav id="nav"></nav><main id="m"></main><div id="receipt"></div>
-<script src="config.js"></script><script src="resto-db.js"></script><script src="resto-portal-bridge.js?v=2"></script><script src="resto-notif.js"></script>
+<script src="config.js"></script><script src="resto-db.js?v=3"></script><script src="resto-portal-bridge.js?v=3"></script><script src="zteam.js"></script><script src="zsupply.js"></script><script src="resto-notif.js"></script>
 <script src="resto-chat.js"></script>
 <script src="resto-charts.js"></script>
 <script src="resto-qr.js"></script>
@@ -180,7 +184,13 @@ const U=guard('restaurant');U&&RGChat.watch(U.id);var setSub='rest';let tab=null
 const R=()=>D.get().rests.find(r=>r.id==U.restId);
 const upd=f=>{const d=D.get();f(d.rests.find(r=>r.id==U.restId),d);D.save(d)};
 const day=ts=>new Date(ts).toISOString().slice(0,10);
-const tabs=['sub','dash','hotel','pos','orders','menu','hist','report','drivers','support','settings'];
+const tabs=['sub','dash','hotel','pos','orders','menu','hist','report','drivers','team','supply','audit','support','settings','wallet'];
+/* Droits : le compte principal a tout ; un employé n'ouvre que les rubriques accordées par le restaurant (contrôle serveur : voir 11_*.sql). */
+const IS_STAFF=!!(U&&U.staff),PERM=(window.ZPERM&&window.ZPERM.permissions)||[];
+const TABPERM={dash:'dash',pos:'pos',orders:'orders',hotel:'orders',menu:'menu',hist:'hist',report:'report',drivers:'drivers',supply:'supply',wallet:'finance',settings:'settings',team:'team'};
+const OWNER_ONLY=['sub','audit'];   /* abonnement et journal : compte principal uniquement */
+function can(k){if(!IS_STAFF)return true;if(k==='support'||k==='account')return true;if(OWNER_ONLY.includes(k))return false;return PERM.includes(TABPERM[k])}
+const ORGID=()=>{const r=R();return (r&&r.portalOrgId)||(window.ZPERM&&window.ZPERM.org_id)||null};
 try{const h=(location.hash||'').slice(1);if(tabs.includes(h))tab=h}catch(e){}
 const tabMeta={
  sub:{label:'Abonnement Pro',ico:'⭐'},
@@ -190,18 +200,19 @@ const tabMeta={
  menu:{label:'Menu',ico:'🍴'},
  hist:{label:'Historique des ventes',ico:'🕐'},
  drivers:{label:'Gestion des livreurs',ico:'🚚'},
+ team:{label:'Mon équipe',ico:'👥'},supply:{label:'Approvisionnement agricole',ico:'🌾'},audit:{label:'Journal des actions',ico:'🧾'},
  report:{label:'Rapport du chiffre d\'affaires',ico:'📈'},
  support:{label:'Support (écrire à l\'administrateur)',ico:'💬'},
  hotel:{label:'Module hôtel',ico:'🏨'},
- settings:{label:'Paramètres et réglages',ico:'⚙️'}
+ settings:{label:'Paramètres et réglages',ico:'⚙️'}, wallet:{label:'Portefeuille',ico:'👛'}
 };
 function isHotelAccount(){const r=R();return !!(r&&(r.businessType==='hotel'||(r.hotel&&r.hotel.enabled)))}
 function homeGrid(){const pend=D.get().orders.filter(o=>o.restId==U.restId&&o.status=='en attente').length;
- const order=[ 'sub','dash',...(isHotelAccount()?['hotel']:[]),'pos','orders','menu','hist','report','drivers','support','settings'];
+ const order=[ 'sub','dash',...(isHotelAccount()?['hotel']:[]),'pos','orders','menu','hist','report','drivers','team','supply','audit','support','settings','wallet'].filter(can);
  const btns=order.map(k=>{const m=tabMeta[k];const badge=(k=='orders'&&pend)?` <span class="badge">${pend}</span>`:'';
   const cls=(k==='settings'||k==='sub')?'hg-btn full':'hg-btn';
   return `<button class="${cls}" onclick="tab='${k}';render()"><span class="ico">${m.ico}</span><span>${m.label}${badge}</span></button>`}).join('');
- return `<div class="home-grid-wrap"><div class="card"><h2 style="margin:0 0 14px;text-align:center">Service de Restauration</h2><div class="home-grid">${btns}</div></div></div>`}
+ return `<div class="home-grid-wrap"><div class="card"><h2 style="margin:0 0 14px;text-align:center">Service de Restauration</h2><div class="home-grid">${btns}<a class="hg-btn full" href="index.html#catalogue-public" style="text-decoration:none"><span class="ico">🌾</span><span>Voir les fournisseurs agricoles</span></a><a class="hg-btn" href="messagerie.html" style="text-decoration:none"><span class="ico">💬</span><span>Messagerie</span></a></div></div></div>`}
 function proUI(r,s){
  const e=s.end?new Date(s.end).toLocaleDateString():'';
  // Formulaire de paiement reçu du propriétaire
@@ -251,9 +262,9 @@ function banner(r,s){const go=` <a href="#" onclick="tab='sub';render();return f
  if(s.state=='trial')return `<div class="card warn">🎁 <b>Essai gratuit</b> : ${s.days} jour(s) restant(s).${go}</div>`;
  if(s.state=='pro'&&s.ok)return `<div class="card okc"><b>Pro actif</b> : ${s.days} jour(s) restant(s).</div>`;
  return ''}
-function render(){const r=R(),s=subInfo(r);if(tab==='hotel'&&!isHotelAccount())tab=null;
+function render(){const r=R(),s=subInfo(r);if(tab==='hotel'&&!isHotelAccount())tab=null;if(tab&&!can(tab))tab=null;const wallet=document.getElementById('walletPanel');if(wallet){wallet.hidden=true;if(wallet.parentNode!==document.body)document.body.appendChild(wallet)}
  const title=tab&&tabMeta[tab]?tabMeta[tab].label:r.name;
- hdr(title);nav.innerHTML='';
+ hdr(title);nav.innerHTML='<a class="znav-action" href="index.html#catalogue-public">🌾 Fournisseurs proches</a><a class="znav-action" href="messagerie.html">💬 Messagerie</a>';
  // Bouton retour dans l'en-tête quand on est dans une section
  if(tab){
   const lo=document.getElementById('lo');
@@ -268,7 +279,7 @@ function render(){const r=R(),s=subInfo(r);if(tab==='hotel'&&!isHotelAccount())t
  if(!s.ok){m.innerHTML=tab==='account'?passwordCard():tab==='support'?RGChat.userView(U):proUI(r,s)+`<div class="row" style="gap:8px"><button type="button" class="sec" onclick="tab='support';render()">💬 Support</button><button type="button" class="sec" onclick="tab='account';render()">🔑 Paramètres du compte</button></div>`;return}
  if(!tab){m.innerHTML=banner(r,s)+homeGrid();return}
  const back=`<div class="back-row"><button type="button" class="back-btn" onclick="tab=null;render()">← Retour à l'accueil</button></div>`;
- m.innerHTML=back+(V[tab])(r)}
+ if(tab==='wallet'){m.innerHTML=back;if(wallet){wallet.hidden=false;m.appendChild(wallet);if(window.RGWalletLoad)window.RGWalletLoad()}return}m.innerHTML=back+(V[tab])(r);mountPro(r)}
 function getOwnerPlans(){
  const d=D.get();const op=d.ownerPay||{};
  const cur=op.defaultCurrency||'XOF';
@@ -358,13 +369,15 @@ menu(r){return `<div class="card col"><b>Nouveau plat</b><div class="row"><input
  <label class="mut">Photos du plat (une ou plusieurs)<br><input id="pf" type="file" accept="image/*" multiple></label><button onclick="addP()">Ajouter</button></div>
  <h3>Catalogue des plats</h3>`+(r.menu.length?`<div class="cat">${r.menu.map((p,i)=>`<div class="card dish">${gal(p.imgs,i)}<b>${esc(p.n)}</b> — <b style="color:var(--acc)">${money(p.p,r.currency)}</b><p class="mut">${esc(p.desc||'')}</p>
  <div class="row"><label class="lb">Ajouter des photos<input type="file" accept="image/*" multiple hidden onchange="addImgs(${i},this.files)"></label><button class="sec" onclick="editD(${i})">Modifier</button><button class="bad" onclick="upd(r=>r.menu.splice(${i},1));render()">Supprimer</button></div></div>`).join('')}</div>`:'<p class="mut">Aucun plat dans le catalogue.</p>')},
-drivers(r){const d=D.get(),all=d.users.filter(u=>u.role=='driver'&&!u.disabled),mine=all.filter(u=>u.restId==r.id),net=all.filter(u=>!u.restId),
+drivers(r){const d=D.get(),mine=d.users.filter(u=>u.role=='driver'&&u.restId==r.id&&u.managed),
  busy=id=>d.orders.some(o=>o.driverId==id&&!['terminée','annulée','refusée'].includes(o.status)),
- st=u=>busy(u.id)?'🛵 En course':(u.lat!=null?'🟢 Disponible':'⚪ Position inconnue'),
- row=(u,own)=>`<tr><td>${esc(u.name)}</td><td>${esc(u.email||u.phone||'')}</td><td>${st(u)}</td><td><button class="sec" onclick="${own?'detD':'attD'}('${u.id}')">${own?'Détacher':'Rattacher'}</button></td></tr>`;
- return `<div class="card"><h3>🚚 Livreurs ZUMUYA Livraison</h3><p class="mut">Les livreurs créent eux-mêmes leur compte sur ZUMUYA GROUP (catégorie « Livreur »). Dès qu'une commande à livrer est acceptée, la course est proposée au livreur libre le plus proche (90 s, puis au suivant). Les commandes en chambre n'utilisent pas de livreur.</p></div>
- <div class="card" style="overflow:auto"><b>Mes livreurs dédiés (${mine.length})</b><p class="mut">Un livreur rattaché ne reçoit plus les courses des autres restaurants.</p><table>${mine.map(u=>row(u,true)).join('')||'<tr><td class="mut">Aucun livreur rattaché.</td></tr>'}</table></div>
- <div class="card" style="overflow:auto"><b>Livreurs du réseau (${net.length})</b><table>${net.map(u=>row(u,false)).join('')||'<tr><td class="mut">Aucun livreur inscrit pour le moment.</td></tr>'}</table></div>`},
+ st=u=>u.disabled?'⛔ Suspendu':busy(u.id)?'🛵 En course':(u.lat!=null?'🟢 Disponible':'⚪ Position inconnue');
+ return `<div class="card"><h3>🚚 Mes livreurs</h3><p class="mut">Les livreurs ne s'inscrivent plus eux-mêmes : <b>seul votre restaurant crée leur compte</b>. Dès qu'une commande à livrer est acceptée, la course est proposée à vos livreurs disponibles (le plus proche en premier, 90 s puis le suivant), ou vous l'attribuez à la main depuis « Commandes en ligne ». Les commandes en chambre n'utilisent pas de livreur.</p></div>
+ <div class="card" style="overflow:auto"><b>Disponibilité en direct (${mine.length})</b><table>${mine.map(u=>`<tr><td>${esc(u.name)}</td><td>${esc(u.email||u.phone||'')}</td><td>${st(u)}</td></tr>`).join('')||'<tr><td class="mut">Aucun livreur créé pour le moment.</td></tr>'}</table></div>
+ <div id="proDrivers"></div>`},
+team(r){return '<div id="proTeam"></div>'},
+supply(r){return '<div id="proSupply"></div>'},
+audit(r){return '<div id="proAudit"></div>'},
 sub(r){return proUI(r,subInfo(r))},
 support(r){return RGChat.userView(U)},
 report(r){return RR.view(r)},
@@ -373,6 +386,7 @@ settings(r){const bar=[['rest','🍽️ Restaurant'],['pay','💳 Paiements'],['
 settingsMain(r){return `<div class="card col"><label>Nom<input id="sn" value="${esc(r.name)}" style="width:100%"></label>
  <div class="row">${r.logo?`<img src="${r.logo}" class="logo">`:''}<label>Logo <input type="file" id="sl" accept="image/*"></label></div>
  <label>Téléphone<input id="sp" value="${esc(r.phone)}" style="width:100%"></label><label>Adresse<input id="sa" value="${esc(r.address)}" style="width:100%"></label>
+ <div class="card col" style="margin:0;padding:14px"><b>🕒 Horaires de commande en ligne</b><p class="mut">En dehors de ces horaires, le restaurant apparaît comme fermé et les commandes en ligne sont bloquées.</p><div class="row"><label>Ouverture<input id="openAt" type="time" value="${esc(r.openAt||'08:00')}"></label><label>Fermeture<input id="closeAt" type="time" value="${esc(r.closeAt||'22:00')}"></label></div><label style="display:flex;gap:8px;align-items:center"><input id="onlineOrders" type="checkbox" ${r.onlineOrders===false?'':'checked'}> Accepter les commandes en ligne pendant les horaires</label></div>
  <div class="card" style="margin:0;padding:12px"><b>🛵 Tarif de livraison</b><label class="mut">Prix pour 1 kilomètre (${esc(r.currency||'XOF')})<input id="skm" type="number" min="0" step="any" value="${r.kmPrice??''}" placeholder="ex. 200" style="width:100%"></label><p class="mut">Le prix de livraison du client = distance (restaurant → client) × ce prix. Il est ajouté automatiquement à son panier.</p></div>
  <div class="card" style="margin:0;padding:12px;${r.lat!=null?'background:rgba(18,163,107,.1);border-inline-start:4px solid var(--ok)':'background:rgba(255,183,3,.12);border-inline-start:4px solid var(--gold)'}">
   <b>📍 Position exacte du restaurant (Google Maps)</b>
@@ -396,8 +410,19 @@ async function addP(){const n=pn.value.trim(),p=pp.value,d=pd.value.trim();if(!n
 async function addImgs(i,fs){const imgs=await Promise.all([...fs].map(readImg));upd(r=>{r.menu[i].imgs=(r.menu[i].imgs||[]).concat(imgs)});render()}
 function delImg(i,k){upd(r=>r.menu[i].imgs.splice(k,1));render()}
 function editD(i){const v=prompt('Ingrédients et description',R().menu[i].desc||'');if(v!==null){upd(r=>r.menu[i].desc=v.trim());render()}}
-function attD(id){upd((r,d)=>{const u=d.users.find(x=>x.id==id&&x.role=='driver');if(u)u.restId=r.id});toast('Livreur rattaché à votre restaurant');render()}
-function detD(id){upd((r,d)=>{const u=d.users.find(x=>x.id==id&&x.restId==r.id);if(u)u.restId=null});toast('Livreur détaché');render()}
+/* Modules professionnels : équipe, livreurs, approvisionnement, journal */
+function localDriverSet(userId,patch){const d=D.get(),u=d.users.find(x=>x.portalId==userId);if(u){Object.assign(u,patch);D.save(d)}}
+function mountPro(r){
+ const org=ORGID(),log=(a,t,dt)=>{if(window.ZTeam)ZTeam.log(org,a,t,dt)};
+ let el=document.getElementById('proDrivers');
+ if(el&&window.ZTeam)ZTeam.mount(el,{kind:'driver',orgId:org,
+   onCreated:x=>{const sync=()=>{if(D.refresh)D.refresh();render()};sync();setTimeout(sync,1500);setTimeout(sync,4000)},
+   onStatus:(m,st)=>localDriverSet(m.user_id,{disabled:st!=='active'}),
+   onDeleted:m=>{const d=D.get();d.users=d.users.filter(u=>u.portalId!=m.user_id);D.save(d)}});
+ el=document.getElementById('proTeam');if(el&&window.ZTeam)ZTeam.mount(el,{kind:'staff',orgId:org});
+ el=document.getElementById('proAudit');if(el&&window.ZTeam)ZTeam.mountAudit(el,org);
+ el=document.getElementById('proSupply');if(el&&window.ZSupply)ZSupply.mount(el,{role:'buyer',orgId:IS_STAFF?org:(org||null),address:r.address||''});
+ if(tab)log('nav.'+tab,null,{})}
 function manualDrv(id){const v=document.getElementById('dv'+id).value;if(!v)return alert('Choisissez un livreur.');setOrder(id,{driverId:v,offer:null});render()}
 function geo(){
  if(!navigator.geolocation)return alert('Géolocalisation indisponible.');
@@ -419,7 +444,7 @@ function payCard(r){const l=payMethods(r).map(p=>`<div class="row" style="justif
  return `<div class="card col"><h3 style="margin:0">💳 Moyens de paiement en ligne</h3><p class="mut">Ajoutez autant de moyens de paiement que vous voulez (Orange Money, MTN MoMo, Wave, Moov, carte, PayPal…). Vos clients les voient et les choisissent à la commande.</p>${l}<hr><input id="pmName" placeholder="Nom (ex. Orange Money)"><input id="pmDet" placeholder="Numéro, lien de paiement ou instructions"><button type="button" onclick="addPay()">➕ Ajouter ce moyen de paiement</button></div>`}
 function addPay(){const n=pmName.value.trim();if(!n)return alert('Saisissez le nom du moyen de paiement.');try{let added=false;upd(r=>{const l=payMethods(r).slice();if(l.some(x=>x.name.toLowerCase()==n.toLowerCase()))return;l.push({id:uid(),name:n,details:pmDet.value.trim()});r.payMethods=l;r.pay=l.map(x=>x.name);added=true});if(!added)return alert('Ce moyen de paiement existe déjà.');render();showOperationSuccess('Ajout du moyen de paiement « '+n+' »',()=>{tab='settings';setSub='pay';render()})}catch(e){alert('Échec de l’enregistrement du moyen de paiement.')}}
 function delPay(id){const item=payMethods(R()).find(x=>x.id==id);if(!item)return;try{upd(r=>{r.payMethods=payMethods(r).filter(x=>x.id!=id);r.pay=r.payMethods.map(x=>x.name)});render();showOperationSuccess('Suppression du moyen de paiement « '+item.name+' »',()=>{tab='settings';setSub='pay';render()})}catch(e){alert('Échec de la suppression du moyen de paiement.')}}
-function saveS(){const f=sl.files[0],go=logo=>{try{upd(r=>{r.name=sn.value;r.phone=sp.value;r.address=sa.value;r.currency=sc.value;r.lat=la.value?+la.value:null;r.lng=ln.value?+ln.value:null;r.kmPrice=(typeof skm!=='undefined'&&skm.value!=='')?Math.max(0,+skm.value):null;if(logo)r.logo=logo});render();showOperationSuccess('Modification des paramètres du restaurant',()=>{tab='settings';setSub='rest';render()})}catch(e){alert('Échec de l’enregistrement des paramètres du restaurant. Vérifiez votre espace de stockage et réessayez.')}};
+function saveS(){const f=sl.files[0],go=logo=>{try{upd(r=>{r.name=sn.value;r.phone=sp.value;r.address=sa.value;r.currency=sc.value;r.openAt=document.getElementById('openAt')?.value||'08:00';r.closeAt=document.getElementById('closeAt')?.value||'22:00';r.onlineOrders=document.getElementById('onlineOrders')?.checked!==false;r.lat=la.value?+la.value:null;r.lng=ln.value?+ln.value:null;r.kmPrice=(typeof skm!=='undefined'&&skm.value!=='')?Math.max(0,+skm.value):null;if(logo)r.logo=logo});render();showOperationSuccess('Modification des paramètres du restaurant',()=>{tab='settings';setSub='rest';render()})}catch(e){alert('Échec de l’enregistrement des paramètres du restaurant. Vérifiez votre espace de stockage et réessayez.')}};
  if(f){const fr=new FileReader();fr.onload=()=>go(fr.result);fr.onerror=()=>alert('Impossible de lire le fichier du logo.');fr.readAsDataURL(f)}else go()}
 let pendN=-1;
 setInterval(()=>{const r=R();if(!r)return;const os=D.get().orders.filter(o=>o.restId==U.restId),cur=Object.fromEntries(os.map(o=>[o.id,o.status])),pend=os.filter(o=>o.status=='en attente').length;
@@ -459,4 +484,25 @@ render();
 })();
 </script>
 <script src="resto-ext-loader.js"></script>
-</body></html>
+<style>
+.wallet-panel{border:1px solid #dce4eb;border-radius:18px;padding:20px;background:#fff;margin:18px 0}
+.wallet-head{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.wallet-kicker{font-size:.72rem;letter-spacing:.14em;font-weight:800;color:#a67c32}
+.wallet-head h2{margin:5px 0}.wallet-head strong{background:#102b45;color:white;border-radius:14px;padding:16px 20px;font-size:1.35rem}
+.wallet-actions{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0}
+.wallet-actions .btn,.wallet-panel .btn{border:0;border-radius:10px;padding:12px 16px;font-weight:800;cursor:pointer}
+.wallet-panel .btn{background:#102b45;color:white}.wallet-panel .btn.secondary{background:#e8edf3;color:#102b45}
+.wallet-ledger .entry{border-radius:10px;padding:12px;margin:8px 0;border:1px solid #e5eaf0}
+.wallet-panel form{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin:12px 0}.wallet-panel form label{display:flex;flex-direction:column;gap:6px}.wallet-panel input,.wallet-panel select{padding:10px;border:1px solid #ccd4df;border-radius:9px;font:inherit}.wallet-ledger .credit{color:#167447;font-weight:800}.wallet-ledger .debit{color:#a33b35;font-weight:800}
+</style><section class="panel wallet-panel" id="walletPanel" hidden>
+  <div class="wallet-head"><div><span class="wallet-kicker">PORTEFEUILLE ZUMUYA</span><h2>Mon portefeuille</h2><p class="muted">Solde, encaissements de ventes et retraits sécurisés.</p></div><strong id="walletBalance">Chargement…</strong></div>
+  <div class="wallet-actions"><button type="button" class="btn" id="walletDeposit">＋ Déposer de l’argent</button><button type="button" class="btn secondary" id="walletWithdrawToggle">↗ Demander un retrait</button></div>
+  <p class="muted" id="walletNotice">Les dépôts seront activés après raccordement du prestataire de paiement et de son webhook sécurisé.</p>
+  <form id="walletWithdrawForm" class="grid" hidden>
+    <label>Montant à retirer (FCFA)<input name="amount" type="number" min="1" step="1" required></label>
+    <label>Moyen de paiement<select name="method" required><option value="">Choisir</option><option value="mobile_money">Mobile Money</option><option value="bank">Virement bancaire</option></select></label>
+    <label>Numéro / référence du bénéficiaire<input name="destination" required placeholder="Numéro Mobile Money ou RIB"></label>
+    <div><button class="btn" type="submit">Envoyer la demande</button></div>
+  </form>
+  <h3>Historique des opérations</h3><div id="walletLedger" class="wallet-ledger"><p class="muted">Chargement…</p></div>
+</section><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="wallet.js?v=2"></script></body></html>

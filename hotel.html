@@ -19,7 +19,9 @@ async function hub(r){const h=r.hotel||{},sub=ZS.subOk(r);
  '<div class="kpis" id="k"></div><div class="flow">'+
  '<a class="card step" href="resto-restaurant.html#hotel" style="text-decoration:none"><i>01</i><b>🏨 Gérer mon hôtel</b><span>Paramètres, service en chambre, notes de chambre, caisse et catalogue.</span></a>'+
  '<a class="card step" href="resto-restaurant.html#orders" style="text-decoration:none"><i>02</i><b>🍽️ Commandes en cours</b><span>Acceptation, préparation et remise en chambre.</span></a>'+
- '<a class="card step" href="livraison.html" style="text-decoration:none"><i>03</i><b>📦 Livraison coordonnée</b><span>Commandes à l’extérieur : livreur libre le plus proche, suivi en direct.</span></a></div>'+
+ '<a class="card step" href="livraison.html" style="text-decoration:none"><i>03</i><b>📦 Livraison coordonnée</b><span>Commandes à l’extérieur : livreur libre le plus proche, suivi en direct.</span></a>
+ <a class="card step" href="index.html#catalogue-public" style="text-decoration:none"><i>04</i><b>🌾 Voir les fournisseurs agricoles</b><span>Découvrez les producteurs, comparez les produits et envoyez vos demandes de réapprovisionnement.</span></a>
+ <a class="card step" href="messagerie.html" style="text-decoration:none"><i>05</i><b>💬 Messagerie fournisseurs</b><span>Discutez directement avec vos partenaires et suivez vos échanges.</span></a></div>'+
  '<div class="sec-title"><h2>Dernières commandes de l’hôtel</h2></div><div class="card tw"><table class="table"><thead><tr><th>Réf.</th><th>Service</th><th>Chambre</th><th>Montant</th><th>Statut</th></tr></thead><tbody id="t"><tr><td colspan="5">Chargement…</td></tr></tbody></table></div>';
  try{const os=(await ZS.orders()).filter(o=>o.restId===r.id),day=t=>new Date(t).toDateString(),done=['terminée','refusée','annulée'];
   const act=os.filter(o=>!done.includes(o.status)),room=os.filter(o=>o.deliveryMode==='room'&&!done.includes(o.status)),tod=os.filter(o=>day(o.created||Date.now())===day(Date.now()));

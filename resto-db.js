@@ -4,7 +4,30 @@ var CF=window.ZUMAYA_CONFIG||{};
 var URL=CF.SUPABASE_URL;
 var KEY=CF.SUPABASE_ANON_KEY;
 var T=['users','rests','orders','chats'],TB={users:'rg_users',rests:'rg_rests',orders:'rg_orders',chats:'rg_chats'},LS='rm_db',PAYID='__ownerpay',CP='__chat_',PREF='resolution=merge-duplicates,return=minimal';
-var H={apikey:KEY,Authorization:'Bearer '+KEY,'Content-Type':'application/json'};
+/* Session Supabase de l'utilisateur connecté : ses requêtes partent avec SON jeton (et non la clé publique anonyme),
+   sinon la base refuse l'écriture (erreur 401 / 42501 « Synchronisation impossible »). */
+function sess(){try{for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);
+  if(/^sb-.*-auth-token$/.test(k)){var v=JSON.parse(localStorage.getItem(k)||'null'),s=v&&(v.currentSession||v);
+   if(s&&s.access_token&&s.user&&s.user.id&&(!s.expires_at||s.expires_at*1000>Date.now()+10000))return s}}}catch(e){}return null}
+function hd(){var s=sess();return {apikey:KEY,Authorization:'Bearer '+(s?s.access_token:KEY),'Content-Type':'application/json'}}
+function me(){var s=sess();return s?s.user.id:null}
+function isPlatformOwner(){var u=me();try{return !!u&&sessionStorage.getItem('zg_owner_'+u)==='1'}catch(e){return false}}
+var AUTHK=['authId','ownerAuthId','clientAuthId','driverAuthId','restaurantOwnerAuthId'];
+/* Les règles de sécurité de la base (RLS) reconnaissent une ligne grâce à ces identifiants : on les ajoute à l'envoi. */
+function stamp(t,row){
+  var uid=me();if(!uid||!row||!row.data)return {id:row.id,data:row.data,isNew:row.isNew};
+  var o=JSON.parse(JSON.stringify(row.data)),U=cache.users||[],R=cache.rests||[];
+  function ownerOf(restId){var r=R.find(function(y){return y.id==restId});if(r&&r.ownerAuthId)return r.ownerAuthId;
+    var u=U.find(function(y){return y.restId==restId&&y.role==='restaurant'&&y.portalId&&!y.staff});return u?u.portalId:null}   /* jamais un employé : le propriétaire reste le compte principal */
+  if(t==='users'){if(o.portalId&&!o.authId)o.authId=o.portalId}
+  else if(t==='rests'){if(!o.ownerAuthId){var ow=ownerOf(o.id);if(!ow){var cu=U.find(function(y){return y.portalId===uid&&y.restId==o.id&&!y.staff});if(cu)ow=uid}if(ow)o.ownerAuthId=ow}}
+  else if(t==='orders'){
+    var c=U.find(function(y){return y.id==o.clientId});if(!o.clientAuthId&&c&&c.portalId)o.clientAuthId=c.portalId;
+    if(!o.restaurantOwnerAuthId){var ro=ownerOf(o.restId);if(ro)o.restaurantOwnerAuthId=ro}
+    if(o.driverId&&!o.driverAuthId){var dr=U.find(function(y){return y.id==o.driverId});if(dr&&dr.portalId)o.driverAuthId=dr.portalId}}
+  else if(t==='chats'){if(!o.authId)o.authId=uid}
+  return {id:row.id,data:o,isNew:row.isNew}}
+function mine(o,uid){return AUTHK.some(function(k){return o[k]===uid})}
 var cache={users:[],rests:[],orders:[],chats:[],ownerPay:null},snap={users:{},rests:{},orders:{},chats:{}},snapPay='null',chatLoc={},chatsTable=true,pending=0,ver=0,online=false;
 
 function clone(o){return JSON.parse(JSON.stringify(o))}
@@ -26,7 +49,7 @@ function loadSync(){
   T.forEach(function(t){
     try{
       var x=new XMLHttpRequest();x.open('GET',URL+'/rest/v1/'+TB[t]+'?select=id,data&order=seq.asc',false);
-      for(var k in H)x.setRequestHeader(k,H[k]);x.send();
+      var H=hd();for(var k in H)x.setRequestHeader(k,H[k]);x.send();
       if(x.status!==200)throw 0;R[t]=JSON.parse(x.responseText);if(t=='chats')chatsTable=true;
     }catch(e){if(t=='chats'){R.chats=[];chatsTable=false}else ok=false}
   });
@@ -48,7 +71,7 @@ function flag(m){var b=document.getElementById('rgdb-banner');
   b.textContent='⚠️ Synchronisation impossible : '+m}
 function send(method,path,body,prefer,quiet){
   pending++;
-  var h=Object.assign({},H);if(prefer)h.Prefer=prefer;
+  var h=hd();if(prefer)h.Prefer=prefer;
   return fetch(URL+'/rest/v1/'+path,{method:method,headers:h,body:body?JSON.stringify(body):undefined})
     .then(function(r){if(r.ok)return;return r.text().then(function(t){throw new Error(r.status+' '+t.slice(0,140))})})
     .then(function(){pending--;if(!retry.length)flag('');return true},
@@ -56,7 +79,16 @@ function send(method,path,body,prefer,quiet){
 }
 function inList(ids){return 'id=in.('+ids.map(function(i){return '"'+String(i).replace(/"/g,'')+'"'}).join(',')+')'}
 function put(t,up){
-  if(t!=='chats'){send('POST',TB[t]+'?on_conflict=id',up,PREF);return}
+  var uid=me();
+  if(uid){var own=isPlatformOwner();
+    up=up.map(function(r){return stamp(t,r)}).filter(function(r){return own||mine(r.data,uid)});
+    if(!up.length)return}
+  if(t!=='chats'){
+    if(!uid){send('POST',TB[t]+'?on_conflict=id',up.map(function(r){return {id:r.id,data:r.data}}),PREF);return}
+    var ins=up.filter(function(r){return r.isNew}).map(function(r){return {id:r.id,data:r.data}});
+    if(ins.length)send('POST',TB[t]+'?on_conflict=id',ins,PREF);
+    up.filter(function(r){return !r.isNew}).forEach(function(r){send('PATCH',TB[t]+'?id=eq.'+encodeURIComponent(r.id),{data:r.data},'return=minimal')});
+    return}
   var tb=[],fb=[];
   up.forEach(function(x){var l=chatLoc[x.id]||(chatsTable?'t':'f');chatLoc[x.id]=l;if(l=='t')tb.push(x);else fb.push({id:CP+x.id,data:x.data})});
   if(tb.length)send('POST','rg_chats?on_conflict=id',tb,PREF,true).then(function(ok){
@@ -82,7 +114,7 @@ var D={
       var list=d[t]||[],up=[],seen={},del=[];
       list.forEach(function(x){
         if(!x||x.id==null)return;seen[x.id]=1;var s=JSON.stringify(x);
-        if(base[t][x.id]!==s){up.push({id:String(x.id),data:x});
+        if(base[t][x.id]!==s){up.push({id:String(x.id),data:x,isNew:base[t][x.id]===undefined});
           var i=cache[t].findIndex(function(y){return y.id==x.id});
           if(i>=0)cache[t][i]=clone(x);else cache[t].push(clone(x));snap[t][x.id]=s}
       });
@@ -104,7 +136,7 @@ function poll(){
   if(retry.length){var q=retry.splice(0);q.forEach(function(a){send.apply(null,a)});return}
   var v=ver;
   Promise.all(T.map(function(t){
-    return fetch(URL+'/rest/v1/'+TB[t]+'?select=id,data&order=seq.asc',{headers:H}).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(x){if(t=='chats')chatsTable=true;return x}).catch(function(e){
+    return fetch(URL+'/rest/v1/'+TB[t]+'?select=id,data&order=seq.asc',{headers:hd()}).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(x){if(t=='chats')chatsTable=true;return x}).catch(function(e){
       if(t=='chats'){chatsTable=false;return []}throw e});
   })).then(function(res){
     if(v!==ver||pending>0)return;

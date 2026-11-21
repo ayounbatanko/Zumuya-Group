@@ -122,9 +122,12 @@ nav:empty{display:none;padding:0;border:0;height:0;overflow:hidden}
 .gps-need{border-color:var(--gold2);background:rgba(255,183,3,.12)}
 .qty-row{display:flex;align-items:center;gap:8px}
 .qty-row span{min-width:28px;text-align:center;font-weight:700}
+</style><style>
+.client-nav-action{display:inline-flex;align-items:center;justify-content:center;white-space:nowrap;text-decoration:none;padding:9px 13px;border-radius:12px;border:1px solid var(--bd);background:var(--card);color:var(--ink);font-weight:800;font-size:13px}
+@media(max-width:600px){nav{padding:9px;gap:6px}.client-nav-action{padding:8px 10px;font-size:12px}}
 </style></head><body>
 <div id="hdr"></div><nav id="nav"></nav><main id="m"></main><div id="receipt"></div>
-<script src="config.js"></script><script src="resto-db.js"></script><script src="resto-portal-bridge.js?v=2"></script><script src="resto-notif.js"></script>
+<script src="config.js"></script><script src="resto-db.js?v=3"></script><script src="resto-portal-bridge.js?v=2"></script><script src="resto-notif.js"></script>
 <script src="resto-chat.js"></script>
 <script>let SH=window;try{if(window.parent!==window&&window.parent.nav)SH=window.parent}catch(e){}
 SH.__m=SH.__m||{l:{},s:{}};
@@ -194,7 +197,7 @@ if(navigator.geolocation){
   );
 }
 const ST=['en attente','acceptée','préparée','colis récupéré','en route','arrivé','terminée'];
-function render(){hdr(U.name);nav.innerHTML=['restos','myorders','support','account'].map(k=>`<button class="${k==tab?'on':''}" onclick="tab='${k}';cur=null;menuQ='';render()">${t(k)}</button>`).join('');m.innerHTML=tab=='account'?passwordCard():tab=='support'?RGChat.userView(U):(tab=='restos'?(cur?menu():list()):orders())}
+function render(){hdr(U.name);nav.innerHTML=['restos','myorders','support','account'].map(k=>`<button class="${k==tab?'on':''}" onclick="tab='${k}';cur=null;menuQ='';render()">${t(k)}</button>`).join('')+'<a class="client-nav-action" href="messagerie.html">💬 Messagerie</a>';m.innerHTML=tab=='account'?passwordCard():tab=='support'?RGChat.userView(U):(tab=='restos'?(cur?menu():list()):orders())}
 function dist(d){return d==null?'':d<1?' — '+Math.round(d*1000)+' m':' — '+d.toFixed(1)+' km'}
 function list(){let rs=D.get().rests.filter(r=>subInfo(r).ok);
  rs=rs.map(r=>({r,d:pos&&r.lat!=null&&r.lng!=null?km(pos,[r.lat,r.lng]):null})).sort((a,b)=>(a.d??1e9)-(b.d??1e9));

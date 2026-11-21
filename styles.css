@@ -206,3 +206,49 @@ footer>div{gap:13px}
 .pc-more{display:block;width:calc(100% - 36px);margin:0 18px 16px;min-height:44px;border:1px solid var(--line);border-radius:10px;background:#fff;font-weight:700;color:var(--navy);cursor:pointer}
 .pc-err{background:#fdecea;color:#a4281b;padding:10px 14px;border-radius:10px;margin-bottom:14px;font-size:14px;font-weight:600}
 @media(max-width:600px){.pc-dishes{grid-template-columns:repeat(2,1fr);padding:12px}.pc-head{padding:14px}}
+
+/* Visuel réseau technologique — lignes lumineuses, profondeur et animation discrète */
+.hero{background:radial-gradient(ellipse at 72% 45%,#17616b 0%,#173f5b 26%,#102b45 62%,#091d32 100%)}
+.hero:before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.23;background:linear-gradient(115deg,transparent 0 47%,#35d6c2 48%,transparent 49%),linear-gradient(25deg,transparent 0 48%,#e9b94f 49%,transparent 50%);background-size:150px 150px,190px 190px;mask-image:radial-gradient(ellipse at center,#000,transparent 82%)}
+.hero-visual:before{content:"";position:absolute;width:min(78%,440px);aspect-ratio:1;border:1px solid #43d9ca55;border-radius:50%;box-shadow:0 0 0 24px #2ac9bd0b,0 0 0 55px #2ac9bd08,0 0 65px #20b6a633;animation:networkPulse 5s ease-in-out infinite}
+.hero-visual:after{content:"";position:absolute;width:80%;height:1px;background:linear-gradient(90deg,transparent,#31cfc2aa,#e9b94f99,transparent);transform:rotate(-28deg);box-shadow:0 0 18px #31cfc2;animation:networkScan 7s linear infinite}
+.orbit-chip{border:1px solid #36c9bd77;background:#102f48;color:#eafafa;box-shadow:0 0 22px #19cbb633,inset 0 0 18px #1ab7a515}
+.core{border:1px solid #4bd8ca;box-shadow:0 0 0 8px #25c7b51c,0 22px 75px #0008;transform:none}
+.ring{border-color:#31c9bd55;box-shadow:0 0 25px #26b8aa22}
+@keyframes networkPulse{0%,100%{transform:scale(.96);opacity:.7}50%{transform:scale(1.04);opacity:1}}
+@keyframes networkScan{0%{translate:-12% 0;opacity:.2}50%{opacity:1}100%{translate:12% 0;opacity:.2}}
+@media(prefers-reduced-motion:reduce){.hero-visual:before,.hero-visual:after{animation:none}}
+
+/* Marketplace prioritaire et carte stylisée du Niger */
+#catalogue-public{scroll-margin-top:90px}
+#catalogue-public .section-heading{margin-bottom:20px}
+.niger-map-card{position:absolute;right:3%;bottom:8%;width:min(220px,38%);padding:12px 14px;border:1px solid #43d9ca66;border-radius:18px;background:linear-gradient(145deg,#0a2944dd,#0e3b50dd);box-shadow:0 16px 42px #0005,inset 0 0 24px #28cbbb12;backdrop-filter:blur(10px);z-index:3}
+.niger-map-card>span{display:block;font:700 9px ui-monospace,monospace;letter-spacing:.16em;color:#76e9dc}
+.niger-map-card svg{display:block;width:100%;height:auto;max-height:130px;margin:3px auto}
+.niger-map-card>b{display:block;text-align:center;font:800 10px ui-monospace,monospace;letter-spacing:.12em;color:#f0cf88}
+@media(max-width:760px){.niger-map-card{right:2%;bottom:4%;width:34%;padding:8px}.niger-map-card svg{max-height:85px}.niger-map-card>b{font-size:8px}.niger-map-card>span{font-size:7px}}
+@media(max-width:520px){.niger-map-card{width:36%;bottom:3%}.hero-visual{min-height:430px}}
+
+/* Sélecteur de catégorie du catalogue public */
+.pc-cats{display:flex;gap:8px;margin:0 0 14px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.pc-cats::-webkit-scrollbar{display:none}
+.pc-cats button{flex:0 0 auto;min-height:44px;padding:0 16px;border:1px solid var(--line);border-radius:999px;background:#fff;color:inherit;font:inherit;font-weight:700;cursor:pointer;white-space:nowrap}
+.pc-cats button i{font-style:normal;font-size:.8em;opacity:.7;margin-left:4px}
+.pc-cats button.on{background:#102b45;border-color:#102b45;color:#fff}
+.pc-cats button.on i{opacity:.9}
+
+/* Visuel réseau : 5 pôles actifs, sans carte — rendu technologique */
+.niger-map-card{display:none!important}
+.hero-visual.tech{height:440px}
+.tech-lines circle.halo{fill:none;stroke:#2dd4bf;stroke-width:1;opacity:.5;animation:halo 2.6s ease-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes halo{0%{transform:scale(.5);opacity:.8}100%{transform:scale(1.8);opacity:0}}
+.tnode{background:linear-gradient(145deg,#0b2d47ee,#0d4254ee);border:1px solid #2dd4bf77;box-shadow:0 0 18px #2dd4bf33,inset 0 0 14px #2dd4bf14;backdrop-filter:blur(6px)}
+.tnode .ti{font-size:14px;line-height:1}
+.tnode .live{width:6px;height:6px;border-radius:50%;background:#34e39a;box-shadow:0 0 8px #34e39a;animation:blink 1.6s steps(2) infinite;margin-left:2px}
+@media(max-width:650px){.hero-visual.tech{height:380px}.tnode{gap:5px;padding:7px 8px;font-size:10px}.tnode em{font-size:8px;padding:1px 4px}.tnode .ti{font-size:12px}.tread.r2{font-size:8px;right:2%}}
+@media(prefers-reduced-motion:reduce){.tech-lines circle.halo,.tnode .live{animation:none}}
+
+/* Catalogue d'accueil : onglet « Tout » et Marketplace */
+.pc-cats{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;flex-wrap:nowrap}.pc-cats button{flex:0 0 auto}
+.pc-sec{margin:18px 0 8px;font-size:18px}
+.market-buy{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:8px;flex-wrap:wrap}

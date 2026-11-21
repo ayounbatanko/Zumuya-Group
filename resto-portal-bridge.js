@@ -18,9 +18,22 @@ function portal(){try{for(var i=0;i<localStorage.length;i++){var k=localStorage.
    if(s&&s.access_token&&s.user&&s.user.id)return s}}}catch(e){}return null}
 var s=portal();if(!s)return;
 var pu=s.user,md=pu.user_metadata||{},type=md.account_type;
-var ROLE={restaurant:'restaurant',hotel:'restaurant',customer:'client',delivery:'driver'}[type];
+var ROLE={restaurant:'restaurant',hotel:'restaurant',staff:'restaurant',customer:'client',delivery:'driver'}[type];
 if(!ROLE)return;
-if((type==='restaurant'||type==='hotel')&&!md.organization_id)return;   /* fiche partenaire pas encore créée : le portail la demande */
+var isStaff=type==='staff';
+if((type==='restaurant'||type==='hotel'||isStaff||type==='delivery')&&!md.organization_id)return;   /* livreur / employé : uniquement s'ils ont été rattachés par un restaurant */
+/* Rattachement officiel (serveur) : statut + permissions d'un employé ou d'un livreur créé par un restaurant.
+   Appel synchrone : la page doit démarrer avec les bons droits. Une réponse absente = aucun accès accordé. */
+function membership(){try{var C=window.ZUMAYA_CONFIG,x=new XMLHttpRequest();x.open('POST',C.SUPABASE_URL+'/rest/v1/rpc/rg_my_membership',false);
+  x.setRequestHeader('apikey',C.SUPABASE_ANON_KEY);x.setRequestHeader('Authorization','Bearer '+s.access_token);x.setRequestHeader('Content-Type','application/json');x.send('{}');
+  if(x.status===200)return JSON.parse(x.responseText)}catch(e){}return undefined}
+var MB=(isStaff||type==='delivery')?membership():null;
+if((isStaff||type==='delivery')&&(!MB||MB.org_id!==md.organization_id||MB.kind!==(isStaff?'staff':'driver'))){window.ZPERM={denied:true};
+  try{var d0=D.get(),b0=d0.users.find(function(x){return x.portalId===pu.id});if(b0&&!b0.disabled){b0.disabled=true;D.save(d0)}}catch(e){}return}
+window.ZPERM=MB?{kind:MB.kind,status:MB.status,permissions:MB.permissions||[],job_title:MB.job_title||'',org_id:MB.org_id}:null;
+var memberOff=!!MB&&MB.status!=='active';
+if(memberOff){try{var d1=D.get(),b1=d1.users.find(function(x){return x.portalId===pu.id});if(b1&&!b1.disabled){b1.disabled=true;D.save(d1)}}catch(e){}window.ZPERM.denied=true;return}
+   /* fiche partenaire pas encore créée : le portail la demande */
 var fromPortal=true;
 var d=D.get(),cur=sget('uid'),curU=cur&&d.users.find(function(x){return x.id==cur&&!x.disabled});
 if(curU&&curU.portalId===pu.id)return;   /* session déjà liée à ce compte portail */
@@ -29,7 +42,15 @@ var uid=function(){return Math.random().toString(36).slice(2,9)};
 function slug(t){return String(t||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'')}
 var u=d.users.find(function(x){return x.portalId===pu.id})||d.users.find(function(x){return x.role==='restaurant'&&email&&String(x.phone||'').toLowerCase()===email});
 var r=u&&u.restId&&d.rests.find(function(x){return x.id===u.restId})||d.rests.find(function(x){return x.portalOrgId===md.organization_id});
-if(ROLE==='client'||ROLE==='driver'){
+if(ROLE==='driver'){
+  /* Livreur : il n'existe que parce qu'un restaurant l'a créé (Mon équipe). Il est toujours rattaché à CE restaurant. */
+  var rr=d.rests.find(function(x){return x.portalOrgId===md.organization_id});
+  var du=d.users.find(function(x){return x.portalId===pu.id&&x.role==='driver'});
+  if(!rr&&!(du&&du.restId))return;
+  if(!du){du={id:uid(),role:'driver',phone:email,name:String(md.name||email||'Livreur'),portalId:pu.id,email:email,created:Date.now(),managed:true,restId:rr.id};d.users.push(du);D.save(d)}
+  else{var ch=false;if(rr&&du.restId!==rr.id){du.restId=rr.id;ch=true}if(!du.managed){du.managed=true;ch=true}if(du.disabled){du.disabled=false;ch=true}if(ch)D.save(d)}
+  sset('uid',du.id);window.ZBRIDGE={fresh:true,userId:du.id};return}
+if(ROLE==='client'){
   var uu=d.users.find(function(x){return x.portalId===pu.id&&x.role===ROLE});
   if(!uu){uu={id:uid(),role:ROLE,phone:email,name:String(md.name||email||'Utilisateur'),portalId:pu.id,email:email,created:Date.now()};
     if(String(uu.name).trim().toLocaleLowerCase('fr')==='ayouba tanko')uu.name=email||'Utilisateur';
@@ -37,6 +58,7 @@ if(ROLE==='client'||ROLE==='driver'){
   sset('uid',uu.id);window.ZBRIDGE={fresh:true,userId:uu.id};return}
 var orgName=md.organization_name||md.name||'Mon restaurant';
 var changed=false;
+if(!r&&isStaff)return;   /* un employé ne crée jamais d'établissement */
 if(!r){
   var sl=slug(orgName)||'resto',b=sl,i=2;while(d.rests.some(function(x){return x.slug==sl}))sl=b+'-'+i++;
   var hotel=type==='hotel';
@@ -50,9 +72,10 @@ if(!r){
 if(!u){
   /* « Ayouba Tanko » est réservé au propriétaire de la plateforme : jamais attribué à un compte partenaire */
   var nm=String(md.name||orgName).trim();if(nm.toLocaleLowerCase('fr')==='ayouba tanko')nm=orgName;
-  u={id:uid(),role:'restaurant',phone:email,name:nm,restId:r.id,portalId:pu.id,email:email};
+  u={id:uid(),role:'restaurant',phone:email,name:nm,restId:r.id,portalId:pu.id,email:email,staff:isStaff||undefined};
   d.users.push(u);changed=true;
 }else{
+  if(isStaff&&(!u.staff||u.disabled)){u.staff=true;u.disabled=false;changed=true}
   if(u.portalId!==pu.id){u.portalId=pu.id;changed=true}
   if(u.restId!==r.id){u.restId=r.id;changed=true}
 }

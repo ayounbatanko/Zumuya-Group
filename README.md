@@ -16,6 +16,8 @@
    - `sql-portail.sql`
    - `supabase-setup.sql` (activer `pg_cron` si demandé)
    - `ZUMUYA_EXTENSION_ESSAI.sql`
+   - `07_portefeuilles_commissions.sql`
+   - `08_messagerie_acteurs.sql`
 5. Créer un compte sur `compte.html`, puis (optionnel) devenir propriétaire en décommentant la dernière requête de `sql-portail.sql` avec votre e-mail.
 
 > Ne jamais committer de clé `service_role`.
@@ -54,7 +56,14 @@ proprietaire.html           → Back-office propriétaire
 parametres.html             → Paramètres communs
 ```
 
-### Modules partagés
+### Portefeuilles et messagerie
+
+- `wallet.js` affiche le portefeuille dans les espaces client, agro, restaurant/hôtel et livreur.
+- `07_portefeuilles_commissions.sql` crée les soldes, le grand livre, les moyens de retrait et le taux de commission propriétaire (5 % par défaut, réglable de 0 à 30 %).
+- Le partage des fonds après vente doit être appelé exclusivement depuis un webhook/Edge Function après vérification du paiement (`rg_wallet_settle_sale`). Le dépôt Mobile Money/carte et le paiement effectif des retraits nécessitent les identifiants et webhooks d'un prestataire ; l'interface ne crédite donc pas artificiellement un compte.
+- `messagerie.html` / `messagerie.js` offrent des conversations privées entre acteurs. `08_messagerie_acteurs.sql` installe les tables et les politiques RLS.
+
+## Modules partagés
 
 - `zsession.js` — session et données publiques
 - `zguard.js` — contrôle d’accès par catégorie

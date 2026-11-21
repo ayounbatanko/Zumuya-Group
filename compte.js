@@ -1,11 +1,11 @@
 (()=>{'use strict';
 const $=s=>document.querySelector(s);
-let sb=null,mode='in';
-const ROLE_TYPES=['restaurant','hotel','delivery','agro_producer','agro_trader','commerce','business'];
-const roleToPartner={restaurant:'restaurant',hotel:'hotel',delivery:'delivery',agro_producer:'agro',agro_trader:'agro_trader',commerce:'commerce',business:'business'};
+let sb=null,mode='in',selectedCategory=null;
+const ROLE_TYPES=['restaurant','hotel','agro_producer','agro_trader','marketplace','delivery_service','commerce','business'];
+const roleToPartner={restaurant:'restaurant',hotel:'hotel',delivery:'delivery',agro_producer:'agro',agro_trader:'agro_trader',marketplace:'marketplace',delivery:'delivery_service',commerce:'commerce',business:'business'};
 /* L'identifiant de connexion du portail reste l'adresse e-mail ; le rôle est détecté depuis le profil après connexion. */
 const EMAIL_RE=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const LABEL={customer:'Client',restaurant:'Restaurant partenaire',hotel:'Hôtel / hébergement',delivery:'Livreur',agro_producer:'Producteur agricole',agro_trader:'Commerçant agricole'};
+const LABEL={customer:'Client',restaurant:'Restaurant partenaire',hotel:'Hôtel / hébergement',delivery:'Livreur (compte créé par un restaurant)',staff:'Employé (compte créé par un restaurant)',agro_producer:'Producteur agricole',agro_trader:'Commerçant agricole',marketplace:'Vendeur Marketplace',delivery_service:'Service de livraison'};
 function updateIdentityFields(){$('#email').required=true}
 const MIN=8;
 
@@ -15,8 +15,11 @@ function setMode(m,init){
   $('#tabIn').classList.toggle('active',!up);$('#tabUp').classList.toggle('active',up);
   $('#tabIn').setAttribute('aria-selected',String(!up));$('#tabUp').setAttribute('aria-selected',String(up));
   $('#nameWrap').hidden=!up;$('#confirmWrap').hidden=!up;$('#pwHelp').hidden=!up;
+  const picker=$('#categoryPicker'),form=$('#authForm');
+  if(up){selectedCategory=null;picker.hidden=false;form.hidden=true;$('#categoryBack').hidden=true;}
+  else{picker.hidden=true;form.hidden=false;}
   const categoryWrap=$('#categoryWrap');
-  if(categoryWrap)categoryWrap.hidden=!up;
+  if(categoryWrap)categoryWrap.hidden=true;
   $('#accountCategory').disabled=!up;$('#accountCategory').required=up;updateIdentityFields();
   $('#displayName').required=up;$('#passwordConfirm').required=up;
   $('#password').autocomplete=up?'new-password':'current-password';
@@ -36,14 +39,15 @@ function updateMatch(){
 }
 async function showAccount(user){
   const type=user.user_metadata?.account_type;
-  const routes={customer:'client-espace.html',restaurant:'resto-restaurant.html',hotel:'resto-restaurant.html',delivery:'resto-driver.html',agro_producer:'agro.html',agro_trader:'agro.html',commerce:'boutique.html'};
+  const routes={customer:'client-espace.html',restaurant:'resto-restaurant.html',hotel:'resto-restaurant.html',staff:'resto-restaurant.html',delivery:'resto-driver.html',agro_producer:'agro.html',agro_trader:'agro.html',marketplace:'marketplace.html',delivery_service:'livraison.html'};
+  const managed=type==='delivery'||type==='staff';   /* comptes gérés : jamais de fiche partenaire */
   const stay=/parametres|stay/.test(location.hash);
   /* Retour au catalogue : un visiteur parti se connecter depuis le panier y revient (clients uniquement, valable 30 min). */
   try{const b=(localStorage.getItem('zg_back')||'').split('|');localStorage.removeItem('zg_back');
     if(!stay&&type==='customer'&&b[0]&&Date.now()-(+b[1]||0)<18e5&&/^[a-z0-9._-]+\.html(#[\w-]*)?$/i.test(b[0])){location.replace(b[0]);return}}catch(e){}
   let owner=false;try{const {data}=await sb.rpc('rg_is_platform_owner');owner=data===true}catch(e){}
   if(owner&&!stay&&!sessionStorage.getItem('zumuya_redirected')){sessionStorage.setItem('zumuya_redirected','1');location.replace('proprietaire.html');return}
-  if(!owner&&type&&routes[type]&&!stay&&(type==='customer'||user.user_metadata?.organization_id)&&!sessionStorage.getItem('zumuya_redirected')){sessionStorage.setItem('zumuya_redirected','1');if(type==='restaurant'||type==='hotel')sessionStorage.setItem('zmy_portal','1');location.replace(routes[type]);return}
+  if(!owner&&type&&routes[type]&&!stay&&!sessionStorage.getItem('zumuya_redirected')){sessionStorage.setItem('zumuya_redirected','1');if(type==='restaurant'||type==='hotel')sessionStorage.setItem('zmy_portal','1');location.replace(routes[type]);return}
   sessionStorage.removeItem('zumuya_redirected');
   $('#auth').hidden=true;$('#account').hidden=false;$('#recovery').hidden=true;
   $('#accPhone').textContent=user.email||user.phone||'—';
@@ -54,12 +58,12 @@ async function showAccount(user){
   $('#ownerLink').hidden=!owner;$('#ownerResto').hidden=!owner;$('#ownerNotice').hidden=!owner;
   const lead=$('#roleLead');
   if(owner){lead.hidden=true}
-  else if(type==='customer'){lead.hidden=false;lead.textContent='Compte client : consultez les services ZUMAYA ou créez votre boutique sans ouvrir un deuxième compte.'}
+  else if(type==='customer'){lead.hidden=false;lead.textContent='Compte client : consultez les restaurants proches, leurs menus, et passez commande depuis votre espace.'}
+  else if(managed&&!ready){lead.hidden=false;lead.textContent='Ce compte est géré par un restaurant partenaire, mais il n’est rattaché à aucun établissement. Contactez votre responsable.'}
   else if(type&&!ready){lead.hidden=false;lead.textContent='Compte '+(LABEL[type]||'professionnel')+' : complétez la fiche de votre activité ci-dessous (« Devenir partenaire ») pour ouvrir votre espace.'}
   else{lead.hidden=true}
-  $('#partnerPanel').hidden=owner||(ready&&type!=='customer');
-  if(!owner&&(!ready||type==='customer')) initPartner(user);
-  await loadProfilePhoto(user);
+  $('#partnerPanel').hidden=owner||ready||managed;
+  if(!owner&&!ready&&!managed) initPartner(user);
   if(ready && type!=='customer') { const lead=$('#roleLead'); lead.hidden=false; lead.textContent='Votre espace professionnel est activé. Accédez directement aux outils réservés à votre catégorie.'; }
 }
 function showAuth(){$('#account').hidden=true;$('#recovery').hidden=true;$('#auth').hidden=false}
@@ -70,6 +74,7 @@ async function submit(e){
   const email=$('#email').value.trim().toLowerCase(),accountType=$('#accountCategory').value;
   if(!EMAIL_RE.test(email))return showMsg('Saisissez une adresse e-mail valide.');
   if(mode==='up'){
+    if(!selectedCategory)return showMsg('Choisissez d’abord une catégorie de compte.');
     if(!name)return showMsg('Saisissez votre nom complet.');
     if(password.length<MIN)return showMsg('Le mot de passe doit contenir au moins '+MIN+' caractères.');
     if(password!==confirm){updateMatch();return showMsg('Les deux saisies du mot de passe ne sont pas identiques.')}
@@ -104,67 +109,14 @@ function translate(err){
 }
 
 
-/* ===== Photo de profil (tous les comptes sauf Restaurant et Hôtel) ===== */
-async function loadProfilePhoto(user){
-  const panel=$('#profilePhotoPanel');
-  if(!panel||!sb||!user)return;
-  try{
-    const {data:profile,error}=await sb.from('rg_profiles')
-      .select('avatar_url,account_type').eq('user_id',user.id).maybeSingle();
-    if(error)throw error;
-    const type=profile?.account_type||user.user_metadata?.account_type||'customer';
-    const allowed=!['restaurant','hotel'].includes(type);
-    panel.hidden=!allowed;
-    if(!allowed)return;
-    const img=$('#profileAvatar');
-    if(profile?.avatar_url){img.src=profile.avatar_url;img.hidden=false;}
-    else {img.removeAttribute('src');img.hidden=true;}
-  }catch(err){console.warn('Chargement photo profil :',err.message);panel.hidden=true;}
-}
-async function uploadProfilePhoto(file){
-  if(!file)throw new Error('Choisissez une photo.');
-  const {data:{user},error:userError}=await sb.auth.getUser();
-  if(userError||!user)throw new Error('Connectez-vous pour modifier votre photo.');
-  const {data:profile,error:profileError}=await sb.from('rg_profiles')
-    .select('account_type').eq('user_id',user.id).single();
-  if(profileError)throw profileError;
-  if(['restaurant','hotel'].includes(profile.account_type))
-    throw new Error('Les comptes Restaurant et Hôtel ne disposent pas de photo personnelle.');
-  if(!['image/jpeg','image/png','image/webp'].includes(file.type))
-    throw new Error('Formats acceptés : JPG, PNG et WEBP.');
-  if(file.size>5*1024*1024)throw new Error('La photo ne doit pas dépasser 5 Mo.');
-  const ext=({'image/jpeg':'jpg','image/png':'png','image/webp':'webp'})[file.type];
-  const path=`${user.id}/${crypto.randomUUID()}.${ext}`;
-  const {error:uploadError}=await sb.storage.from('zumaya-profile-photos')
-    .upload(path,file,{cacheControl:'3600',upsert:false,contentType:file.type});
-  if(uploadError)throw uploadError;
-  const {data:urlData}=sb.storage.from('zumaya-profile-photos').getPublicUrl(path);
-  const {error:updateError}=await sb.from('rg_profiles')
-    .update({avatar_url:urlData.publicUrl}).eq('user_id',user.id);
-  if(updateError)throw updateError;
-  $('#profileAvatar').src=urlData.publicUrl;
-  $('#profileAvatar').hidden=false;
-  return urlData.publicUrl;
-}
-$('#profilePhotoForm')?.addEventListener('submit',async e=>{
-  e.preventDefault();
-  const input=$('#profilePhotoFile'),msg=$('#profilePhotoMsg'),btn=$('#profilePhotoSave');
-  msg.textContent='';msg.hidden=false;
-  try{
-    btn.disabled=true;msg.textContent='Enregistrement de la photo…';
-    await uploadProfilePhoto(input.files?.[0]);
-    msg.textContent='Photo de profil mise à jour.';msg.className='msg success';
-  }catch(err){msg.textContent=err.message||'Impossible d’enregistrer la photo.';msg.className='msg error';}
-  finally{btn.disabled=false;}
-});
-
 /* ===== Demande d'adhésion partenaire ===== */
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const F=(name,label,type='text',req=true,opts=null,full=false)=>({name,label,type,req,opts,full});
 const CATS=[
  {id:'restaurant',icon:'🍽️',label:'Restaurant',desc:'Restaurants, maquis, fast-foods',fields:[F('organization_name','Nom du restaurant'),F('city','Ville'),F('address','Adresse',"text",false),F('cuisine','Type de cuisine'),F('seats','Nombre de places','number',false),F('registration','N° d’immatriculation (RCCM / NIF)','text',false)]},
  {id:'hotel',icon:'🏨',label:'Hôtel',desc:'Hôtels, auberges, résidences',fields:[F('organization_name','Nom de l’établissement'),F('city','Ville'),F('address','Adresse','text',false),F('hotel_type','Type d’hébergement','select',true,['Hôtel','Auberge','Résidence meublée','Maison d’hôtes']),F('rooms','Nombre de chambres','number'),F('registration','N° d’immatriculation (RCCM / NIF)','text',false)]},
- {id:'delivery',icon:'📦',label:'Livreur',desc:'Livreurs indépendants ou sociétés de livraison',fields:[F('organization_name','Nom complet ou de la société'),F('city','Ville'),F('zone','Zone de livraison'),F('vehicle','Moyen de livraison','select',true,['Moto','Vélo','Voiture','Camionnette','Camion']),F('availability','Disponibilité','select',true,['Temps plein','Temps partiel','Week-end uniquement']),F('experience','Années d’expérience','number',false)]},
+ {id:'marketplace',icon:'🛍️',label:'Vendeur Marketplace',desc:'Boutiques, commerçants, grossistes et vendeurs en ligne',fields:[F('organization_name','Nom de la boutique'),F('city','Ville'),F('address','Adresse','text',false),F('products','Produits vendus'),F('market','Type de clientèle','select',true,['Particuliers (B2C)','Professionnels (B2B)','Entre particuliers (C2C)','Tous']),F('registration','N° d’immatriculation (RCCM / NIF)','text',false)]},
+ {id:'delivery',icon:'📦',label:'Service de livraison',desc:'Sociétés de livraison et coursiers indépendants',fields:[F('organization_name','Nom de la société ou du coursier'),F('city','Ville'),F('zone','Zone de livraison'),F('vehicle','Moyen de livraison','select',true,['Moto','Vélo','Voiture','Camionnette','Camion']),F('availability','Disponibilité','select',true,['Temps plein','Temps partiel','Week-end uniquement']),F('registration','N° d’immatriculation (RCCM / NIF)','text',false)]},
  {id:'commerce',icon:'🏪',label:'Boutique / commerce',desc:'Boutiques, magasins, grossistes',fields:[F('organization_name','Nom de la boutique'),F('city','Ville'),F('address','Adresse','text',false),F('products','Produits vendus'),F('outlets','Nombre de points de vente','number',false),F('registration','N° d’immatriculation (RCCM / NIF)','text',false)]},
  {id:'transport',icon:'🚕',label:'Transport',desc:'Chauffeurs, taxis, transporteurs',fields:[F('organization_name','Nom complet ou de la société'),F('city','Ville'),F('vehicle','Type de véhicule','select',true,['Taxi','Moto-taxi','Minibus','Bus','Camion']),F('capacity','Capacité (places ou tonnage)'),F('experience','Années d’expérience','number',false)]},
  {id:'services',icon:'🧰',label:'Prestataire de services',desc:'Artisans, techniciens, indépendants',fields:[F('organization_name','Nom ou raison sociale'),F('city','Ville'),F('trade','Métier / type de prestation'),F('experience','Années d’expérience','number',false),F('description','Décrivez vos prestations','textarea',true,null,true)]},
@@ -174,7 +126,7 @@ const CATS=[
  {id:'travel',icon:'🧭',label:'Tourisme & voyages',desc:'Agences, guides, hébergements touristiques',fields:[F('organization_name','Nom de l’agence ou du guide'),F('city','Ville'),F('offer_type','Type d’offre','select',true,['Agence de voyages','Guide','Hébergement touristique','Excursions']),F('destinations','Destinations proposées')]},
  {id:'business',icon:'📊',label:'Entreprise / institution',desc:'Entreprises, institutions, partenaires techniques',fields:[F('organization_name','Nom de l’entreprise ou de l’institution'),F('city','Ville'),F('partner_kind','Type de partenariat','select',true,['Commercial','Institutionnel','Technique','Paiement']),F('website','Site web','url',false)]}
 ];
-const LIVE=['restaurant','hotel','delivery','commerce','agro','agro_trader'];
+const LIVE=['restaurant','hotel','agro','agro_trader','marketplace','delivery'];   /* « delivery » retiré : les livreurs sont créés uniquement par un restaurant (Mon équipe) */
 CATS.splice(0,CATS.length,...CATS.filter(c=>LIVE.includes(c.id)));
 const COLS=['organization_name','city'];
 const STATUS={pending:'En attente',approved:'Acceptée',rejected:'Refusée'};
@@ -238,11 +190,11 @@ async function submitPartner(e){
   currentCat.fields.forEach(f=>{if(!COLS.includes(f.name)){const v=(fd[f.name]||'').trim();if(v)details[f.name]=f.type==='number'?Number(v):v}});
   const btn=$('#pSubmit');btn.disabled=true;
   try{
-    const roleMap={restaurant:'restaurant',hotel:'hotel',delivery:'delivery',agro:'agro_producer',agro_trader:'agro_trader',commerce:'commerce',business:'business'};
+    const roleMap={restaurant:'restaurant',hotel:'hotel',agro:'agro_producer',agro_trader:'agro_trader',commerce:'commerce',business:'business'};
     const accountType=roleMap[currentCat.id]||'business';
     const {data:org,error}=await sb.from('rg_organizations').insert({
       legal_name:fd.organization_name.trim(),public_name:fd.organization_name.trim(),country_code:fd.country_code||'CI',
-      organization_type:currentCat.id,verification_status:currentCat.id==='commerce'?'pending':'verified',owner_id:currentUser.id,
+      organization_type:currentCat.id,verification_status:'pending',owner_id:currentUser.id,
       city:fd.city.trim(),address:fd.address||null,latitude:fd.latitude?Number(fd.latitude):null,longitude:fd.longitude?Number(fd.longitude):null,
       contact_phone:fd.contact_phone.trim(),details
     }).select('id').single();
@@ -256,11 +208,11 @@ async function submitPartner(e){
     }
     closeFlow();
     $('#appList').innerHTML='<p class="empty">Compte professionnel activé. Votre espace est disponible.</p>';
-    const destinations={restaurant:'resto-restaurant.html',hotel:'resto-restaurant.html',delivery:'resto-driver.html',commerce:'boutique.html',agro:'agro.html',agro_trader:'agro.html'};
+    const destinations={restaurant:'resto-restaurant.html',hotel:'resto-restaurant.html',agro:'agro.html',agro_trader:'agro.html'};
     if(currentCat.id==='restaurant'||currentCat.id==='hotel')sessionStorage.setItem('zmy_portal','1');
     if(destinations[currentCat.id])location.href=destinations[currentCat.id];
   }catch(err){
-    pShow(/duplicate|unique/i.test(err.message||'')?'Vous avez déjà une demande active dans cette catégorie.':'Votre espace n’a pas pu être créé. Vérifiez les informations et réessayez.');
+    pShow(/duplicate|unique/i.test(err.message||'')?'Vous avez déjà une demande active dans cette catégorie.':'Votre demande n’a pas pu être envoyée. Réessayez dans un instant.');
   }finally{btn.disabled=false}
 }
 $('#startPartner').addEventListener('click',()=>{renderCats();$('#partnerFlow').hidden=false;$('#startPartner').hidden=true;$('#stepCat').hidden=false;$('#partnerForm').hidden=true});
@@ -318,6 +270,15 @@ $('#pwForm').addEventListener('submit',async e=>{
 });
 
 document.addEventListener('click',e=>{
+  const cat=e.target.closest('[data-account-type]');
+  if(cat){
+    selectedCategory=cat.dataset.accountType;$('#accountCategory').value=selectedCategory;
+    $('#categoryPicker').hidden=true;$('#authForm').hidden=false;$('#categoryBack').hidden=false;
+    $('#authTitle').textContent='Créer votre compte — '+(LABEL[selectedCategory]||'Compte professionnel');
+    $('#authLead').textContent='Renseignez vos informations pour créer votre compte.';
+    $('#displayName').focus();return;
+  }
+  if(e.target.closest('#categoryBack')){$('#categoryPicker').hidden=false;$('#authForm').hidden=true;$('#categoryBack').hidden=true;return}
   const t=e.target.closest('[data-mode]');if(t){setMode(t.dataset.mode);return}
   const eye=e.target.closest('[data-eye]');
   if(eye){const i=document.getElementById(eye.dataset.eye),show=i.type==='password';i.type=show?'text':'password';eye.textContent=show?'Masquer':'Afficher'}
