@@ -1,0 +1,18 @@
+ZUMUYA MARKET — REFONTE INTERFACE + BOUTIQUE VENDEUR
+
+Modifications :
+- Refonte visuelle du catalogue marketplace, cartes produits et responsive mobile.
+- Espace vendeur organisé en onglets : Boutique, Produit, Commandes.
+- Publication de produit avec jusqu'à 8 photos et 3 vidéos.
+- Téléversement média dans le bucket Supabase Storage commerce-media.
+- Preview locale des fichiers avant téléversement.
+- Support des colonnes media_urls et video_urls sur commerce_products.
+- L'espace boutique reste soumis aux contrôles/validation existants.
+
+INSTALLATION :
+1. Remplacer marketplace.html, market.js et market.css par ceux de cette archive.
+2. Dans Supabase SQL Editor, exécuter 12_marketplace_media.sql.
+3. Vérifier les policies RLS de commerce_products et commerce_stores déjà en place.
+4. Publier sur GitHub / hébergeur.
+
+Note : les vidéos et images sont publiques une fois téléversées, via le bucket public. Le SQL limite le dépôt aux utilisateurs authentifiés dans leur propre dossier UID. La taille maximale par fichier est fixée à 50 Mo. Pour une plateforme à fort trafic, prévoir une optimisation vidéo et une modération.
