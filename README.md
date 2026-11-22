@@ -18,9 +18,6 @@
    - `ZUMUYA_EXTENSION_ESSAI.sql`
    - `07_portefeuilles_commissions.sql`
    - `08_messagerie_acteurs.sql`
-   - `10_logistique_organisations.sql`
-   - `11_equipes_livreurs_approvisionnement.sql`
-   - `16_reseau_livraison_partenaire.sql` (nouveau réseau multi-entreprises)
 5. Créer un compte sur `compte.html`, puis (optionnel) devenir propriétaire en décommentant la dernière requête de `sql-portail.sql` avec votre e-mail.
 
 > Ne jamais committer de clé `service_role`.
@@ -65,14 +62,6 @@ parametres.html             → Paramètres communs
 - `07_portefeuilles_commissions.sql` crée les soldes, le grand livre, les moyens de retrait et le taux de commission propriétaire (5 % par défaut, réglable de 0 à 30 %).
 - Le partage des fonds après vente doit être appelé exclusivement depuis un webhook/Edge Function après vérification du paiement (`rg_wallet_settle_sale`). Le dépôt Mobile Money/carte et le paiement effectif des retraits nécessitent les identifiants et webhooks d'un prestataire ; l'interface ne crédite donc pas artificiellement un compte.
 - `messagerie.html` / `messagerie.js` offrent des conversations privées entre acteurs. `08_messagerie_acteurs.sql` installe les tables et les politiques RLS.
-
-## ZUMUYA LIVRAISON — réseau multi-entreprises
-
-- `livraison-entreprise.html` : tableau de bord société (missions, partenariats, livreurs, flotte, tarification, rapports).
-- `livraison-partenaires.html` : réception des demandes de partenariat et envoi de missions depuis les comptes restaurant, hôtel, agro et Marketplace.
-- `16_reseau_livraison_partenaire.sql` : partenariats, flotte, événements de mission, incidents, tarifs et RPC sécurisées.
-- Une société de livraison peut recevoir des missions uniquement après partenariat actif ; les partenaires destinataires répondent aux demandes depuis une future interface dédiée ou via les RPC.
-- Les montants affichés dans les rapports sont des frais associés aux missions, pas une preuve d’encaissement. Les paiements réels restent confirmés par les webhooks prestataires.
 
 ## Modules partagés
 
@@ -151,3 +140,6 @@ Code fourni pour déploiement et évolution de la plateforme ZUMUYA GROUP.
 Adapter `config.js` à votre projet Supabase avant mise en production.
 
 © ZUMUYA GROUP — L’Afrique de l’Ouest en réseau.
+
+### Écosystème multi-pôles
+La migration `16_ecosysteme_poles_interconnectes.sql` ajoute le catalogue des pôles, leur activation sur le compte unique, l'association organisation/pôle, les relations inter-entreprises et le flux commun d'événements métier. La console de collaboration est `ecosysteme.html`; l'espace entreprise de livraison est `livraison-entreprise.html`.

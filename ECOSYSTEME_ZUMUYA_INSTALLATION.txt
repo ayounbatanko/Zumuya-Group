@@ -1,0 +1,18 @@
+ZUMUYA GROUP — ECOSYSTEME MULTI-POLES
+
+1. Sauvegarder la base Supabase.
+2. Vérifier que les migrations initiales, 10_logistique_organisations.sql et 11_equipes_livreurs_approvisionnement.sql sont exécutées.
+3. Exécuter UNE SEULE FOIS (relançable) : 16_ecosysteme_poles_interconnectes.sql.
+4. Publier les fichiers du projet, notamment module-manager.js et ce fichier SQL.
+5. Dans Mon compte > Mes activités, activer les pôles souhaités.
+
+CONCEPT MIS EN PLACE
+- Compte utilisateur unique et plusieurs pôles activables.
+- Espaces métiers indépendants : restaurant, hôtel, agriculture, Marketplace et livraison.
+- Organisation pouvant être associée à plusieurs pôles.
+- Relations inter-entreprises avec demande et acceptation explicite.
+- Flux d'événements métier inter-pôles pour commandes, approvisionnement et expédition.
+- RLS : chaque entreprise ne lit que ses propres relations et événements entrants/sortants.
+
+IMPORTANT
+La migration crée la couche commune d'interopérabilité. Le raccordement détaillé de chaque bouton métier (création d'une commande, réservation d'un transporteur, paiement confirmé, webhook, etc.) doit appeler les fonctions/événements correspondants depuis le module concerné. Aucun paiement n'est réputé encaissé sans confirmation serveur du prestataire.
