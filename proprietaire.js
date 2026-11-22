@@ -29,7 +29,7 @@ async function start(){
 async function verify(s){session=s;
  const {data,error}=await sb.rpc('rg_is_platform_owner');if(error)throw error;
  if(data!==true){await sb.auth.signOut();session=null;throw Error('Ce compte ne figure pas dans la liste d’autorisation du propriétaire.')}
- $('#login').hidden=true;$('#shell').hidden=false;$('#who').textContent=s.user.email;show();await refresh()}
+ $('#login').hidden=true;$('#shell').hidden=false;$('#who').textContent=s.user.email;show();try{await refresh()}catch(e){fail('Connexion propriétaire validée, mais certaines données du tableau de bord ne se chargent pas : '+(e.message||'erreur inconnue')+'. Utilisez Actualiser après vérification des droits des tables.')}}
 
 /* ---------- Chargement des données ---------- */
 async function optional(p){try{const r=await p;return r.error?null:r}catch(e){return null}}

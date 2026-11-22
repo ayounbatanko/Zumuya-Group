@@ -1,0 +1,19 @@
+ZUMAYA GROUP — correctif d'interface du 22/11/2026
+
+Cette version repart de ZUMAYA_GROUP_INTEGRE_BASE_ORIGINALE.zip et conserve les pages, modules, scripts et migrations existants.
+
+Corrections incluses :
+- Gestionnaire des 12 pôles : affichage avec les codes réels du catalogue Supabase (restauration, livraison, etc.).
+- Formulaire de configuration individuel pour chaque pôle : nom d'activité, pays, ville, adresse, téléphone, description et visibilité catalogue.
+- Enregistrement de la configuration dans rg_user_modules.configuration via rg_ecosystem_set_module.
+- Les paramètres existants d'un pôle sont conservés lors de sa mise en pause.
+- Le tableau propriétaire reste ouvert si une requête de données échoue après authentification. Le message d'erreur est affiché sans déconnecter le propriétaire.
+- Aucun changement de propriétaire : tankobama73@gmail.com reste l'unique propriétaire autorisé.
+
+IMPORTANT — Données catalogue :
+L'inspection du projet Supabase azfunhfjmybekzakhtbu montre que les tables de données métier rg_rests, rg_organizations, rg_public_offers, rg_public_restaurants, rg_agro_products et commerce_products ne contiennent actuellement aucune fiche. Les archives ZIP contiennent le code et les migrations, pas les lignes des anciennes bases. Ce correctif ne fabrique pas de restaurants, produits ou comptes et ne supprime aucune donnée. Les anciens catalogues ne peuvent être réimportés qu'à partir d'une sauvegarde/export réel ou de l'ancienne base qui les contient.
+
+SUPABASE :
+Le RPC rg_ecosystem_set_module et le mécanisme de synchronisation des catalogues sont déjà présents dans le projet actuel. Ne relancez pas 00_RESET_ET_SCHEMA_COMPLET.sql : ce script pourrait réinitialiser des données.
+
+Déploiement : remplacez les fichiers du dépôt par le contenu de cette archive (ou téléversez l'archive décompressée). Le correctif ne requiert pas de changement de propriétaire.
