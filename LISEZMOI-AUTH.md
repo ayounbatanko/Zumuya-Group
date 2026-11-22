@@ -1,26 +1,23 @@
-# ZUMUYA GROUP — comptes, catégories et espaces (version 2.5)
+# Authentification ZUMUYA GROUP : e-mail pour tout le monde
 
-## Connexion : e-mail + mot de passe pour toutes les catégories
-`compte.html` : le visiteur choisit sa catégorie (client, restaurant, hôtel, livreur, producteur agricole, commerçant agricole), saisit son e-mail et un mot de passe (deux fois à l'inscription). Aucun SMS n'est utilisé ; « Mot de passe oublié » envoie un lien par e-mail. Les catégories Commerce et Entreprise sont masquées tant qu'elles n'ont pas d'espace.
+La page unique `compte.html` propose un sélecteur de catégorie (client, restaurant, hôtel, livreur, producteur, commerçant, commerce, entreprise). **Toutes les catégories se connectent et s'inscrivent avec adresse e-mail + mot de passe** (mot de passe saisi deux fois à l'inscription). Les libellés ne répètent plus « (e-mail) ».
 
-## Chaque catégorie arrive UNIQUEMENT dans son espace
-| Catégorie | Espace | Pages autorisées |
-|---|---|---|
-| Client | `client-espace.html` | `client-espace`, `resto-client` (restaurants, commandes) |
-| Restaurant | `resto-restaurant.html` | Tableau de bord, Caisse, Commandes, Menu, Historique, Rapport CA, Livreurs, Support, Paramètres (sans Module hôtel) ; `agro` |
-| Hôtel | `resto-restaurant.html` | Idem + **Module hôtel** |
-| Livreur | `resto-driver.html` | Courses, position |
-| Producteur / commerçant agricole | `agro.html` | Catalogue et demandes |
-| Propriétaire | `proprietaire.html`, `resto-owner.html` | Administration de toute la plateforme |
-Toutes les catégories : `parametres.html` (profil, e-mail, mot de passe, notifications, export, suppression du compte).
+Seule exception : un ancien compte client créé avec un numéro de téléphone peut encore se connecter grâce au lien « Mon compte client a été créé avec un numéro de téléphone » (connexion uniquement).
 
-`zguard.js` (chargé en tête de chaque page privée, attribut `data-roles`) renvoie toute catégorie non autorisée vers son propre espace, et les visiteurs sans session vers `compte.html`. C'est un aiguillage d'interface : la protection réelle des données doit venir des règles RLS de Supabase (à renforcer pour les tables Restauration).
+## Restaurants partenaires : plus de seconde connexion
 
-## Propriétaire (administrateur) — géré dans Supabase, pas dans GitHub
-Aucune adresse e-mail de propriétaire n'est écrite dans le code. Le propriétaire est la ligne de la table `rg_platform_owners` (fonction `rg_is_platform_owner()`), créée par SQL dans Supabase. Le privilège « propriétaire » fondé sur un nom (« Ayouba Tanko ») a été supprimé.
+Après connexion e-mail, un restaurant ayant sa fiche partenaire arrive directement sur son espace (`resto-restaurant.html`, tableau de bord RestoGest). Le fichier `resto-portal-bridge.js` (chargé par `resto-restaurant.html` et `resto-index.html`) reconnaît la session du portail, retrouve ou crée le compte local et la fiche restaurant, puis ouvre la session. L'écran « Gestion Multiples de Restaurant » ne redemande plus d'identifiants dans ce parcours. « Changer de compte » et « Déconnexion » dans le Service restent possibles.
 
-## Supabase
-1. SQL Editor : `SQL-TOUT-EN-UN.sql` (ou seulement `05_suppression_compte.sql` si la base est déjà installée).
-2. Authentication > Providers : Email activé. Phone peut rester désactivé.
-3. Authentication > Sign In / Providers > Email : « Confirm email » activé en production (nécessite un SMTP personnalisé : le service e-mail par défaut est très limité) ou désactivé pendant les essais.
-4. Authentication > URL Configuration : mettre l'adresse GitHub Pages du site dans « Site URL » et « Redirect URLs ».
+## Configuration Supabase Auth
+
+Dans Authentication > Providers :
+1. Activez **Email** pour tous les comptes. (**Phone** n'est utile que pour les anciens comptes clients.)
+2. Choisissez les règles de confirmation adaptées à votre exploitation. La confirmation par SMS nécessite un fournisseur SMS configuré ; la confirmation e-mail nécessite le service e-mail Supabase ou un SMTP personnalisé.
+
+## SQL
+
+Après le schéma principal, exécutez `04_auth_phone_email_profile.sql` dans SQL Editor. Il rend le déclencheur de profil compatible avec les comptes dont l'identifiant est un téléphone (email nul) comme avec les comptes e-mail.
+
+## Connexion
+
+Le champ identifiant est toujours l'adresse e-mail. Choisissez la même catégorie qu'à l'inscription. Les professionnels complètent ensuite leur fiche d'organisation depuis « Devenir partenaire » si elle n'a pas encore été créée.
