@@ -1,0 +1,41 @@
+MISE A JOUR ZUMAYA — PANIER UNIVERSEL, CATALOGUES, PORTEFEUILLE ET NOTIFICATIONS
+Date : 22/11/2026
+
+CONTENU DE CETTE MISE A JOUR
+- Ajout de Mon panier dans le tableau de bord de chaque compte.
+- Suivi des commandes universelles : attente, acceptée, préparation, prête, en livraison, livrée.
+- Choix du paiement à la livraison ou par portefeuille ZUMAYA.
+- Ajout de Mon portefeuille dans son propre onglet.
+- Demandes de recharge à partir des moyens configurés par l'administrateur.
+- Catalogue public transversal consultable depuis le compte, sans activation préalable du pôle.
+- Compteurs de notifications par pôle.
+- Synchronisation automatique des annonces Marketplace et Agro existantes vers le catalogue public central.
+- Configuration du site reliée au projet Supabase azfunhfjmybekzakhtbu.
+
+INSTALLATION GITHUB
+1. Décompresser cette archive.
+2. Remplacer les fichiers correspondants dans le dépôt GitHub par ceux de cette archive.
+3. Conserver tous les autres fichiers existants du dépôt.
+4. Publier les modifications GitHub Pages et tester avec un compte utilisateur connecté.
+
+SUPABASE
+La migration additive a déjà été appliquée au projet Supabase connecté :
+- universal_cart_wallet_notifications_20261122
+- sync_public_catalogues_wallet_security_20261122
+
+Ne pas exécuter le script 00_RESET_ET_SCHEMA_COMPLET.sql pour cette mise à jour.
+La base existante a été conservée.
+
+PAIEMENTS ET SECURITE
+- Le paiement interne portefeuille débite l'acheteur et crédite le vendeur dans une transaction atomique.
+- Le vendeur doit accepter la commande avant que l'acheteur puisse confirmer le paiement portefeuille.
+- Une recharge est enregistrée en attente et ne crédite pas le solde tant que l'administrateur ne l'a pas validée.
+- Les dépôts Mobile Money / banque ne sont pas une intégration automatique de paiement : pour une validation automatique, il faudra connecter un prestataire et vérifier ses webhooks côté serveur.
+- Aucun secret service_role n'est inclus dans les fichiers publics.
+- Les nouveaux objets disposent de politiques RLS.
+
+LIMITES A CONNAITRE
+- Le catalogue central reprend automatiquement les produits Marketplace et Agro existants. Les catalogues Restauration, Hôtel, Prestations et autres pôles devront être raccordés à rg_public_offers pour que toutes leurs annonces soient commandables dans le même panier universel.
+- La commande universelle du nouveau catalogue traite actuellement les offres une par une (un enregistrement par offre). Le panier permet plusieurs lignes et les envoie en commandes séparées.
+- Les notifications de commandes universelles sont prises en charge. Les notifications de messagerie des anciens modules nécessitent encore le raccordement de leurs événements de messages à rg_activity_notifications.
+- Les frais de livraison sont initialisés à zéro dans ce parcours générique ; il faudra relier le calcul tarifaire de chaque pôle avant activation commerciale réelle.

@@ -130,6 +130,8 @@
     <a href="livraison.html"><span class="ic">🛵</span>Livraison</a>
     <a href="ecosysteme.html"><span class="ic">🔗</span>Collaborations</a>
     <a href="index.html#services"><span class="ic">🛠️</span>Prestations</a>
+    <a href="#" data-view="basket"><span class="ic">🛒</span>Mon panier <i class="zcount" id="basketCount" hidden>0</i></a>
+    <a href="#" data-view="wallet"><span class="ic">👛</span>Mon portefeuille</a>
     <hr>
     <a href="parametres.html"><span class="ic">⚙️</span>Paramètres</a>
     <div class="dsig"><div class="af" aria-hidden="true">🌍</div><b>ZUMAYA <i>GROUP</i></b><em>Un seul écosystème, mille opportunités.</em></div>
@@ -151,26 +153,33 @@
     <div id="vOverview">
       <h2 class="dh2">🚀 Explorez et activez vos activités</h2>
       <div class="dgrid" id="dCards"></div>
-      <h2 class="dh2">👛 Mon portefeuille unique</h2>
-      <p class="dwalletnote">Un seul portefeuille pour toutes vos activités : ventes, commissions et retraits arrivent ici.</p>
-      <div class="dwallet"><section class="panel wallet-panel" id="walletPanel">
-  <div class="wallet-head"><div><span class="wallet-kicker">PORTEFEUILLE ZUMUYA</span><h2>Mon portefeuille</h2><p class="muted">Solde, encaissements de ventes et retraits sécurisés.</p></div><strong id="walletBalance">Chargement…</strong></div>
-  <div class="wallet-actions"><button type="button" class="btn" id="walletDeposit">＋ Déposer de l’argent</button><button type="button" class="btn secondary" id="walletWithdrawToggle">↗ Demander un retrait</button></div>
-  <p class="muted" id="walletNotice">Les dépôts seront activés après raccordement du prestataire de paiement et de son webhook sécurisé.</p>
-  <form id="walletWithdrawForm" class="grid" hidden>
-    <label>Montant à retirer (FCFA)<input name="amount" type="number" min="1" step="1" required></label>
-    <label>Moyen de paiement<select name="method" required><option value="">Choisir</option><option value="mobile_money">Mobile Money</option><option value="bank">Virement bancaire</option></select></label>
-    <label>Numéro / référence du bénéficiaire<input name="destination" required placeholder="Numéro Mobile Money ou RIB"></label>
-    <div><button class="btn" type="submit">Envoyer la demande</button></div>
-  </form>
-  <h3>Historique des opérations</h3><div id="walletLedger" class="wallet-ledger"><p class="muted">Chargement…</p></div>
-</section></div>
+      <section class="z-public-catalog">
+        <h2 class="dh2">🌍 Catalogues publics de tous les pôles</h2>
+        <p class="dwalletnote">Explorez les offres publiques, même sans avoir activé le pôle correspondant.</p>
+        <label class="z-search">Rechercher une offre<input id="zOfferSearch" type="search" placeholder="Produit, service, catégorie, fournisseur…"></label>
+        <div id="zPublicOffers" class="z-offers" aria-live="polite"><p class="muted">Chargement du catalogue…</p></div>
+      </section>
       <p id="dashMsg" role="status" aria-live="polite"></p>
       <div class="dbottom">
         <div><h2 class="dh2">💼 Mes activités configurées</h2><div class="dlist" id="dList"></div></div>
         <aside class="dhelp"><div class="face" aria-hidden="true">🎧</div><div><h3>Besoin d’aide ?</h3><p>Configurez uniquement les activités qui correspondent à vos besoins.</p><a class="dbtn" href="mailto:zumuyagroup@gmail.com?subject=Assistance%20ZUMAYA">❓ Assistance</a></div></aside>
       </div>
     </div>
+    <section id="vBasket" hidden>
+      <h2 class="dh2">🛒 Mon panier et mes commandes</h2>
+      <p class="dwalletnote">Retrouvez vos articles sélectionnés et suivez chaque commande jusqu’à sa livraison.</p>
+      <div class="z-basket-layout"><div><h3>Articles sélectionnés</h3><div id="zCartItems"></div><div class="z-checkout"><label>Mode de paiement<select id="zPaymentMode"><option value="cash_on_delivery">Espèces à la livraison</option><option value="wallet">Portefeuille ZUMAYA</option></select></label><label>Adresse de livraison<input id="zDeliveryAddress" placeholder="Ville, quartier, adresse précise"></label><button type="button" class="dbtn gold" id="zCheckout">Confirmer les commandes →</button></div></div>
+      <div><h3>Suivi de mes commandes</h3><div id="zMyOrders"><p class="muted">Chargement…</p></div></div></div>
+    </section>
+    <section id="vWallet" hidden>
+      <h2 class="dh2">👛 Mon portefeuille</h2>
+      <section class="panel wallet-panel" id="walletPanel">
+        <div class="wallet-head"><div><span class="wallet-kicker">PORTEFEUILLE ZUMAYA</span><h2>Mon solde disponible</h2><p class="muted">Un seul portefeuille pour toutes vos activités.</p></div><strong id="walletBalance">Chargement…</strong></div>
+        <h3>Recharger mon portefeuille</h3><p class="muted">Choisissez un moyen de dépôt configuré par l'administrateur. Le crédit intervient après vérification du paiement.</p>
+        <form id="zDepositForm" class="z-deposit-form"><label>Moyen de dépôt<select id="zDepositMethod" required><option value="">Chargement des moyens…</option></select></label><label>Montant (FCFA)<input id="zDepositAmount" type="number" min="1" step="1" required></label><label>Référence de transaction<input id="zDepositReference" placeholder="Référence du transfert"></label><label>Preuve de paiement (lien)<input id="zDepositProof" type="url" placeholder="https://…"></label><button class="dbtn gold" type="submit">Envoyer la demande de recharge</button></form>
+        <p id="walletNotice" class="muted" role="status"></p><h3>Historique des opérations</h3><div id="walletLedger" class="wallet-ledger"></div>
+      </section>
+    </section>
     <div id="vConfig" hidden>
       <h2 class="dh2">🧩 Configurer une activité</h2>
       <button type="button" class="dbtn line" id="dBack">← Retour à la vue d’ensemble</button>
@@ -182,7 +191,8 @@
 <script src="config.js"></script>
 <script src="module-manager.js?v=1"></script>
 <script src="wallet.js?v=3"></script>
-<script src="dashboard.js?v=5"></script>
+<script src="dashboard.js?v=6"></script>
+<script src="universal-account.js?v=1"></script>
 <script src="compte.js?v=15"></script>
 <script src="zchat.js"></script></body>
 </html>

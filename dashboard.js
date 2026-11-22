@@ -15,6 +15,7 @@ let sb=null,user=null,orgs=[],mods=[],busy=false;
 const say=(t,good)=>{const m=$('#dashMsg');if(m){m.textContent=t||'';m.className=good?'good':''}};
 function view(v){
   $('#vOverview').hidden=v!=='overview';$('#vConfig').hidden=v!=='config';
+  const vb=$('#vBasket'),vw=$('#vWallet');if(vb)vb.hidden=v!=='basket';if(vw)vw.hidden=v!=='wallet';
   $$('#dash .dside [data-view]').forEach(a=>a.classList.toggle('on',a.dataset.view===v||(v==='config'&&a.dataset.view==='activities')));
   closeSide();window.scrollTo({top:0});
 }
@@ -97,6 +98,7 @@ window.ZDASH={
     mount();say('');
     document.body.classList.add('dash-on');$('#dash').hidden=false;$('#account').hidden=true;
     view('overview');load();
+    if(window.ZUniversalAccount)window.ZUniversalAccount.open(sb,user);
     if(window.RGWalletLoad)window.RGWalletLoad();
   },
   hide(){document.body.classList.remove('dash-on');const d=$('#dash');if(d)d.hidden=true}
