@@ -1,0 +1,15 @@
+ZUMUYA GROUP — ACTIVATION DU RÉSEAU ZUMUYA LIVRAISON
+
+1. Sauvegardez votre projet Supabase et votre dépôt GitHub.
+2. Dans Supabase > SQL Editor, vérifiez que les migrations 00_RESET_ET_SCHEMA_COMPLET.sql, 10_logistique_organisations.sql et 11_equipes_livreurs_approvisionnement.sql ont déjà été exécutées.
+3. Exécutez ensuite 16_reseau_livraison_partenaire.sql. Cette migration est additive et relançable.
+4. Publiez tous les fichiers du dossier à la racine du dépôt GitHub, notamment livraison-entreprise.html, livraison.html, zguard.js, compte.js, zservice.css et le nouveau SQL.
+5. Connectez-vous avec un compte dont la fiche organisation est de type delivery_service / delivery / logistics. Le tableau de bord initialise alors son registre de société via rg_delivery_bootstrap().
+6. Vérifiez la fiche société, le statut de vérification, puis ajoutez les véhicules, les tarifs et envoyez des demandes de partenariat.
+7. Les partenaires doivent accepter la demande avant de pouvoir envoyer des missions à cette société.
+
+IMPORTANT
+- Ne mettez jamais de clé service_role dans le navigateur.
+- Les invitations et la création des comptes livreurs restent contrôlées côté serveur par les fonctions existantes.
+- Les paiements ne sont pas réputés encaissés par le seul affichage d'un montant : les webhooks du prestataire de paiement restent nécessaires.
+- Testez d'abord en environnement de préproduction avec des comptes de test et vérifiez les politiques RLS avant ouverture au public.

@@ -3,11 +3,15 @@
 (()=>{'use strict';
 const root=document.getElementById('pubCatalog');if(!root||!window.ZS)return;
 const esc=ZS.esc,ZC=window.ZC||{ctl:()=>'',headBtn:()=>'',init(){},setData(){}};
-let rests=[],pos=null,q='',sort='near',open={},err='',loading=true,agroProducts=[],mktProducts=[],agroCart=readAgroCart();
+let rests=[],pos=null,q='',sort='near',open={},err='',loading=true,agroProducts=[],mktProducts=[],orgs=[],agroCart=readAgroCart();
 const $=s=>root.querySelector(s);
 let cat=(()=>{try{const v=sessionStorage.getItem('zg_cat');return ['all','resto','hotel','agro','market'].includes(v)?v:'all'}catch(_){return 'all'}})();
-function catBar(){const nh=rests.filter(r=>ZS.isHotel(r)).length,nr=rests.length-nh,na=agroProducts.filter(p=>p.availability!=='unavailable').length,nm=mktProducts.length;
- return '<div class="pc-cats" role="tablist" aria-label="Catégorie de catalogue">'+[['all','✨ Tout',rests.length+na+nm],['resto','🍽️ Restaurants',nr],['hotel','🏨 Hôtels',nh],['agro','🌾 Produits agricoles',na],['market','🛍️ Marketplace',nm]].map(x=>'<button type="button" role="tab" data-cat="'+x[0]+'" class="'+(cat===x[0]?'on':'')+'" aria-selected="'+(cat===x[0])+'">'+x[1]+' <i>'+x[2]+'</i></button>').join('')+'</div>'}
+function phRests(){const known=new Set(rests.map(r=>r.portalOrgId).filter(Boolean)),names=new Set(rests.map(r=>(r.name||'').trim().toLowerCase()));
+ return orgs.filter(o=>(o.organization_type==='restaurant'||o.organization_type==='hotel')&&!known.has(o.id)&&!names.has((o.public_name||'').trim().toLowerCase()));}
+function phCard(o){const h=o.organization_type==='hotel';
+ return '<article class="pc-rest"><div class="pc-head"><div class="pc-logo">'+(h?'🏨':'🍽️')+'</div><div class="pc-g"><h3>'+esc(o.public_name)+'</h3><span class="pc-mut">'+esc([o.address,o.city].filter(Boolean).join(', ')||'Adresse non renseignée')+'</span><div class="pc-badges"><span class="pc-b">'+(h?'Hôtel':'Restaurant')+'</span><span class="pc-b grey">0 plat</span></div></div></div><p class="pc-mut" style="padding:14px 18px">Catalogue bientôt disponible.</p></article>'}
+function catBar(){const ph=phRests(),nph=ph.length,nph_h=ph.filter(o=>o.organization_type==='hotel').length,nh=rests.filter(r=>ZS.isHotel(r)).length+nph_h,nr=rests.length-rests.filter(r=>ZS.isHotel(r)).length+(nph-nph_h),na=agroProducts.filter(p=>p.availability!=='unavailable').length,nm=mktProducts.length;
+ return '<div class="pc-cats" role="tablist" aria-label="Catégorie de catalogue">'+[['all','✨ Tout',rests.length+nph+na+nm],['resto','🍽️ Restaurants',nr],['hotel','🏨 Hôtels',nh],['agro','🌾 Produits agricoles',na],['market','🛍️ Marketplace',nm]].map(x=>'<button type="button" role="tab" data-cat="'+x[0]+'" class="'+(cat===x[0]?'on':'')+'" aria-selected="'+(cat===x[0])+'">'+x[1]+' <i>'+x[2]+'</i></button>').join('')+'</div>'}
 function dishCard(r,p,k,fee){
  const img=p.imgs&&p.imgs[0]?'<img loading="lazy" src="'+esc(p.imgs[0])+'" alt="">':'<div class="pc-ph">🍽️</div>',act=ZC.ctl(r.id,k,p.n);
  return '<div class="pc-dish">'+img+'<div class="pc-in"><b>'+esc(p.n)+'</b><span class="pc-d">'+esc(p.desc||'')+'</span><span class="pc-pr">'+ZS.money(p.p,r.currency)+'</span>'+
@@ -32,7 +36,8 @@ function draw(){
  root.innerHTML=catBar()+'<div class="pc-bar"><input id="pcSearch" type="search" placeholder="'+(cat==='all'?'Rechercher un restaurant, un plat ou un produit…':cat==='market'?'Rechercher un produit ou une boutique…':cat==='agro'?'Rechercher un produit agricole…':cat==='hotel'?'Rechercher un hôtel ou un plat…':'Rechercher un restaurant ou un plat…')+'" value="'+esc(q)+'" aria-label="Rechercher un restaurant ou un plat">'+(cat==='agro'||cat==='market'?'':'<select id="pcSort" aria-label="Trier"><option value="near"'+(sort==='near'?' selected':'')+'>Les plus proches</option><option value="fee"'+(sort==='fee'?' selected':'')+'>Livraison la moins chère</option></select>')+(pos?'<span class="pc-b">📍 Position active</span>':'<button type="button" class="btn btn-gold" id="pcLoc">📍 Activer ma localisation</button>')+'</div>'+
   (err?'<div class="pc-err">'+esc(err)+'</div>':'')+
   (()=>{const showR=['all','resto','hotel'].includes(cat),showA=cat==='all'||cat==='agro',showM=cat==='all'||cat==='market';let out='';
-  if(showR){if(loading)out+='<p class="empty">Chargement des catalogues…</p>';else if(list.length)out+=(cat==='all'?'<h3 class="pc-sec">🍽️ Restaurants &amp; hôtels</h3>':'')+list.map(card).join('');else if(cat!=='all')out+='<p class="empty">Aucun '+(cat==='hotel'?'hôtel':'restaurant')+' partenaire disponible pour le moment.</p>'}
+  const phl=phRests().filter(o=>(cat==='all'||(cat==='hotel')===(o.organization_type==='hotel'))&&(!ql||(o.public_name||'').toLowerCase().includes(ql)));
+  if(showR){if(loading)out+='<p class="empty">Chargement des catalogues…</p>';else if(list.length||phl.length)out+=(cat==='all'?'<h3 class="pc-sec">🍽️ Restaurants &amp; hôtels</h3>':'')+list.map(card).join('')+phl.map(phCard).join('');else if(cat!=='all')out+='<p class="empty">Aucun '+(cat==='hotel'?'hôtel':'restaurant')+' partenaire disponible pour le moment.</p>'}
   if(showA){const a=agroHTML(cat==='all');out+=a}
   if(showM){out+=marketHTML(cat==='all')}
   if(cat==='all'&&!out.trim())out='<p class="empty">Aucun contenu disponible pour le moment.</p>';return out})();
@@ -45,6 +50,8 @@ function readAgroCart(){try{return JSON.parse(localStorage.getItem('zg_agro_cart
 function writeAgroCart(){try{localStorage.setItem('zg_agro_cart',JSON.stringify(agroCart))}catch(_){}}
 function agroHTML(hideEmpty){
  const products=agroProducts.filter(p=>p.availability!=='unavailable'&&(!q||((p.product_name+' '+p.category+' '+(p.owner?.business_name||'')).toLowerCase().includes(q.toLowerCase()))));
+ const prods=orgs.filter(o=>o.organization_type==='agro'||o.organization_type==='agro_trader');
+ if(!products.length&&prods.length)return '<section class="market-section"><div class="market-heading"><div><span class="market-kicker">PÔLE AGRICOLE</span><h3>Producteurs partenaires</h3><p>Les produits seront affichés dès leur publication.</p></div><span class="market-count">'+prods.length+' producteur'+(prods.length>1?'s':'')+'</span></div><div class="market-grid">'+prods.map(o=>'<article class="market-product"><div class="market-photo">🌱</div><div class="market-product-body"><span class="market-kicker">'+(o.organization_type==='agro'?'PRODUCTEUR':'COMMERÇANT AGRICOLE')+'</span><h4>'+esc(o.public_name)+'</h4><p>'+esc([o.address,o.city].filter(Boolean).join(', '))+'</p></div></article>').join('')+'</div></section>';
  if(!products.length)return hideEmpty?'':'<section class="market-section"><h3>🌾 Catalogue des producteurs agricoles</h3><p class="pc-mut">Aucun produit agricole public disponible pour le moment.</p></section>';
  return '<section class="market-section"><div class="market-heading"><div><span class="market-kicker">PÔLE AGRICOLE</span><h3>Produits des producteurs partenaires</h3><p>Choisissez les produits d’un seul fournisseur par panier.</p></div><span class="market-count">'+products.length+' produits</span></div><div class="market-grid">'+products.map(p=>{const owner=p.owner||{},qty=agroCart&&agroCart.owner_id===p.owner_id?((agroCart.items||[]).find(x=>x.id===p.id)?.qty||0):0;return '<article class="market-product">'+(p.photo_url?'<img loading="lazy" src="'+esc(p.photo_url)+'" alt="">':'<div class="market-photo">🌱</div>')+'<div class="market-product-body"><span class="market-kicker">'+esc(p.category||'PRODUIT AGRICOLE')+'</span><h4>'+esc(p.product_name)+'</h4><p>'+esc(p.description||'')+'</p><div class="market-owner">🏡 '+esc(owner.business_name||'Producteur partenaire')+' · '+esc(owner.city||'')+'</div><strong>'+ZS.money(p.price,'XOF')+' / '+esc(p.unit||'unité')+'</strong><button type="button" class="pc-add" data-agro-add="'+esc(p.id)+'">＋ Ajouter au panier'+(qty?' ('+qty+')':'')+'</button></div></article>'}).join('')+'</div></section>'+
  (agroCart?'<div class="market-cart"><b>🛒 Panier · '+esc(agroCart.owner_name)+'</b><span>'+agroCart.items.reduce((n,x)=>n+x.qty,0)+' article(s)</span><button type="button" class="btn btn-gold" data-agro-chat>Contacter le fournisseur et commander →</button><button type="button" class="pc-clear" data-agro-clear>Vider</button></div>':'');
@@ -57,6 +64,11 @@ async function loadMarket(){
  const c=window.ZUMAYA_CONFIG||{};if(!c.SUPABASE_URL||!c.SUPABASE_ANON_KEY)return;
  try{const r=await fetch(c.SUPABASE_URL+'/rest/v1/commerce_products?select=id,title,description,price,currency,image_url,stock_quantity,store_id,commerce_stores(store_name,city),commerce_categories(name)&status=eq.active&stock_quantity=gt.0&order=created_at.desc&limit=60',{headers:{apikey:c.SUPABASE_ANON_KEY,Authorization:'Bearer '+c.SUPABASE_ANON_KEY}});
   if(!r.ok)return;mktProducts=await r.json();draw()}catch(_){}
+}
+async function loadOrgs(){
+ const c=window.ZUMAYA_CONFIG||{};if(!c.SUPABASE_URL||!c.SUPABASE_ANON_KEY)return;
+ try{const r=await fetch(c.SUPABASE_URL+'/rest/v1/rg_organizations?select=id,organization_type,public_name,city,address,latitude,longitude&organization_type=in.(restaurant,hotel,agro,agro_trader)&order=created_at.desc',{headers:{apikey:c.SUPABASE_ANON_KEY,Authorization:'Bearer '+c.SUPABASE_ANON_KEY}});
+  if(!r.ok)return;orgs=await r.json();draw()}catch(_){}
 }
 async function loadAgro(){
  const c=window.ZUMAYA_CONFIG||{};if(!c.SUPABASE_URL||!c.SUPABASE_ANON_KEY)return;
@@ -92,5 +104,5 @@ root.addEventListener('click',e=>{
 });
 async function locate(){try{pos=await ZS.locate();err=''}catch(e){err='Position indisponible : autorisez la localisation pour trier les restaurants et calculer les frais de livraison.'}ZC.setData(rests,pos);draw()}
 async function load(){try{rests=(await ZS.rests()).filter(r=>ZS.subOk(r));err='';ZC.setData(rests,pos)}catch(e){err='Impossible de charger les restaurants. Vérifiez votre connexion.'}loading=false;draw()}
-ZC.init({onChange:draw});draw();load();loadAgro();loadMarket();setInterval(load,60000);setInterval(loadAgro,120000);setInterval(loadMarket,120000);
+ZC.init({onChange:draw});draw();load();loadAgro();loadMarket();loadOrgs();setInterval(loadOrgs,120000);setInterval(load,60000);setInterval(loadAgro,120000);setInterval(loadMarket,120000);
 })();

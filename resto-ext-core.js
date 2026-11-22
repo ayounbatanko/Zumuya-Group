@@ -43,7 +43,7 @@ function mount(){
   if(g){var b=document.createElement('button');b.className='hg-btn';b.setAttribute('data-rgx-hub','1');b.innerHTML='<span class="ico">🧰</span><span>Outils &amp; options</span>';b.onclick=X.openHub;
     var last=g.lastElementChild;g.insertBefore(b,last&&last.classList.contains('full')?last:null);return}
   var n=document.getElementById('nav');
-  if(n&&n.children.length){var c=document.createElement('button');c.setAttribute('data-rgx-hub','1');c.textContent='🧰 Outils';c.onclick=X.openHub;n.appendChild(c)}}
+  if(n&&n.children.length){var c=document.createElement('button');c.setAttribute('data-rgx-hub','1');c.textContent='🧰 Outils';c.onclick=X.openHub;n.appendChild(c);if(location.pathname.endsWith('resto-restaurant.html')&&!n.querySelector('[data-z-delivery]')){var a=document.createElement('a');a.href='livraison-partenaires.html';a.setAttribute('data-z-delivery','1');a.textContent='🚚 Livraison';a.style.cssText='display:inline-flex;align-items:center;padding:9px 12px;border-radius:10px;text-decoration:none;font-weight:800';n.appendChild(a)}}}
 X.mountHub=function(){clearTimeout(mt);mt=setTimeout(mount,120)};
 try{new MutationObserver(X.mountHub).observe(document.documentElement,{childList:true,subtree:true})}catch(e){}
 X.patchOrder=function(id,patch){var d=X.db().get(),o=d.orders.find(function(x){return x.id==id});if(!o)return false;Object.assign(o,patch);X.db().save(d);return true};

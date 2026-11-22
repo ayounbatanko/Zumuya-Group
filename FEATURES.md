@@ -153,3 +153,10 @@ Chaque compte ouvre **uniquement** son propre espace (contrôlé par `zguard.js`
 ---
 
 *Document généré pour la version organisée de la plateforme ZUMUYA GROUP.*
+
+## ZUMUYA LIVRAISON — réseau multi-entreprises (mise à jour)
+- Espace société : `livraison-entreprise.html` avec missions, indicateurs, partenariats, équipe, flotte, tarification et rapports.
+- Espace partenaires : `livraison-partenaires.html` pour recevoir les demandes de collaboration et transmettre des missions aux transporteurs actifs.
+- Migration additive `16_reseau_livraison_partenaire.sql` : partenariats, flotte, événements de suivi, incidents, tarifs, annuaire limité aux sociétés vérifiées et fonctions RPC avec contrôle du propriétaire.
+- Les missions sont rattachées à une société de livraison uniquement après partenariat actif. Les livreurs doivent appartenir à la société qui reçoit la mission.
+- Les indicateurs financiers affichent les frais enregistrés sur les missions ; ils ne déclarent pas un paiement encaissé sans confirmation du prestataire.
