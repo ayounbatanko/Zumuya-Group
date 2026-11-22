@@ -45,7 +45,7 @@ async function showAccount(user){
   try{const b=(localStorage.getItem('zg_back')||'').split('|');localStorage.removeItem('zg_back');
     if(!stay&&type==='customer'&&b[0]&&Date.now()-(+b[1]||0)<18e5&&/^[a-z0-9._-]+\.html(#[\w-]*)?$/i.test(b[0])){location.replace(b[0]);return}}catch(e){}
   let owner=false;try{const {data}=await sb.rpc('rg_is_platform_owner');owner=data===true}catch(e){}
-  if(owner&&!stay&&!sessionStorage.getItem('zumuya_redirected')){sessionStorage.setItem('zumuya_redirected','1');location.replace('proprietaire.html');return}
+  /* Le propriétaire reste sur son compte et ouvre l'infrastructure via le bouton réservé. */
   if(!owner&&type&&type!=='universal'&&routes[type]&&!stay&&!sessionStorage.getItem('zumuya_redirected')){sessionStorage.setItem('zumuya_redirected','1');if(type==='restaurant'||type==='hotel')sessionStorage.setItem('zmy_portal','1');location.replace(routes[type]);return}
   sessionStorage.removeItem('zumuya_redirected');
   $('#auth').hidden=true;$('#account').hidden=false;$('#recovery').hidden=true;
@@ -63,7 +63,7 @@ async function showAccount(user){
   else{lead.hidden=true}
   $('#partnerPanel').hidden=owner||managed;
   if(!owner&&!managed) initPartner(user);
-  if(universal){lead.hidden=false;lead.textContent='Votre compte unique est actif. Activez et gérez plusieurs activités depuis le même compte.';$('#moduleManager').hidden=true;$('#partnerPanel').hidden=true;if(window.ZDASH)window.ZDASH.show(sb,user);else{$('#moduleManager').hidden=false;if(window.ZUMAYA_MODULE_MANAGER)window.ZUMAYA_MODULE_MANAGER.init(sb,user)}}else{if($('#moduleManager'))$('#moduleManager').hidden=true;if(window.ZDASH)window.ZDASH.hide()}
+  if(universal&&!owner){lead.hidden=false;lead.textContent='Votre compte unique est actif. Activez et gérez plusieurs activités depuis le même compte.';$('#moduleManager').hidden=true;$('#partnerPanel').hidden=true;if(window.ZDASH)window.ZDASH.show(sb,user);else{$('#moduleManager').hidden=false;if(window.ZUMAYA_MODULE_MANAGER)window.ZUMAYA_MODULE_MANAGER.init(sb,user)}}else{if($('#moduleManager'))$('#moduleManager').hidden=true;if(window.ZDASH)window.ZDASH.hide()}
 }
 function showAuth(){if(window.ZDASH)window.ZDASH.hide();$('#account').hidden=true;$('#recovery').hidden=true;$('#auth').hidden=false}
 
