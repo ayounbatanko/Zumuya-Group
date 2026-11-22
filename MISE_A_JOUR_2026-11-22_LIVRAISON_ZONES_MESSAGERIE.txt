@@ -1,0 +1,54 @@
+ZUMAYA GROUP — MISE A JOUR DU 22/11/2026
+Livraison par zone de desserte + messagerie entre tous les utilisateurs
+
+1) CE QUI A ETE FAIT SUR SUPABASE (projet « Gestion resto », deja applique)
+   Migration « 20_livraison_zones_offres_messagerie » (copie : 17_livraison_zones_offres_messagerie.sql).
+   - Zones de desserte et disponibilite des societes de livraison (tarif de base + prix par km).
+   - Demandes d'expedition et offres envoyees aux societes ; chaque societe accepte ou refuse.
+   - Les adresses exactes ne sont visibles par la societe qu'apres acceptation.
+   - Position du vendeur Marketplace stockee en prive (rg_seller_locations).
+   - Commande Marketplace : ville et position GPS de livraison de l'acheteur (commerce_create_order).
+   - Messagerie : conversations reutilisees par contexte, messages non lus, noms sans e-mail, temps reel.
+   Fichier SQL conserve pour un autre projet Supabase : executer 16 puis 17 dans l'editeur SQL.
+
+2) FONCTIONNEMENT
+   Vendeur (Marketplace, producteur ou fournisseur agricole)
+   - Commande confirmee -> bouton « Faire livrer par une societe ».
+   - Il indique sa position (ville, GPS ou position enregistree) et la destination de l'acheteur.
+   - Sont proposees UNIQUEMENT les societes disponibles qui desservent sa zone ET la destination,
+     triees de la plus proche a la plus eloignee de sa position, avec une estimation du prix.
+   - Il coche les societes (1 a 10) : la premiere qui accepte prend la livraison, les autres sont cloturees.
+   - Il suit les reponses (acceptee / refusee + motif / en attente) et peut ecrire a chaque societe.
+   Societe de livraison (page livraison-entreprise.html)
+   - Definit ses zones (ville ou rayon GPS) et ses tarifs, et se met disponible / indisponible.
+   - Recoit les demandes de ses zones, accepte (avec son tarif) ou refuse (avec motif), pose des questions.
+   - Apres acceptation : adresses exactes visibles, boutons « Colis recupere » puis « Livre ».
+     Pour une commande Marketplace, le statut de la commande passe automatiquement a expediee puis livree.
+   - Une offre non traitee expire apres 24 h.
+
+3) MESSAGERIE
+   - Bouton « Contacter » : produits et boutiques Marketplace, produits agricoles, restaurants, hotels.
+   - Boutons « Ecrire a l'acheteur » / « Ecrire au fournisseur » sur les commandes et demandes.
+   - Conversation vendeur <-> societe de livraison pour chaque offre.
+   - Liste avec messages non lus, apercu, recherche, annuaire (boutiques, restaurants et hotels, producteurs).
+   - Pastille de messages non lus sur le lien « Messagerie » de toutes les pages.
+   - Entree pour envoyer, Maj+Entree pour sauter une ligne ; affichage mobile liste / conversation.
+
+4) FICHIERS A ENVOYER SUR GITHUB (racine du depot, remplacer les fichiers existants)
+   Nouveaux : zdelivery.js, zchat.js, livraison-pro.js, 17_livraison_zones_offres_messagerie.sql
+   Modifies : messagerie.html, messagerie.js, livraison-entreprise.html, boutique.js, boutique.html,
+   market.js, market.css, catalogue.js, agro.js, agro.html, zsupply.js, resto-restaurant.html,
+   resto-driver.html, client-espace.html, compte.html, marketplace.html, proprietaire.html, sw.js
+   Apres publication, recharger le site (le cache passe en v32).
+
+5) POUR TESTER
+   a. Compte « Service de livraison » -> livraison-entreprise.html -> ajouter une zone (ex. Abidjan) -> rester disponible.
+   b. Compte vendeur Marketplace : un client commande (avec ville), le vendeur confirme puis « Faire livrer ».
+   c. Societe : onglet « A traiter » -> Accepter ; verifier la conversation ouverte avec le vendeur.
+   d. Cote client : « Contacter » sur un restaurant ou un hotel depuis l'accueil.
+
+6) LIMITES CONNUES
+   - La localisation d'une adresse (bouton « Localiser ») utilise le service gratuit OpenStreetMap ; sans resultat, la ville est utilisee.
+   - Une societe n'est proposee que si une de ses zones couvre l'enlevement ET la destination.
+   - Seul le proprietaire de la societe gere les zones et les offres pour l'instant (pas les employes).
+   - Les commandes agricoles n'ont pas de destination enregistree : elle est reprise du profil de l'acheteur, modifiable avant l'envoi.

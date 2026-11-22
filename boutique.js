@@ -9,6 +9,7 @@ const fdate=d=>new Date(d).toLocaleDateString('fr-FR',{day:'2-digit',month:'shor
 const LBL={pending:'En attente',confirmed:'Confirmée',shipped:'Expédiée',delivered:'Livrée',cancelled:'Annulée'};
 const SCOL={pending:'#c89d50',confirmed:'#1d57a6',shipped:'#7a4bb8',delivered:'#12a36b',cancelled:'#c0392b'};
 const PST={active:['Publié',''],draft:['Brouillon','warn'],archived:['Archivé','off']};
+let orderCache=new Map(),dlvT=null;
 let sb,user,stores=[],store=null,products=[],categories=[],period=30,stats=null,pstats=null,statProduct='',editing=null,keep={images:[],videos:[]},orderFilter='all',draws=[];
 const notice=$('#notice');
 const say=(el,t)=>{el.textContent=t||''};
@@ -280,17 +281,25 @@ async function loadOrders(){
   const root=$('#orders');
   $('#orderFilter').innerHTML=['all','pending','confirmed','shipped','delivered','cancelled'].map(s=>`<button data-s="${s}" class="${s===orderFilter?'on':''}">${s==='all'?'Toutes':LBL[s]}</button>`).join('');
   try{
-    let q=sb.from('commerce_orders').select('id,order_number,status,subtotal,delivery_fee,currency,delivery_address,buyer_note,created_at,commerce_order_items(title,quantity,unit_price)').eq('store_id',store.id).order('created_at',{ascending:false}).limit(100);
+    let q=sb.from('commerce_orders').select('id,order_number,status,subtotal,delivery_fee,currency,delivery_address,delivery_city,delivery_lat,delivery_lng,buyer_id,buyer_note,created_at,commerce_order_items(title,quantity,unit_price)').eq('store_id',store.id).order('created_at',{ascending:false}).limit(100);
     if(orderFilter!=='all')q=q.eq('status',orderFilter);
     const {data,error}=await q;if(error)throw error;
     root.innerHTML=(data||[]).map(o=>`<div class="ord"><header><strong>${esc(o.order_number)}</strong><span class="chip" style="background:${SCOL[o.status]}22;color:${SCOL[o.status]}">${esc(LBL[o.status]||o.status)}</span></header><div class="meta">${new Date(o.created_at).toLocaleString('fr-FR',{dateStyle:'medium',timeStyle:'short'})}</div>
       <ul>${(o.commerce_order_items||[]).map(i=>`<li>${esc(i.title)} × ${i.quantity} — ${money(i.unit_price*i.quantity)}</li>`).join('')}</ul>
       ${o.delivery_address?`<div class="meta">📍 ${esc(o.delivery_address)}</div>`:''}${o.buyer_note?`<div class="meta">💬 ${esc(o.buyer_note)}</div>`:''}
-      <div class="total">Total : ${money(Number(o.subtotal)+Number(o.delivery_fee||0))}</div>${orderActs(o)}</div>`).join('')||'<div class="card"><p class="muted">Aucune commande.</p></div>';
+      <div class="total">Total : ${money(Number(o.subtotal)+Number(o.delivery_fee||0))}</div><div data-dlv="${o.id}"></div>${orderActs(o)}</div>`).join('')||'<div class="card"><p class="muted">Aucune commande.</p></div>';
+    orderCache=new Map((data||[]).map(o=>[o.id,o]));
+    if(window.ZDelivery)(data||[]).filter(o=>o.status!=='pending'&&o.status!=='cancelled').forEach(o=>{const d=root.querySelector('[data-dlv="'+o.id+'"]');if(d)ZDelivery.status(d,'commerce_order',o.id,{onChange:()=>{clearTimeout(dlvT);dlvT=setTimeout(()=>{loadOrders();loadPendingBadge()},800)}})});
   }catch(x){root.innerHTML=`<div class="card"><p class="muted">${esc(x.message)}</p></div>`}
 }
-function orderActs(o){const n={pending:[['confirmed','Confirmer'],['cancelled','Refuser']],confirmed:[['shipped','Marquer expédiée'],['cancelled','Annuler']],shipped:[['delivered','Marquer livrée']]}[o.status]||[];return n.length?'<div class="acts">'+n.map(a=>`<button class="btn sm ${a[0]==='cancelled'?'danger':'primary'}" data-o="${o.id}" data-st="${a[0]}">${a[1]}</button>`).join('')+'</div>':''}
+function orderActs(o){const n={pending:[['confirmed','Confirmer'],['cancelled','Refuser']],confirmed:[['shipped','Marquer expédiée'],['cancelled','Annuler']],shipped:[['delivered','Marquer livrée']]}[o.status]||[];
+  const chat=o.buyer_id&&o.status!=='cancelled'?`<a class="btn sm ghost" href="messagerie.html?kind=user&ref=${encodeURIComponent(o.buyer_id)}&subject=${encodeURIComponent('Commande '+o.order_number)}&ctx_type=commerce_order&ctx_id=${encodeURIComponent(o.id)}">💬 Écrire à l’acheteur</a>`:'';
+  const dl=o.status==='confirmed'?`<button class="btn sm primary" data-deliver="${o.id}">🚚 Faire livrer par une société</button>`:'';
+  const all=n.map(a=>`<button class="btn sm ${a[0]==='cancelled'?'danger':'primary'}" data-o="${o.id}" data-st="${a[0]}">${a[1]}</button>`).join('')+dl+chat;return all?'<div class="acts">'+all+'</div>':''}
 $('#orders').addEventListener('click',async e=>{
+  const dv=e.target.closest('[data-deliver]');
+  if(dv){const o=orderCache.get(dv.dataset.deliver);if(!o)return;if(!window.ZDelivery)return alert('Module de livraison indisponible.');
+    ZDelivery.open({sourceType:'commerce_order',sourceId:o.id,title:'Faire livrer la commande '+o.order_number,saveSellerLocation:true,pickup:{city:store.city||'',address:''},dest:{address:o.delivery_address||'',city:o.delivery_city||'',lat:o.delivery_lat,lng:o.delivery_lng},onDone:()=>{loadOrders()}});return}
   const b=e.target.closest('[data-st]');if(!b)return;
   try{b.disabled=true;const {error}=await sb.rpc('commerce_set_order_status',{p_order:b.dataset.o,p_status:b.dataset.st});if(error)throw error;await Promise.all([loadOrders(),loadStats(),loadProducts(),loadPendingBadge()]);renderProducts()}catch(x){alert(x.message);b.disabled=false}
 });
