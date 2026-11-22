@@ -1,0 +1,37 @@
+ZUMAYA GROUP — VERSION INTEGREE POUR GITHUB
+
+Cette archive reprend le projet historique « 6 correction.zip » comme base. Les fichiers et modules historiques sont conservés, puis les mises à jour récentes sont intégrées à la racine pour éviter les sous-dossiers inutiles.
+
+INSTALLATION GITHUB (ANDROID)
+1. Téléverser le contenu de ce dossier à la racine du dépôt GitHub qui héberge ZUMAYA.
+2. Lorsqu'un fichier du dépôt porte le même nom, le remplacer par celui de cette archive.
+3. Conserver les autres fichiers historiques déjà présents dans le dépôt.
+4. Vérifier que index.html est bien à la racine du dépôt.
+5. Publier les modifications et recharger le site après le déploiement.
+
+FONCTIONNALITÉS INTÉGRÉES DANS CETTE VERSION
+- Compte utilisateur unifié : inscription sans sélection obligatoire d'une catégorie.
+- Accès transversal aux pôles et catalogues publics depuis l'interface principale.
+- Panier universel avec commandes et suivi de statut.
+- Portefeuille utilisateur, historique et demandes de recharge soumises à validation.
+- Notifications regroupées par pôle.
+- Synchronisation des catalogues publics et correctifs de configuration des pôles.
+- Espace propriétaire et modules historiques RestoGest, hôtel, Agro, livraison et Marketplace conservés.
+
+SUPABASE
+- Projet configuré dans config.js : azfunhfjmybekzakhtbu.
+- Le correctif SQL additif 18_FIX_CONFIGURATION_CATALOGUES_2026-11-22.sql est fourni pour référence et réapplication contrôlée uniquement si la migration n'est pas déjà présente.
+- Ne pas exécuter 00_RESET_ET_SCHEMA_COMPLET.sql sur une base en production : ce script est destructif.
+- Les fichiers SQL 00_RESET_ET_SCHEMA_COMPLET.sql et autres scripts historiques sont conservés à titre d'archive; ne pas les exécuter en bloc.
+
+LIMITES À CONNAÎTRE AVANT UNE MISE EN PRODUCTION
+- Les commandes du panier universel sont enregistrées séparément par offre; le panier peut contenir plusieurs lignes.
+- Le calcul des frais de livraison du parcours générique est initialisé à zéro; il faut relier les tarifs de chaque pôle avant toute commercialisation.
+- Les recharges de portefeuille restent en attente jusqu'à validation. Aucun paiement Mobile Money automatique n'est activé sans prestataire, clés serveur et vérification de webhook.
+- Les menus Restauration/Hôtel et les offres des autres pôles doivent être publiés/synchronisés dans rg_public_offers pour apparaître dans le catalogue central.
+- Les catalogues actuellement vides resteront vides tant que les partenaires n'auront pas publié leurs offres. Aucun faux produit n'a été ajouté.
+- La version web doit être testée sur le projet Supabase réel après publication, notamment l'inscription, l'espace propriétaire, la création de commande et les politiques RLS.
+
+SÉCURITÉ
+- Ne jamais placer la clé service_role dans un fichier JavaScript public.
+- Garder les opérations de portefeuille et de validation côté serveur/RPC avec contrôle des droits.

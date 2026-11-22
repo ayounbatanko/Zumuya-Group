@@ -23,16 +23,8 @@ Statuts : `en attente < acceptée < préparée < en route < terminée` (+ `annul
 4. **Un seul projet Supabase** : `config.js` sert au portail et au Service de Restauration (`resto-db.js`, extensions, realtime).
 5. **Realtime activé** (`realtime:1`), le polling reste en secours.
 
-## Ajouts de la version 2.4.0
-1. **Commandes (restaurant / hôtel)** : une commande en chambre affiche « 🛎️ Remis en chambre ✓ » (plus de choix de livreur) ; une commande à livrer affiche l'état de l'attribution (offre en cours, livreur, attribution manuelle).
-2. **Client** : le suivi d'une commande en chambre a ses 4 étapes (envoyée, acceptée, préparée, remise en chambre).
-3. **Livreurs** : les comptes se créent sur `compte.html` (catégorie Livreur). Le restaurant/hôtel peut rattacher un livreur du réseau (il ne reçoit alors plus que ses courses) ou le détacher.
-4. **Livreur** : la carte de course indique où récupérer la commande (restaurant, adresse, téléphone, itinéraire) et la devise du restaurant.
-5. **Ventes** : une seule vente par commande, source « chambre » pour le service en chambre.
-6. **Liens directs** : `hotel.html` et `livraison.html` ouvrent directement l'onglet utile (`resto-restaurant.html#orders`, `#hotel`, `#drivers`).
-
 ## Limites restantes (à traiter ensuite)
-- Les politiques d'accès restent ouvertes (clé anon), comme avant : la sécurité RLS stricte reste à faire après migration des comptes vers Supabase Auth.
+- Les politiques d'accès restent ouvertes (clé anon), comme avant : `resto-sql-v2_securite_rls.sql` ne doit être lancé qu'après migration des comptes vers Supabase Auth.
 - Les comptes et données de l'ancien projet `azfun…` ne sont pas migrés automatiquement.
 - Les restaurants ne sont pas encore reliés aux organisations du portail (`rg_organizations`).
 - Pas de rôle « réception » dédié : les notes de chambre sont gérées depuis le compte de l'hôtel.

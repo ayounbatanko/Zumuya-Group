@@ -1,0 +1,31 @@
+CORRECTIF ZUMAYA — CONFIGURATION DES PÔLES ET CATALOGUES PUBLICS
+
+Corrections incluses :
+- Ajout de la fonction RPC rg_ecosystem_set_module absente de la base active.
+- Correspondance des codes historiques restaurant/restauration et delivery/livraison.
+- Synchronisation des menus de restaurants et hôtels vers rg_public_offers.
+- Lecture publique des restaurants via une table dédiée qui ne contient que les informations de catalogue (la table interne rg_rests reste protégée).
+- Synchronisation Marketplace sans bloquer la publication en attente de vérification administrative, si la boutique est active et le produit publié.
+- Affichage des offres centrales sur le site public, dans les rubriques Marketplace, Agro et Autres pôles.
+- Ajout au panier du site public avec conservation dans le panier du compte unique.
+
+FICHIERS FRONTEND MODIFIÉS :
+- dashboard.js
+- catalogue.js
+- zsession.js
+- compte.html
+- index.html
+
+BASE SUPABASE :
+Le correctif SQL a déjà été appliqué au projet Supabase connecté pendant cette session.
+Le fichier 18_FIX_CONFIGURATION_CATALOGUES_2026-11-22.sql est fourni pour archivage et réapplication contrôlée si nécessaire.
+
+IMPORTANT :
+La base active a été contrôlée : rg_public_offers, commerce_products, rg_agro_products,
+rg_organizations et rg_rests ne contiennent actuellement aucune ligne publiée.
+Le catalogue affichera donc les contenus réels dès qu'un partenaire publiera un produit,
+un menu ou une offre. Aucun produit fictif n'a été créé.
+
+PUBLICATION GITHUB :
+Remplacer les fichiers frontend correspondants dans le dépôt par ceux de cette archive,
+puis attendre le déploiement GitHub Pages et recharger le site sans cache.

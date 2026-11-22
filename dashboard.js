@@ -5,10 +5,10 @@ const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 /* cats = catégories du formulaire partenaire ; orgs = types d'organisation qui rendent l'activité « configurée » ; page = espace de gestion ; browse = page publique du pôle */
 const MODS=[
  {code:'marketplace',ico:'🛍️',title:'Marketplace',desc:'Boutique, produits et commandes',cats:['marketplace'],orgs:['marketplace','commerce'],page:'boutique.html',browse:'marketplace.html',def:'Ma boutique'},
- {code:'restaurant',ico:'🍽️',title:'Restauration',desc:'Restaurant, menus et commandes',cats:['restaurant'],orgs:['restaurant'],page:'resto-restaurant.html',browse:'resto-client.html',def:'Mon restaurant'},
+ {code:'restaurant',dbCode:'restauration',ico:'🍽️',title:'Restauration',desc:'Restaurant, menus et commandes',cats:['restaurant'],orgs:['restaurant'],page:'resto-restaurant.html',browse:'resto-client.html',def:'Mon restaurant'},
  {code:'agro',ico:'🌱',title:'Agro',desc:'Producteurs, fournisseurs et acheteurs',cats:['agro','agro_trader'],orgs:['agro','agro_trader'],page:'agro.html',browse:'agro.html',def:'Mon activité agricole'},
  {code:'hotel',ico:'🏨',title:'Hôtel',desc:'Chambres et service en chambre',cats:['hotel'],orgs:['hotel'],page:'resto-restaurant.html',browse:'hotel.html',def:'Mon hôtel'},
- {code:'delivery',ico:'🚚',title:'Livraison',desc:'Courses et suivi',cats:['delivery'],orgs:['delivery','delivery_service','logistics'],page:'livraison-entreprise.html',browse:'livraison.html',def:'Mon service de livraison'},
+ {code:'delivery',dbCode:'livraison',ico:'🚚',title:'Livraison',desc:'Courses et suivi',cats:['delivery'],orgs:['delivery','delivery_service','logistics'],page:'livraison-entreprise.html',browse:'livraison.html',def:'Mon service de livraison'},
  {code:'prestations',ico:'🛠️',title:'Prestations',desc:'Services et rendez-vous',cats:[],orgs:['services'],page:'index.html#services',browse:'index.html#services',def:'Mes prestations',discover:true}
 ];
 let sb=null,user=null,orgs=[],mods=[],busy=false;
@@ -23,7 +23,7 @@ function openSide(){$('#dSide').classList.add('open');$('#dScrim').classList.add
 function closeSide(){$('#dSide').classList.remove('open');$('#dScrim').classList.remove('open')}
 function status(m){
   const o=orgs.find(x=>m.orgs.includes(x.organization_type));
-  const row=mods.find(x=>x.module_code===m.code&&x.status!=='paused'&&x.status!=='suspended');
+  const row=mods.find(x=>x.module_code===(m.dbCode||m.code)&&x.status!=='paused'&&x.status!=='suspended');
   if(o){
     /* Activation immédiate : aucune validation par un tiers. Seule une suspension décidée par la plateforme est signalée. */
     const sus=o.verification_status==='suspended';
@@ -60,7 +60,7 @@ async function configure(code){
   try{
     /* activation du pôle sur le compte (sans effet bloquant si la table n'est pas accessible) */
     const org=orgs.find(o=>m.orgs.includes(o.organization_type));
-    const {error:activationError}=await sb.rpc('rg_ecosystem_set_module',{p_module:code,p_org:org?.id||null,p_configuration:{},p_status:'active'});
+    const {error:activationError}=await sb.rpc('rg_ecosystem_set_module',{p_module:m.dbCode||m.code,p_org:org?.id||null,p_configuration:{},p_status:'active'});
     if(activationError)throw activationError;
     if(!window.ZPARTNER)throw new Error('Le formulaire n’est pas disponible.');
     view('config');
