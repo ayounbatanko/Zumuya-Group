@@ -27,7 +27,7 @@ async function start(){
   const p=new URLSearchParams(location.search);let kind=p.get('kind'),ref=p.get('ref');const to=p.get('to');
   if(!kind&&to){kind='user';ref=to}
   if(kind&&ref){
-    const {data,error}=await sb.rpc('rg_chat_open',{p_kind:kind,p_ref:ref,p_subject:p.get('subject')||null,p_ctx_type:p.get('ctx_type')||null,p_ctx_id:p.get('ctx_id')||null});
+    const {data,error}=await sb.rpc('rg_market_chat_open',{p_kind:kind,p_ref:ref,p_subject:p.get('subject')||null,p_ctx_type:p.get('ctx_type')||null,p_ctx_id:p.get('ctx_id')||null});
     history.replaceState({},'','messagerie.html');
     if(error)status(error.message||'Impossible d’ouvrir la conversation.',true);else active=data;
   }
@@ -39,7 +39,7 @@ async function start(){
 }
 
 async function loadThreads(){
-  const {data,error}=await sb.rpc('rg_chat_threads');if(error)throw error;threads=data||[];renderThreads();
+  const {data,error}=await sb.rpc('rg_market_chat_threads');if(error)throw error;threads=data||[];renderThreads();
   const total=threads.reduce((n,t)=>n+Number(t.unread_count||0),0);
   $('#unreadTotal').innerHTML=total?'<span class="badge">'+total+'</span>':'';document.title=(total?'('+total+') ':'')+'Messagerie — ZUMUYA GROUP';
 }
@@ -58,7 +58,7 @@ async function openThread(id){
   renderThreads();await loadMessages(id);
   $('#chatBody').focus({preventScroll:true});
 }
-async function markRead(id){try{await sb.rpc('rg_chat_mark_read',{p_conversation:id});const t=threads.find(x=>x.conversation_id===id);if(t&&Number(t.unread_count)){t.unread_count=0;renderThreads();const total=threads.reduce((n,x)=>n+Number(x.unread_count||0),0);$('#unreadTotal').innerHTML=total?'<span class="badge">'+total+'</span>':'';document.title=(total?'('+total+') ':'')+'Messagerie — ZUMUYA GROUP'}}catch(_){}}
+async function markRead(id){try{await sb.rpc('rg_market_chat_mark_read',{p_conversation:id});const t=threads.find(x=>x.conversation_id===id);if(t&&Number(t.unread_count)){t.unread_count=0;renderThreads();const total=threads.reduce((n,x)=>n+Number(x.unread_count||0),0);$('#unreadTotal').innerHTML=total?'<span class="badge">'+total+'</span>':'';document.title=(total?'('+total+') ':'')+'Messagerie — ZUMUYA GROUP'}}catch(_){}}
 async function loadMessages(id,quiet){
   const {data,error}=await sb.from('rg_market_messages').select('id,sender_id,body,created_at,kind').eq('conversation_id',id).order('created_at',{ascending:true}).limit(400);if(error)throw error;
   if(id!==active)return;const last=data&&data.length?data[data.length-1].id:null;if(quiet&&last===lastMsgId)return;lastMsgId=last;
@@ -105,7 +105,7 @@ async function renderDir(){
   catch(e){box.innerHTML='<p class="chat-empty">'+esc(e.message||'Annuaire indisponible.')+'</p>'}
 }
 async function startWith(k,ref,name){
-  try{const {data,error}=await sb.rpc('rg_chat_open',{p_kind:k,p_ref:ref,p_subject:'Échange avec '+(name||'un contact')});if(error)throw error;
+  try{const {data,error}=await sb.rpc('rg_market_chat_open',{p_kind:k,p_ref:ref,p_subject:'Échange avec '+(name||'un contact')});if(error)throw error;
     $('#dir').open=false;await loadThreads();await openThread(data)}catch(e){status(e.message||'Contact impossible.',true)}
 }
 

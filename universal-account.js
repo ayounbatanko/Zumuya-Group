@@ -8,10 +8,17 @@ try{cart=JSON.parse(localStorage.getItem(KEY)||'[]')}catch(_){cart=[]}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(cart))}catch(_){}renderCart()}
 function note(t){const n=$('walletNotice');if(n)n.textContent=t}
 function add(id){const o=offers.find(x=>x.id===id);if(!o)return;const row=cart.find(x=>x.offer_id===id);if(row)row.quantity=Math.min(10000,row.quantity+1);else cart.push({offer_id:id,title:o.title,price_minor:o.price_minor,currency_code:o.currency_code,quantity:1,seller_id:o.seller_id});save();const c=$('basketCount');if(c){c.hidden=!cart.length;c.textContent=cart.reduce((n,x)=>n+x.quantity,0)}}
+function mediaMarkup(o){
+ const raw=[...(Array.isArray(o.media_urls)?o.media_urls:[]),...(Array.isArray(o.video_urls)?o.video_urls:[])];
+ if(o.image_url)raw.unshift(o.image_url);
+ const urls=[...new Set(raw.filter(x=>typeof x==='string'&&/^https?:\/\//i.test(x)))].slice(0,8);
+ if(!urls.length)return '';
+ return '<div class="z-offer-media">'+urls.map(u=>/\.(mp4|webm|mov|m4v)(?:[?#].*)?$/i.test(u)?'<video controls playsinline preload="metadata" src="'+esc(u)+'"></video>':'<img loading="lazy" src="'+esc(u)+'" alt="Visuel du produit" onerror="this.hidden=true">').join('')+'</div>';
+}
 function renderOffers(){
  const root=$('zPublicOffers');if(!root)return;const q=($('zOfferSearch')?.value||'').trim().toLowerCase();
  const list=offers.filter(o=>!q||[o.title,o.description,o.category,o.module_code].join(' ').toLowerCase().includes(q));
- root.innerHTML=list.length?list.map(o=>`<article class="z-offer"><span class="module">${esc(o.module_code)} · ${esc(o.category)}</span><h3>${esc(o.title)}</h3><p>${esc(o.description||'Offre publique')}</p><span class="price">${money(o.price_minor)}</span><button class="dbtn gold" type="button" data-zadd="${esc(o.id)}">＋ Ajouter au panier</button></article>`).join(''):'<p class="dempty">Aucune offre publique disponible dans cette recherche.</p>';
+ root.innerHTML=list.length?list.map(o=>`<article class="z-offer">${mediaMarkup(o)}<span class="module">${esc(o.module_code)} · ${esc(o.category)}</span><h3>${esc(o.title)}</h3><p>${esc(o.description||'Offre publique')}</p><span class="price">${money(o.price_minor)} ${esc(o.currency_code||'XOF')}</span><div class="z-offer-actions"><button class="dbtn gold" type="button" data-zadd="${esc(o.id)}">＋ Ajouter au panier</button>${o.seller_id&&o.seller_id!==user?.id?`<a class="dbtn line" href="messagerie.html?to=${encodeURIComponent(o.seller_id)}&subject=${encodeURIComponent('Question sur : '+o.title)}">💬 Contacter le fournisseur</a>`:''}</div></article>`).join(''):'<p class="dempty">Aucune offre publique disponible dans cette recherche.</p>';
 }
 function renderCart(){
  const root=$('zCartItems');if(!root)return;
@@ -19,9 +26,12 @@ function renderCart(){
  const c=$('basketCount');if(c){const n=cart.reduce((a,x)=>a+x.quantity,0);c.hidden=!n;c.textContent=n}
 }
 async function loadOffers(){
- const {data,error}=await sb.from('rg_public_offers').select('id,seller_id,module_code,category,title,description,price_minor,currency_code,stock_quantity').eq('is_public',true).order('created_at',{ascending:false}).limit(200);
+ const {data,error}=await sb.from('rg_public_offers').select('id,seller_id,module_code,category,title,description,price_minor,currency_code,stock_quantity,media_urls,source_table,source_id').eq('is_public',true).order('created_at',{ascending:false}).limit(200);
  if(error){const root=$('zPublicOffers');if(root)root.innerHTML='<p class="dempty">Catalogue momentanément indisponible.</p>';return}
- offers=data||[];renderOffers();
+ offers=data||[];
+ const ids=offers.filter(o=>o.source_table==='commerce_products'&&o.source_id).map(o=>o.source_id);
+ if(ids.length){const {data:media}=await sb.from('commerce_products').select('id,image_url,media_urls,video_urls').in('id',ids);const byId=new Map((media||[]).map(x=>[x.id,x]));offers=offers.map(o=>{const m=o.source_id?byId.get(o.source_id):null;return m?{...o,image_url:m.image_url,media_urls:m.media_urls||o.media_urls,video_urls:m.video_urls||[]}:o})}
+ renderOffers();
 }
 async function loadOrders(){
  const root=$('zMyOrders');if(!root)return;

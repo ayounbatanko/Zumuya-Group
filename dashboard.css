@@ -103,3 +103,10 @@
 #walletBalance{font-size:clamp(22px,4vw,32px);color:var(--navy)}
 @media(max-width:900px){.z-offers{grid-template-columns:repeat(2,minmax(0,1fr))}.z-basket-layout{grid-template-columns:1fr}}
 @media(max-width:560px){.z-offers{grid-template-columns:1fr}.z-cart-line{align-items:flex-start;flex-direction:column}}
+
+/* ZUMAYA account marketplace media + supplier contact */
+.z-offer-media{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin:-2px -2px 6px;overflow:hidden;border-radius:10px}
+.z-offer-media img,.z-offer-media video{display:block;width:100%;height:150px;object-fit:cover;background:#eef2f5;border-radius:8px}
+.z-offer-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:auto;align-items:center}
+.z-offer-actions .dbtn{margin-top:0}
+@media(max-width:560px){.z-offer-media img,.z-offer-media video{height:180px}.z-offer-actions{display:grid;grid-template-columns:1fr}.z-offer-actions .dbtn{justify-content:center}}
