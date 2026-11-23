@@ -32,11 +32,12 @@ async function loadProducts(){
   const root=$('#products');root.innerHTML='';
   items.forEach(p=>{const card=document.createElement('article');card.className='product';card.dataset.id=p.id;
     const img=https(p.image_url)||https((p.media_urls||[])[0]);
-    card.innerHTML=`<div class="ph">${img?`<img src="${esc(img)}" alt="${esc(p.title)}" loading="lazy" onerror="this.style.display='none'">`:''}</div><div class="body"><h3>${esc(p.title)}</h3><div class="price">${money(p.price)}</div><div class="meta">${esc(p.commerce_stores.store_name)} · ${esc(p.commerce_stores.city||'')}</div><div class="meta">Stock : ${p.stock_quantity}${(p.video_urls||[]).length?' · 🎥':''}</div><button type="button" data-buy="${p.id}" data-store="${p.store_id}">Commander</button></div>`;
+    card.innerHTML=`<div class="ph">${img?`<img src="${esc(img)}" alt="${esc(p.title)}" loading="lazy" onerror="this.style.display='none'">`:''}</div><div class="body"><h3>${esc(p.title)}</h3><div class="price">${money(p.price)}</div><div class="meta">${esc(p.commerce_stores.store_name)} · ${esc(p.commerce_stores.city||'')}</div><div class="meta">Stock : ${p.stock_quantity}${(p.video_urls||[]).length?' · 🎥':''}</div><button type="button" data-buy="${p.id}" data-store="${p.store_id}">Commander</button><a class="zm-chat" data-contact href="messagerie.html?kind=store&ref=${encodeURIComponent(p.store_id)}&subject=${encodeURIComponent('Question sur : '+p.title)}&ctx_type=product&ctx_id=${encodeURIComponent(p.id)}">💬 Contacter le fournisseur</a></div>`;
     root.append(card)});
   if(!items.length)root.innerHTML='<p class="muted">Aucun produit disponible pour cette recherche.</p>';
 }
 $('#products').addEventListener('click',e=>{
+  const contact=e.target.closest('[data-contact]');if(contact){e.stopPropagation();return}
   const b=e.target.closest('[data-buy]');
   if(b){e.stopPropagation();return buy(b.dataset.store,b.dataset.buy)}
   const c=e.target.closest('.product');if(c)openProduct(c.dataset.id);
