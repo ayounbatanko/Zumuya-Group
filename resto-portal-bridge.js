@@ -18,10 +18,15 @@ function portal(){try{for(var i=0;i<localStorage.length;i++){var k=localStorage.
    if(s&&s.access_token&&s.user&&s.user.id)return s}}}catch(e){}return null}
 var s=portal();if(!s)return;
 var pu=s.user,md=pu.user_metadata||{},type=md.account_type;
-/* Compte unique (universal) : si l'utilisateur a activé le pôle Restauration ou Hôtel, on retrouve son établissement côté serveur
-   et on le traite comme un compte restaurant / hôtel. Sans cela, le Service ouvrait un écran de connexion (session perdue). */
-if(type==='universal'){
-  var mods=md.enabled_modules||[],om=md.org_map||{},want=md.portal_type||(om.restaurant?'restaurant':om.hotel?'hotel':'');
+/* Le tableau de bord transmet le pôle explicitement (?portal=restaurant|hotel).
+   Cela évite qu'un compte universel ouvrant ses deux établissements soit toujours aiguillé vers le dernier pôle configuré. */
+var requestedPortal='';
+try{var qp=new URLSearchParams(location.search),rp=qp.get('portal');if(rp==='restaurant'||rp==='hotel')requestedPortal=rp}catch(e){}
+/* Compte universel : retrouver l'établissement demandé dans Supabase. Les anciens comptes restaurant/hôtel
+   sans organization_id dans user_metadata sont également réparés à partir de owner_id. */
+if(type==='universal'||((type==='restaurant'||type==='hotel')&&!md.organization_id)){
+  var mods=md.enabled_modules||[],om=md.org_map||{};
+  var want=requestedPortal||(type==='restaurant'||type==='hotel'?type:(md.portal_type||(om.restaurant?'restaurant':om.hotel?'hotel':'')));
   if(want||mods.indexOf('restaurant')>-1||mods.indexOf('restauration')>-1||mods.indexOf('hotel')>-1||md.organization_id){
     try{var C0=window.ZUMAYA_CONFIG,x0=new XMLHttpRequest();
       x0.open('GET',C0.SUPABASE_URL+'/rest/v1/rg_organizations?owner_id=eq.'+encodeURIComponent(pu.id)+'&organization_type=in.(restaurant,hotel)&select=id,organization_type,public_name,legal_name,city,address,contact_phone,latitude,longitude',false);
@@ -32,6 +37,10 @@ if(type==='universal'){
           md=Object.assign({},md,{organization_id:og.id,organization_name:og.public_name||og.legal_name||md.organization_name,org_city:og.city||md.org_city,org_address:og.address||md.org_address,org_phone:og.contact_phone||md.org_phone,org_lat:og.latitude!=null?og.latitude:md.org_lat,org_lng:og.longitude!=null?og.longitude:md.org_lng})}}
     }catch(e){}
   }
+}
+/* Si aucun établissement ne correspond au pôle demandé, ne pas ouvrir un espace vide ou celui d'un autre pôle. */
+if(((type==='restaurant'||type==='hotel')&&!md.organization_id)||(pu.user_metadata&&pu.user_metadata.account_type==='universal'&&requestedPortal&&!md.organization_id)){
+  location.replace('compte.html#stay');return;
 }
 var ROLE={restaurant:'restaurant',hotel:'restaurant',staff:'restaurant',customer:'client',delivery:'driver'}[type];
 if(!ROLE)return;

@@ -23,7 +23,7 @@ function decide(owner){
   if(owner){if(!ROLES.includes('owner'))go('proprietaire.html');return}
   if(ROLES.includes('owner')&&!ROLES.includes(type)){go(HOME[type]||'compte.html');return}
   if(!ROLES.includes(type)){go(HOME[type]||'compte.html');return}
-  if(PRO.includes(type)&&!md.organization_id)go('compte.html#stay');
+  if(PRO.includes(type)&&!md.organization_id&&!['restaurant','hotel'].includes(type))go('compte.html#stay');
 }
 if(ROLES.includes('owner')){/* page réservée au propriétaire : on attend la réponse du serveur */
   document.documentElement.style.visibility='hidden';
