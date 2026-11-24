@@ -399,7 +399,7 @@ settingsMain(r){return `<div class="card col"><label>Nom<input id="sn" value="${
  </div>
  <label>Devise<select id="sc">${curOptions(r.currency)}</select></label>
  <button onclick="saveS()">Enregistrer</button></div>
- <div class="card"><b>Carte de visite</b><p><a href="${cardUrl(r.slug)}" target="_blank">Ouvrir la carte de visite de ${esc(r.name)}</a></p><div style="text-align:center">${RGQR.svg(new URL('resto-index.html?resto='+r.slug,location.href).href,150)}<p class="mut">📱 QR code : vos clients arrivent directement sur votre restaurant.</p></div></div>`}};
+ <div class="card"><b>Carte de visite</b><p><a href="${cardUrl(r.slug)}" target="_blank">Ouvrir la carte de visite de ${esc(r.name)}</a></p><div style="text-align:center">${RGQR.svg(new URL('resto-card.html?r='+encodeURIComponent(r.slug),location.href).href,150)}<p class="mut">📱 QR code : vos clients arrivent directement sur votre restaurant.</p></div></div>`}};
 function saveHotel(){const services=[...document.querySelectorAll('.hotel-service:checked')].map(x=>x.value);try{upd(r=>{r.hotel={...(r.hotel||{}),enabled:true,name:hn.value.trim(),category:hc.value,manager:hm.value.trim(),rooms:Math.max(0,+hr.value||0),services,hours:ht.value.trim(),instructions:hi.value.trim()};r.businessType='hotel'});render();showOperationSuccess('Modification des paramètres de l’hôtel',()=>{tab='hotel';render()})}catch(e){alert('Échec de l’enregistrement des paramètres hôtel. Vérifiez votre espace de stockage et réessayez.')}}
 function addC(i){const p=R().menu[i],x=cart.find(c=>c.n==p.n);x?x.q++:cart.push({n:p.n,p:p.p,q:1});render()}
 function sell(){const r=R(),s={id:uid(),date:Date.now(),items:cart,total:cart.reduce((a,i)=>a+i.p*i.q,0),pay:pm.value,src:'caisse'};
@@ -483,7 +483,7 @@ render();
  if('serviceWorker' in navigator && location.protocol.startsWith('http')){navigator.serviceWorker.register('./sw.js?v=9').catch(()=>{})}
 })();
 </script>
-<script src="resto-ext-loader.js"></script>
+<script src="resto-ext-loader.js?v=4"></script>
 <style>
 
 
