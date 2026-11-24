@@ -1,0 +1,56 @@
+ZUMAYA GROUP — Mise à jour native Restaurant & Hôtel
+
+Cette mise à jour remplace le routage des espaces Restaurant/Hôtel et ajoute un module professionnel natif ZUMAYA.
+Elle ne dépend pas de l'ancien backend ni des anciennes tables locales RestoGest.
+
+FICHIERS À REMPLACER À LA RACINE DU DÉPÔT GITHUB :
+- compte.html
+- compte.js
+- dashboard.js
+- module-manager.js
+- parametres.js
+- zguard.js
+- sw.js
+
+NOUVEAUX FICHIERS À AJOUTER À LA RACINE :
+- hospitality.html
+- hospitality.css
+- hospitality.js
+- hospitality-catalog.html
+- hospitality-catalog.js
+
+FICHIERS SUPABASE À AJOUTER :
+- z_hospitality_native.sql (migration déjà appliquée au projet Supabase ZUMAYA)
+- supabase/functions/z-hospitality-team/index.ts (fonction déjà déployée sous le nom z-hospitality-team)
+
+BASE SUPABASE : azfunhfjmybekzakhtbu
+Migration appliquée : z_hospitality_native_core + correctifs catalogue, audit et permissions.
+Edge Function : z-hospitality-team, version 2, ACTIVE.
+
+FONCTIONNALITÉS NATIVES DISPONIBLES DANS LE CODE :
+- Tableau de bord Restaurant/Hôtel
+- Catalogue public, articles, prix et QR individuel
+- Commandes publiques et suivi de statuts
+- Caisse et ventes manuelles
+- Stocks et seuils
+- Chambres et réservations (Hôtel)
+- Promotions
+- Avis clients (consultation des avis stockés dans le module)
+- Rapports et export CSV des ventes
+- Gestion d'équipe, création des comptes employés et livreurs par le compte principal
+- Attribution des livraisons et espace de suivi des livreurs
+- Journal des actions sur les données et les membres
+
+SÉCURITÉ :
+- RLS activée sur les nouvelles tables.
+- Les employés et livreurs sont rattachés à une organisation précise.
+- Seul le propriétaire de l'organisation peut créer les comptes membres via Edge Function.
+- Les visiteurs ne lisent que le catalogue public et passent commande par RPC ; aucun owner_id n'est exposé par le catalogue.
+- Ne jamais placer de clé service_role / secret dans les fichiers GitHub.
+
+IMPORTANT :
+La migration SQL et la fonction Edge ont déjà été appliquées/déployées sur Supabase pendant cette intervention.
+Ne pas exécuter les anciens scripts RESET ou les migrations RestoGest.
+Après remplacement des fichiers GitHub, attendre le déploiement Pages, puis actualiser le navigateur (au besoin vider le cache du site).
+
+Limites de validation : contrôles de syntaxe JavaScript et vérification de présence des objets SQL/Edge effectués. Le parcours complet dans un navigateur avec de vrais comptes et une commande client n'a pas encore été testé. Les notifications push, paiements en ligne, suivi GPS temps réel, fidélité avancée et cuisine KDS dédiée restent à compléter dans une phase suivante.

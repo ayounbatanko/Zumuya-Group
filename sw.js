@@ -1,7 +1,7 @@
 /* ZUMUYA GROUP — service worker commun au portail et au module Restauration.
    Cache versionné : toutes les pages et dépendances statiques du dépôt sont préchargées.
    Stratégie réseau d’abord, cache en secours hors ligne. */
-const CACHE='zumuya-v33-20261122';
+const CACHE='zumuya-v33-20261124-hospitality-native';
 const FILES=[
   './agro-collaboration.js',
   './agro.css',
@@ -16,6 +16,11 @@ const FILES=[
   './compte.js',
   './dashboard.css',
   './dashboard.js',
+  './hospitality.html',
+  './hospitality.css',
+  './hospitality.js',
+  './hospitality-catalog.html',
+  './hospitality-catalog.js',
   './config.js',
   './hotel.html',
   './icon-180.png',

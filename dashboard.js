@@ -5,9 +5,9 @@ const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 /* cats = catégories du formulaire partenaire ; orgs = types d'organisation qui rendent l'activité « configurée » ; page = espace de gestion ; browse = page publique du pôle */
 const MODS=[
  {code:'marketplace',ico:'🛍️',title:'Marketplace',desc:'Boutique, produits et commandes',cats:['marketplace'],orgs:['marketplace','commerce'],page:'boutique.html',browse:'marketplace.html',def:'Ma boutique'},
- {code:'restaurant',dbCode:'restauration',ico:'🍽️',title:'Restauration',desc:'Restaurant, menus et commandes',cats:['restaurant'],orgs:['restaurant'],page:'resto-restaurant.html?portal=restaurant',browse:'resto-client.html',def:'Mon restaurant'},
+ {code:'restaurant',dbCode:'restauration',ico:'🍽️',title:'Restauration',desc:'Restaurant, menus et commandes',cats:['restaurant'],orgs:['restaurant'],page:'hospitality.html?type=restaurant',browse:'hospitality-catalog.html',def:'Mon restaurant'},
  {code:'agro',ico:'🌱',title:'Agro',desc:'Producteurs, fournisseurs et acheteurs',cats:['agro','agro_trader'],orgs:['agro','agro_trader'],page:'agro.html',browse:'agro.html',def:'Mon activité agricole'},
- {code:'hotel',ico:'🏨',title:'Hôtel',desc:'Chambres et service en chambre',cats:['hotel'],orgs:['hotel'],page:'resto-restaurant.html?portal=hotel',browse:'hotel.html',def:'Mon hôtel'},
+ {code:'hotel',ico:'🏨',title:'Hôtel',desc:'Chambres et service en chambre',cats:['hotel'],orgs:['hotel'],page:'hospitality.html?type=hotel',browse:'hospitality-catalog.html',def:'Mon hôtel'},
  {code:'delivery',dbCode:'livraison',ico:'🚚',title:'Livraison',desc:'Courses et suivi',cats:['delivery'],orgs:['delivery','delivery_service','logistics'],page:'livraison-entreprise.html',browse:'livraison.html',def:'Mon service de livraison'},
  {code:'prestations',ico:'🛠️',title:'Prestations',desc:'Services et rendez-vous',cats:[],orgs:['services'],page:'index.html#services',browse:'index.html#services',def:'Mes prestations',discover:true}
 ];
@@ -81,7 +81,7 @@ function init(){
   $('#dAcc').addEventListener('click',e=>{e.stopPropagation();$('#dMenu').classList.toggle('open')});
   document.addEventListener('click',()=>$('#dMenu').classList.remove('open'));
   $('#dash').addEventListener('click',e=>{const b=e.target.closest('[data-conf]');if(b)configure(b.dataset.conf)});
-  const go=e=>{if(e.target.closest('a,button'))return;const c=e.target.closest('[data-go]');if(c&&/^[a-z0-9._-]+\.html(?:\?[^#]*)?(?:#[\w-]*)?$/i.test(c.dataset.go))location.href=c.dataset.go};
+  const go=e=>{if(e.target.closest('a,button'))return;const c=e.target.closest('[data-go]');if(c&&/^[a-z0-9._-]+\.html(?:\?[a-z0-9_=&-]+)?(?:#[\w-]*)?$/i.test(c.dataset.go))location.href=c.dataset.go};
   $('#dash').addEventListener('click',go);
   $('#dash').addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.closest('[data-go]')&&!e.target.closest('a,button')){e.preventDefault();go(e)}});
   $('#dLogout').addEventListener('click',()=>{const l=document.getElementById('logout');if(l)l.click()});

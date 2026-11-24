@@ -4,7 +4,7 @@
    NB : c'est un aiguillage d'interface. La vraie protection des données reste côté Supabase (règles RLS). */
 (()=>{'use strict';
 const me=document.currentScript,ROLES=(me&&me.dataset.roles||'').split(',').map(s=>s.trim()).filter(Boolean);
-const HOME={customer:'client-espace.html',restaurant:'resto-restaurant.html',hotel:'resto-restaurant.html',staff:'resto-restaurant.html',delivery:'resto-driver.html',agro_producer:'agro.html',agro_trader:'agro.html',marketplace:'marketplace.html',delivery_service:'livraison-entreprise.html'};
+const HOME={customer:'client-espace.html',restaurant:'hospitality.html?type=restaurant',hotel:'hospitality.html?type=hotel',staff:'hospitality.html?type=member',delivery:'hospitality.html?type=member',agro_producer:'agro.html',agro_trader:'agro.html',marketplace:'marketplace.html',delivery_service:'livraison-entreprise.html'};
 const PRO=['restaurant','hotel','delivery','staff','agro_producer','agro_trader','marketplace','delivery_service'];
 function session(){try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);
   if(/^sb-.*-auth-token$/.test(k)){const v=JSON.parse(localStorage.getItem(k)||'null'),s=v&&(v.currentSession||v);if(s&&s.access_token&&s.user&&s.user.id)return s}}}catch(e){}return null}
@@ -23,7 +23,7 @@ function decide(owner){
   if(owner){if(!ROLES.includes('owner'))go('proprietaire.html');return}
   if(ROLES.includes('owner')&&!ROLES.includes(type)){go(HOME[type]||'compte.html');return}
   if(!ROLES.includes(type)){go(HOME[type]||'compte.html');return}
-  if(PRO.includes(type)&&!md.organization_id&&!['restaurant','hotel'].includes(type))go('compte.html#stay');
+  if(PRO.includes(type)&&!md.organization_id)go('compte.html#stay');
 }
 if(ROLES.includes('owner')){/* page réservée au propriétaire : on attend la réponse du serveur */
   document.documentElement.style.visibility='hidden';
