@@ -1,0 +1,26 @@
+# Secrets et configuration locale
+.env
+.env.*
+!.env.example
+!.env.*.example
+*.pem
+*.key
+
+# Dépendances et fichiers temporaires
+node_modules/
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+*.bak
+*.swp
+
+# Archives et exécutables de distribution : ne pas publier à la racine du site
+*.zip
+*.apk
+*.aab
+
+# Sorties de compilation
+dist/
+build/
+coverage/
