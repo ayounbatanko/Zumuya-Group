@@ -1,7 +1,7 @@
 (()=>{'use strict';
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let sb,session,countries=[],rests=[],orders=[];
-const TITLES={overview:'Vue d’ensemble',services:'Services : restauration, hôtel, livraison',partners:'Partenaires',countries:'Déploiement par pays',orgs:'Organisations',payments:'Transactions',wallet:'Portefeuille & commissions',activity:'Activité métier'};
+const TITLES={overview:'Vue d’ensemble',services:'Services : restauration, hôtel, livraison',partners:'Partenaires',countries:'Déploiement par pays',orgs:'Organisations',payments:'Transactions',wallet:'Portefeuille & commissions',activity:'Activité métier',subscriptions:'Abonnements Pro'};
 const msg=s=>{$('#loginMsg').textContent=s};
 const fail=s=>{const e=$('#err');e.hidden=!s;e.textContent=s||''};
 const dt=x=>x?new Date(x).toLocaleDateString('fr-FR'):'—';
@@ -29,7 +29,7 @@ async function start(){
 async function verify(s){session=s;
  const {data,error}=await sb.rpc('rg_is_platform_owner');if(error)throw error;
  if(data!==true){await sb.auth.signOut();session=null;throw Error('Ce compte ne figure pas dans la liste d’autorisation du propriétaire.')}
- $('#login').hidden=true;$('#shell').hidden=false;$('#who').textContent=s.user.email;show();try{await refresh()}catch(e){fail('Connexion propriétaire validée, mais certaines données du tableau de bord ne se chargent pas : '+(e.message||'erreur inconnue')+'. Utilisez Actualiser après vérification des droits des tables.')}}
+ $('#login').hidden=true;$('#shell').hidden=false;$('#who').textContent=s.user.email;show();await refresh()}
 
 /* ---------- Chargement des données ---------- */
 async function optional(p){try{const r=await p;return r.error?null:r}catch(e){return null}}
@@ -59,9 +59,39 @@ async function refresh(){fail('');
  const orgNames=Object.fromEntries((orgs.data||[]).map(x=>[x.id,x.public_name]));
  const pend=(partners.data||[]).filter(x=>x.status==='pending');
  renderOverview(orgs.data||[],prof.count||0,ests.count||0,payments.data||[],pend);await loadWalletAdmin();
- renderServices();renderPartners(partners.data||[]);renderCountries();renderOrgs(orgs.data||[]);renderPayments(payments.data||[]);renderActivity(records.data||[],orgNames);
+ renderServices();await loadProAdmin();renderPartners(partners.data||[]);renderCountries();renderOrgs(orgs.data||[]);renderPayments(payments.data||[]);renderActivity(records.data||[],orgNames);
  if(!rr)fail('Les données du Service de Restauration ne sont pas lisibles : exécutez supabase-setup.sql dans ce projet Supabase.');
  const b=$('#pBadge');b.hidden=!pend.length;b.textContent=pend.length;$('#live').textContent='● Connecté · '+new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}
+
+/* ---------- Abonnements Pro natifs ZUMAYA ---------- */
+const fmtMoney=(n,c='XOF')=>new Intl.NumberFormat('fr-FR',{maximumFractionDigits:0}).format(Number(n)||0)+' '+c;
+const dateTime=x=>x?new Date(x).toLocaleDateString('fr-FR'):'—';
+async function loadProAdmin(){
+ const [orgs,subs,reqs,plans,methods]=await Promise.all([
+  sb.from('rg_organizations').select('id,public_name,legal_name,organization_type,contact_phone,country_code').in('organization_type',['restaurant','hotel']).order('created_at',{ascending:false}),
+  sb.from('zrh_subscriptions').select('*').order('updated_at',{ascending:false}),
+  sb.from('zrh_subscription_requests').select('*').order('created_at',{ascending:false}).limit(100),
+  sb.from('zrh_subscription_plans').select('*').order('service_type').order('months'),
+  sb.from('zrh_subscription_payment_methods').select('*').order('created_at')
+ ]);
+ for(const x of [orgs,subs,reqs,plans,methods])if(x.error)throw x.error;
+ const om=Object.fromEntries((orgs.data||[]).map(o=>[o.id,o]));
+ const rq=reqs.data||[],ss=subs.data||[],pp=plans.data||[],mm=methods.data||[];
+ $('#proStats').innerHTML=stat('Établissements',orgs.data.length)+stat('Pro actifs',ss.filter(x=>x.status==='active'&&x.current_period_end&&new Date(x.current_period_end)>new Date()).length)+stat('Essais en cours',ss.filter(x=>x.status==='trial'&&new Date(x.trial_ends_at)>new Date()).length)+stat('Demandes à traiter',rq.filter(x=>['requested','instructions_sent','payment_submitted'].includes(x.status)).length);
+ $('#proRequests').innerHTML=rq.map(r=>{const o=om[r.org_id]||{};return `<tr><td><b>${esc(o.public_name||o.legal_name||'Établissement')}</b><br><small>${esc(o.contact_phone||'')}</small></td><td>${r.service_type==='hotel'?'🏨 Hôtel':'🍽️ Restaurant'}</td><td>${r.months} mois</td><td>${fmtMoney(r.amount_minor,r.currency_code)}</td><td><span class="badge ${r.status==='approved'?'good':r.status==='rejected'?'bad':'warn'}">${esc(r.status)}</span>${r.payment_instructions?`<small><br>${esc(r.payment_instructions)}</small>`:''}</td><td>${esc(r.payment_reference||'—')}<small><br>${esc(r.payment_method_name||'')}</small></td><td>${r.status==='requested'?`<select data-pro-method="${r.id}"><option value="">Mode de paiement…</option>${mm.filter(m=>m.active).map(m=>`<option value="${m.id}">${esc(m.name)}</option>`).join('')}</select><button class="smallbtn" data-pro-send="${r.id}">Envoyer formulaire</button>`:''}${r.status==='payment_submitted'?`<button class="smallbtn" data-pro-approve="${r.id}">Confirmer paiement / Activer</button><button class="smallbtn" data-pro-reject="${r.id}">Rejeter</button>`:''}</td></tr>`}).join('')||'<tr><td colspan="7">Aucune demande Pro.</td></tr>';
+ $('#proSubs').innerHTML=orgs.data.map(o=>{const x=ss.find(z=>z.org_id===o.id)||{};return `<tr><td><b>${esc(o.public_name||o.legal_name)}</b></td><td>${o.organization_type==='hotel'?'Hôtel':'Restaurant'}</td><td><span class="badge ${x.status==='active'?'good':x.status==='suspended'?'bad':'warn'}">${esc(x.status||'trial')}</span></td><td>${dateTime(x.trial_ends_at)}</td><td>${dateTime(x.current_period_end)}</td><td><button class="smallbtn" data-pro-admin="${o.id}" data-action="extend">+1 mois</button><button class="smallbtn" data-pro-admin="${o.id}" data-action="${x.status==='suspended'?'reactivate':'suspend'}">${x.status==='suspended'?'Réactiver':'Suspendre'}</button></td></tr>`}).join('')||'<tr><td colspan="6">Aucun restaurant ou hôtel.</td></tr>';
+ $('#proPlans').innerHTML=['restaurant','hotel'].map(t=>`<h3>${t==='hotel'?'🏨 Hôtel':'🍽️ Restaurant'}</h3><div class="tools" style="margin-bottom:12px">${[1,3,6,12].map(m=>{const x=pp.find(z=>z.service_type===t&&z.months===m);return `<label>${m} mois<input type="number" min="1" data-plan-type="${t}" data-plan-months="${m}" value="${x?.amount_minor||0}" style="width:110px"></label>`}).join('')}</div>`).join('')+'<button class="btn primary" id="saveProPlans">Enregistrer les tarifs</button>';
+ $('#proMethods').innerHTML=`<form id="proMethodForm" class="tools"><input name="name" required placeholder="Orange Money, Wave…"><input name="instructions" required placeholder="Numéro / instructions de paiement"><button class="btn primary">Ajouter</button></form>${mm.map(m=>`<p><b>${esc(m.name)}</b> · ${esc(m.instructions)} <button class="smallbtn" data-method-toggle="${m.id}" data-active="${m.active}">${m.active?'Désactiver':'Activer'}</button></p>`).join('')||'<p>Aucun moyen de paiement configuré.</p>'}`;
+}
+$('#subscriptions')?.addEventListener('click',e=>run(async()=>{
+ const send=e.target.closest('[data-pro-send]'),approve=e.target.closest('[data-pro-approve]'),reject=e.target.closest('[data-pro-reject]'),admin=e.target.closest('[data-pro-admin]'),mt=e.target.closest('[data-method-toggle]');
+ if(send){const sel=document.querySelector(`[data-pro-method="${send.dataset.proSend}"]`);if(!sel?.value)throw Error('Choisissez un moyen de paiement.');const {error}=await sb.rpc('zrh_subscription_owner_action',{p_request_id:send.dataset.proSend,p_action:'send_instructions',p_method_id:sel.value,p_owner_note:null});if(error)throw error;await loadProAdmin();return}
+ if(approve||reject){const id=(approve||reject).dataset.proApprove||(approve||reject).dataset.proReject;const action=approve?'approve':'reject';if(!confirm(action==='approve'?'Confirmer le paiement et activer Pro ?':'Rejeter cette demande ?'))return;const {error}=await sb.rpc('zrh_subscription_owner_action',{p_request_id:id,p_action:action,p_method_id:null,p_owner_note:null});if(error)throw error;await loadProAdmin();return}
+ if(admin){const action=admin.dataset.action;const {error}=await sb.rpc('zrh_subscription_admin_set_status',{p_org_id:admin.dataset.proAdmin,p_action:action,p_months:1,p_note:'Gestion depuis espace propriétaire'});if(error)throw error;await loadProAdmin();return}
+ if(mt){const {error}=await sb.from('zrh_subscription_payment_methods').update({active:mt.dataset.active!=='true'}).eq('id',mt.dataset.methodToggle);if(error)throw error;await loadProAdmin()}
+}));
+$('#subscriptions')?.addEventListener('submit',e=>{if(e.target.id==='proMethodForm'){e.preventDefault();run(async()=>{const f=Object.fromEntries(new FormData(e.target));const {error}=await sb.from('zrh_subscription_payment_methods').insert(f);if(error)throw error;await loadProAdmin()})}});
+$('#subscriptions')?.addEventListener('click',e=>{if(e.target.id==='saveProPlans')run(async()=>{const fields=[...document.querySelectorAll('[data-plan-type]')];for(const el of fields){const {error}=await sb.from('zrh_subscription_plans').upsert({service_type:el.dataset.planType,months:+el.dataset.planMonths,amount_minor:+el.value,currency_code:'XOF',active:+el.value>0},{onConflict:'service_type,months'});if(error)throw error}await loadProAdmin();alert('Tarifs Pro enregistrés.')})});
 
 /* ---------- Rendus ---------- */
 function renderOverview(orgs,users,ests,pays,pend){

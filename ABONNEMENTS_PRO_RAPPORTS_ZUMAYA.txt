@@ -1,0 +1,31 @@
+MISE A JOUR ZUMAYA — ABONNEMENTS PRO ET RAPPORTS PROFESSIONNELS
+
+FICHIERS A REMPLACER SUR GITHUB (5 fichiers, tous à la racine) :
+- proprietaire.html
+- proprietaire.js
+- zrh-native.js
+- restaurant-gestion.html
+- hotel-gestion.html
+
+FONCTIONNEMENT ABONNEMENT PRO :
+- Le compte propriétaire autorisé ouvre Espace propriétaire > Abonnements Pro.
+- Il configure les tarifs 1, 3, 6 et 12 mois séparément pour Restaurant et Hôtel.
+- Il ajoute/active/désactive les moyens de paiement et les instructions.
+- Il reçoit les demandes, transmet les instructions, vérifie la référence de paiement, accepte ou rejette.
+- Il peut prolonger, suspendre et réactiver un abonnement.
+- Le compte principal Restaurant/Hôtel consulte son statut, demande une formule et transmet sa référence de paiement.
+- Les paiements ne sont pas débités automatiquement : validation manuelle par le propriétaire, comme dans l'ancien RestoGest.
+
+RAPPORTS :
+- Les espaces Restaurant et Hôtel ont un onglet « Rapport professionnel ».
+- Période personnalisable, chiffre d'affaires, nombre de ventes, panier moyen, recettes, dépenses, solde de caisse, graphique et détail des ventes.
+- Export CSV et impression via le navigateur (choisir « Enregistrer en PDF » pour obtenir un PDF).
+- Les données sont isolées par établissement ; le rapport Hôtel inclut les séjours clôturés.
+
+SUPABASE :
+Les tables et fonctions zrh_subscription_* ont déjà été créées sur le projet Supabase ZUMAYA connecté. Ne pas exécuter de script RESET.
+Les tarifs initiaux de démonstration sont 10 000 / 27 000 / 50 000 / 90 000 XOF pour 1 / 3 / 6 / 12 mois. Modifiables dans l'espace propriétaire.
+Aucun moyen de paiement n'est préconfiguré : ajoutez vos propres coordonnées dans Espace propriétaire > Abonnements Pro avant d'envoyer les formulaires.
+
+IMPORTANT :
+Contrôles de syntaxe JavaScript effectués. Les parcours complets dans un navigateur avec comptes propriétaire et établissements n'ont pas encore été testés. Vérifier les invitations et la confirmation des paiements sur un compte test avant mise en production.
