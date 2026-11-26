@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="fr"><head><script src="config.js"></script><script src="zguard.js" data-roles="customer"></script><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="manifest" href="zrestaurant-manifest.webmanifest"><meta name="theme-color" content="#14213d"><link rel="icon" type="image/png" href="zrestaurant-icon-192.png?v=3"><link rel="apple-touch-icon" href="zrestaurant-icon-192.png?v=3"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Restauration"><meta property="og:type" content="website">
+<!DOCTYPE html><html lang="fr"><head><script src="config.js"></script><script src="zguard.js?v=4" data-roles="customer"></script><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="manifest" href="zrestaurant-manifest.webmanifest"><meta name="theme-color" content="#14213d"><link rel="icon" type="image/png" href="zrestaurant-icon-192.png?v=3"><link rel="apple-touch-icon" href="zrestaurant-icon-192.png?v=3"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Restauration"><meta property="og:type" content="website">
 <meta property="og:locale" content="fr_FR">
 <meta property="og:site_name" content="ZUMUYA Restauration">
 <meta property="og:title" content="ZUMUYA Restauration - Gestion intelligente du restaurant">
@@ -197,7 +197,7 @@ if(navigator.geolocation){
   );
 }
 const ST=['en attente','acceptée','préparée','colis récupéré','en route','arrivé','terminée'];
-function render(){hdr(U.name);nav.innerHTML=['restos','myorders','support','account'].map(k=>`<button class="${k==tab?'on':''}" onclick="tab='${k}';cur=null;menuQ='';render()">${t(k)}</button>`).join('')+'<a class="client-nav-action" href="messagerie.html">💬 Messagerie</a>';m.innerHTML=tab=='account'?passwordCard():tab=='support'?RGChat.userView(U):(tab=='restos'?(cur?menu():list()):orders())}
+function render(){hdr(U.name);nav.innerHTML=['restos','myorders','support','account'].map(k=>`<button class="${k==tab?'on':''}" onclick="tab='${k}';cur=null;menuQ='';render()">${t(k)}</button>`).join('')+'<a class="client-nav-action" href="portefeuille.html">👛 Portefeuille</a><a class="client-nav-action" href="messagerie.html">💬 Messagerie</a>';m.innerHTML=tab=='account'?passwordCard():tab=='support'?RGChat.userView(U):(tab=='restos'?(cur?menu():list()):orders())}
 function dist(d){return d==null?'':d<1?' — '+Math.round(d*1000)+' m':' — '+d.toFixed(1)+' km'}
 function list(){let rs=D.get().rests.filter(r=>subInfo(r).ok);
  rs=rs.map(r=>({r,d:pos&&r.lat!=null&&r.lng!=null?km(pos,[r.lat,r.lng]):null})).sort((a,b)=>(a.d??1e9)-(b.d??1e9));
@@ -377,5 +377,5 @@ U&&RGChat.watch(U.id);try{const tg=store.g('l','rg_target');if(tg){const rr=D.ge
  if('serviceWorker' in navigator && location.protocol.startsWith('http')){navigator.serviceWorker.register('./sw.js?v=9').catch(()=>{})}
 })();
 </script>
-<script src="zrestaurant-ext-loader.js"></script>
+<script src="zrestaurant-ext-loader.js?v=2"></script>
 </body></html>
