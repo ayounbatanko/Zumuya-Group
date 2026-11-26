@@ -5,7 +5,7 @@ const ROLE_TYPES=['restaurant','hotel','agro_producer','agro_trader','marketplac
 const roleToPartner={restaurant:'restaurant',hotel:'hotel',delivery:'delivery',agro_producer:'agro',agro_trader:'agro_trader',marketplace:'marketplace',delivery:'delivery_service',commerce:'commerce',business:'business'};
 /* L'identifiant de connexion du portail reste l'adresse e-mail ; le rôle est détecté depuis le profil après connexion. */
 const EMAIL_RE=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const LABEL={customer:'Client',restaurant:'Restaurant partenaire',hotel:'Hôtel / hébergement',delivery:'Livreur (compte créé par un restaurant)',staff:'Employé (compte créé par un restaurant)',agro_producer:'Producteur agricole',agro_trader:'Commerçant agricole',marketplace:'Vendeur Marketplace',delivery_service:'Service de livraison'};
+const LABEL={customer:'Client',restaurant:'Restaurant partenaire',hotel:'Hôtel / hébergement',delivery:'Livreur (compte créé par un restaurant)',staff:'Employé (compte créé par un restaurant)',agro_producer:'Producteur agricole',agro_trader:'Commerçant agricole',marketplace:'Vendeur Marketplace',delivery_service:'Service de livraison',platform_staff:'Membre du groupe de gestion ZUMUYA'};
 function updateIdentityFields(){$('#email').required=true}
 const MIN=8;
 
@@ -37,8 +37,8 @@ function updateMatch(){
 }
 async function showAccount(user){
   const type=user.user_metadata?.account_type;
-  const routes={customer:'client-espace.html',restaurant:'hospitality.html?type=restaurant',hotel:'hospitality.html?type=hotel',staff:'hospitality.html?type=member',delivery:'hospitality.html?type=member',agro_producer:'agro.html',agro_trader:'agro.html',marketplace:'marketplace.html',delivery_service:'livraison-entreprise.html'};
-  const managed=type==='delivery'||type==='staff';
+  const routes={customer:'client-espace.html',restaurant:'hospitality.html?type=restaurant',hotel:'hospitality.html?type=hotel',staff:'hospitality.html?type=member',delivery:'hospitality.html?type=member',agro_producer:'agro.html',agro_trader:'agro.html',marketplace:'marketplace.html',delivery_service:'livraison-entreprise.html',platform_staff:'proprietaire.html'};
+  const managed=type==='delivery'||type==='staff'||type==='platform_staff';
   const universal=type==='universal'||!type;   /* comptes gérés : jamais de fiche partenaire */
   const stay=/parametres|stay/.test(location.hash);
   /* Retour au catalogue : un visiteur parti se connecter depuis le panier y revient (clients uniquement, valable 30 min). */
@@ -54,7 +54,7 @@ async function showAccount(user){
   const rt=routes[type],ready=rt&&(type==='customer'||user.user_metadata?.organization_id);
   const sp=$('#mySpace');sp.hidden=owner||!ready;if(ready)sp.href=rt;
   $('#clientOrder').hidden=owner||(!universal&&type!=='customer');
-  $('#ownerLink').hidden=!owner;$('#ownerResto').hidden=!owner;$('#ownerNotice').hidden=!owner;
+  $('#ownerLink').hidden=!owner;$('#ownerNotice').hidden=!owner;
   const lead=$('#roleLead');
   if(owner){lead.hidden=true}
   else if(type==='customer'){lead.hidden=false;lead.textContent='Compte client : consultez les restaurants proches, leurs menus, et passez commande depuis votre espace.'}

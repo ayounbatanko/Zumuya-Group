@@ -17,7 +17,7 @@ header.bar{display:flex;align-items:center;justify-content:space-between;padding
 
 @media(max-width:600px){.wrap{padding:10px}.panel{padding:15px}.tabs{top:0;border-radius:0;margin:0 -10px}.tab{padding:11px 13px}}
 </style></head><body>
-<header class="bar"><a class="brand" href="index.html">ZUMUYA <b>GROUP</b></a><div class="actions"><a class="btn gold" href="resto-client.html">🍽️ Commander</a><a class="btn" href="messagerie.html">💬 Messages</a><button id="logout" class="btn secondary" type="button">Déconnexion</button></div></header>
+<header class="bar"><a class="brand" href="index.html">ZUMUYA <b>GROUP</b></a><div class="actions"><a class="btn gold" href="zrestaurant-client.html">🍽️ Commander</a><a class="btn secondary" href="analytics.html">📈 Mon activité</a><a class="btn" href="messagerie.html">💬 Messages</a><button id="logout" class="btn secondary" type="button">Déconnexion</button></div></header>
 <main class="wrap"><div class="hero"><h1>Mon espace client</h1><p>Retrouvez chaque service dans son onglet, sans fonctionnalités dispersées.</p></div>
 <nav class="tabs" role="tablist" aria-label="Navigation du compte client">
 <button class="tab" role="tab" aria-selected="true" data-tab="home">🏠 Accueil</button>
@@ -29,8 +29,8 @@ header.bar{display:flex;align-items:center;justify-content:space-between;padding
 </nav>
 <div id="flash" class="msg" hidden></div>
 <section class="tabcontent active" id="tab-home"><div class="panel"><h2>Bienvenue dans votre espace</h2><p class="muted">Accédez directement à vos principaux services.</p><div class="grid">
-<a class="btn" href="resto-client.html">🍽️ Commander et suivre</a><a class="btn secondary" href="index.html#catalogue-public">📋 Explorer les menus</a><button class="btn secondary" type="button" data-open-tab="orders">🛍️ Mes commandes</button><button class="btn secondary" type="button" data-open-tab="addresses">📍 Mes adresses</button><button class="btn secondary" type="button" data-open-tab="favorites">❤️ Mes favoris</button></div></div><div class="panel"><h2>Commandes récentes</h2><p class="muted">Consultez vos commandes dans l’onglet dédié.</p><button class="btn" type="button" data-open-tab="orders">Voir mes commandes</button></div></section>
-<section class="tabcontent" id="tab-orders"><div class="panel"><h2>Mes commandes</h2><p class="muted">Historique récent et suivi des commandes.</p><div id="ordersList"><p class="muted">Chargement…</p></div><a class="btn" href="resto-client.html">Ouvrir le suivi complet</a></div></section>
+<a class="btn" href="zrestaurant-client.html">🍽️ Commander et suivre</a><a class="btn secondary" href="index.html#catalogue-public">📋 Explorer les menus</a><button class="btn secondary" type="button" data-open-tab="orders">🛍️ Mes commandes</button><button class="btn secondary" type="button" data-open-tab="addresses">📍 Mes adresses</button><button class="btn secondary" type="button" data-open-tab="favorites">❤️ Mes favoris</button></div></div><div class="panel"><h2>Commandes récentes</h2><p class="muted">Consultez vos commandes dans l’onglet dédié.</p><button class="btn" type="button" data-open-tab="orders">Voir mes commandes</button></div></section>
+<section class="tabcontent" id="tab-orders"><div class="panel"><h2>Mes commandes</h2><p class="muted">Historique récent et suivi des commandes.</p><div id="ordersList"><p class="muted">Chargement…</p></div><a class="btn" href="zrestaurant-client.html">Ouvrir le suivi complet</a></div></section>
 
 <section class="tabcontent" id="tab-addresses"><section class="panel">
     <h2>Mes adresses de livraison</h2>

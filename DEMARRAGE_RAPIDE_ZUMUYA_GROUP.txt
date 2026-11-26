@@ -1,0 +1,14 @@
+ZUMUYA GROUP — DÉMARRAGE RAPIDE
+
+1. Publier le contenu de cette archive à la racine du dépôt GitHub Pages.
+2. Ouvrir INSTALLATION_ZUMUYA_GROUP.md et suivre l'ordre des migrations Supabase.
+3. Déployer les Edge Functions z-hospitality-team et platform-team-admin.
+4. Enregistrer l'UUID du propriétaire dans rg_platform_owners.
+5. Tester chaque type de compte et les permissions RLS avant mise en production.
+
+Les rapports de tous les pôles sont accessibles depuis le bouton « Rapports & statistiques »
+dans les espaces professionnels. Les filtres de dates permettent les exports CSV et JSON.
+
+ATTENTION : les migrations SQL ne sont pas exécutées automatiquement par l'archive.
+La configuration distante Supabase et le déploiement Edge Functions nécessitent un accès
+administrateur au projet. Ne jamais publier la clé service_role.

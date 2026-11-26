@@ -1,0 +1,10 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#102b45"><title>Rapports & statistiques — ZUMUYA GROUP</title><link rel="stylesheet" href="zanalytics.css"><script src="config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script></head>
+<body><header><a href="compte.html" class="brand">ZUMUYA <b>GROUP</b></a><div><span id="identity">Tableau de bord professionnel</span> <a class="back" href="compte.html">Mon compte</a></div></header>
+<main><section class="hero"><small>ANALYSE DE VOTRE ACTIVITÉ</small><h1>Rapports & statistiques</h1><p>Consultez l'historique de votre activité sur la période choisie et téléchargez vos rapports.</p></section>
+<div id="message" class="notice">Chargement de vos données…</div>
+<section class="filters"><label>Du <input id="from" type="date"></label><label>Au <input id="to" type="date"></label><button id="apply">Actualiser</button><button id="csv" class="secondary">Télécharger CSV</button><button id="json" class="secondary">Télécharger JSON</button></section>
+<section id="stats" class="stats"></section><section class="panel"><h2>Évolution de l'activité</h2><div id="chart" class="chart"></div></section>
+<section class="panel"><h2>Répartition par type d'action</h2><div id="breakdown"></div></section>
+<section class="panel"><h2>Historique détaillé</h2><div class="tablewrap"><table><thead><tr><th>Date</th><th>Pôle</th><th>Action</th><th>Module / table</th><th>Résumé</th></tr></thead><tbody id="history"></tbody></table></div></section></main>
+<script src="zanalytics.js?v=1"></script></body></html>

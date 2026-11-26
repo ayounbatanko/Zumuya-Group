@@ -20,11 +20,11 @@ Statuts : `en attente < acceptée < préparée < en route < terminée` (+ `annul
 1. **Écrasements** : `rg_orders_guard` fusionne les écritures (une copie périmée n'efface plus `driverId`, `driverPos`, `settled`) et empêche le recul des statuts. L'acceptation d'une course est atomique (`rg_driver_accept`) : un seul livreur la prend.
 2. **Attribution côté serveur** au lieu du navigateur du restaurant. Si `supabase-setup.sql` n'est pas installé, l'ancien mécanisme sert de repli. Correction aussi d'un blocage : quand tous les livreurs avaient refusé, la course n'était plus jamais reproposée.
 3. **Hôtel** : l'étape « remise en chambre » existe (aucun livreur n'est sollicité pour une commande en chambre) ; vue SQL `rg_room_folios`.
-4. **Un seul projet Supabase** : `config.js` sert au portail et au Service de Restauration (`resto-db.js`, extensions, realtime).
+4. **Un seul projet Supabase** : `config.js` sert au portail et au Service de Restauration (`zrestaurant-db.js`, extensions, realtime).
 5. **Realtime activé** (`realtime:1`), le polling reste en secours.
 
 ## Limites restantes (à traiter ensuite)
-- Les politiques d'accès restent ouvertes (clé anon), comme avant : `resto-sql-v2_securite_rls.sql` ne doit être lancé qu'après migration des comptes vers Supabase Auth.
+- Les politiques d'accès restent ouvertes (clé anon), comme avant : `zrestaurant-sql-v2_securite_rls.sql` ne doit être lancé qu'après migration des comptes vers Supabase Auth.
 - Les comptes et données de l'ancien projet `azfun…` ne sont pas migrés automatiquement.
 - Les restaurants ne sont pas encore reliés aux organisations du portail (`rg_organizations`).
 - Pas de rôle « réception » dédié : les notes de chambre sont gérées depuis le compte de l'hôtel.
