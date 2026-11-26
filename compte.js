@@ -54,7 +54,7 @@ async function showAccount(user){
   const rt=routes[type],ready=rt&&(type==='customer'||user.user_metadata?.organization_id);
   const sp=$('#mySpace');sp.hidden=owner||!ready;if(ready)sp.href=rt;
   $('#clientOrder').hidden=owner||(!universal&&type!=='customer');
-  $('#ownerLink').hidden=!owner;$('#ownerResto').hidden=!owner;$('#ownerNotice').hidden=!owner;
+  $('#ownerLink').hidden=!owner;$('#ownerNotice').hidden=!owner;
   const lead=$('#roleLead');
   if(owner){lead.hidden=true}
   else if(type==='customer'){lead.hidden=false;lead.textContent='Compte client : consultez les restaurants proches, leurs menus, et passez commande depuis votre espace.'}
