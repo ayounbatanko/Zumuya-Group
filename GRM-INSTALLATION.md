@@ -5,7 +5,7 @@ Cette extension ajoute (sans remplacer le système existant) une interface de ge
 ## Contenu
 - `grm-zumuya.html` / `grm-zumuya.js`: interface web de l'extension
 - `grm-zumuya-migration.sql`: migration Supabase additive, tables et politiques RLS
-- `resto-restaurant.html`: intégration d'un lien d'accès flottant à GRM
+- `zrestaurant-restaurant.html`: intégration d'un lien d'accès flottant à GRM
 
 ## Mise en place
 1. Faites une sauvegarde du projet et de Supabase.
