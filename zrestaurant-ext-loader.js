@@ -1,4 +1,4 @@
-/* Service de Restauration v2 - chargeur unique des extensions. Ajouter dans chaque page, APRÈS zrestaurant-db.js :
+/* ZUMUYA Restauration v2 - chargeur unique des extensions. Ajouter dans chaque page, APRÈS zrestaurant-db.js :
    <script src="zrestaurant-ext-loader.js"></script>                                                       */
 (function(){
 /* ===== CONFIGURATION ===== */

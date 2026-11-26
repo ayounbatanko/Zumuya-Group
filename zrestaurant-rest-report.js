@@ -1,4 +1,4 @@
-/* Service de Restauration - rapport du chiffre d'affaires du restaurant partenaire */
+/* ZUMUYA Restauration - rapport du chiffre d'affaires du restaurant partenaire */
 (function(){
 var S={from:'',to:''},DONE=['annulée','refusée'],RID=null,sm=function(l,f){return l.reduce(function(s,x){return s+f(x)},0)};
 function rg(){if(!S.from){var t=new Date();S.to=ymd(t);t.setDate(t.getDate()-29);S.from=ymd(t)}return [new Date(S.from+'T00:00:00').getTime(),new Date(S.to+'T00:00:00').getTime()+864e5]}

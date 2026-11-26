@@ -1,4 +1,4 @@
-/* Service de Restauration - couche de données partagée (Supabase). Remplace le localStorage pour users / rests / orders. */
+/* ZUMUYA Restauration - couche de données partagée (Supabase). Remplace le localStorage pour users / rests / orders. */
 (function(){
 var CF=window.ZUMAYA_CONFIG||{};
 var URL=CF.SUPABASE_URL;

@@ -1,4 +1,4 @@
-/* Pont portail -> Service de Restauration (SEUL point d'entrée : compte.html).
+/* Pont portail -> ZUMUYA Restauration (SEUL point d'entrée : compte.html).
    Gère les comptes client, livreur, restaurant et hôtel. Le propriétaire est géré par zrestaurant-index.html (aiguillage).
    Un restaurant (ou hôtel) qui s'est connecté sur le portail avec son e-mail et son mot de passe (Supabase Auth)
    est reconnu ici automatiquement : on retrouve ou on crée son compte local + sa fiche restaurant, puis on ouvre

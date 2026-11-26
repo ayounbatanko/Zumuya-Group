@@ -1,0 +1,23 @@
+MISE A JOUR — CATALOGUES PUBLICS MULTI-PARTENAIRES
+
+Fonctionnalités ajoutées :
+- Catalogue public des restaurants et hôtels à l'accueil.
+- Catalogue public des produits agricoles depuis Supabase.
+- Panier agricole limité à un seul fournisseur à la fois.
+- Depuis le panier agricole, ouverture d'une conversation privée avec le fournisseur,
+  avec le détail des articles dans l'objet de la conversation.
+- Horaires d'ouverture et fermeture configurables dans Réglages > Restaurant.
+- Ajout au panier et passage à la commande bloqués hors horaires du restaurant.
+- Indication Ouvert / Fermé dans les cartes des restaurants.
+- Visuel d'accueil renforcé avec un réseau graphique lumineux et animations discrètes.
+
+À DÉPLOYER :
+1. Remplacer les fichiers du dépôt par ceux de cette archive.
+2. Exécuter 09_catalogues_publics.sql dans Supabase > SQL Editor.
+3. Publier le site et effectuer un rechargement complet du navigateur.
+
+Remarque :
+Le panier agricole est conservé dans le navigateur du client. Le passage à l'étape
+commerciale ouvre la messagerie du vendeur pour confirmer disponibilité, quantité,
+livraison et paiement. Il ne crée pas encore une commande agricole comptabilisée
+dans un système de paiement/commande centralisé.

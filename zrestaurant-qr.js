@@ -1,4 +1,4 @@
-/* Service de Restauration - générateur de QR code (hors ligne, niveau de correction M, versions 1 à 10) */
+/* ZUMUYA Restauration - générateur de QR code (hors ligne, niveau de correction M, versions 1 à 10) */
 window.RGQR=(function(){
 var ECC=[10,16,26,18,24,16,18,22,22,26],BLK=[1,1,1,2,2,4,4,4,5,5];
 function raw(v){var r=(16*v+128)*v+64;if(v>=2){var n=Math.floor(v/7)+2;r-=(25*n-10)*n-55;if(v>=7)r-=36}return r}

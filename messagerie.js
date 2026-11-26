@@ -2,7 +2,7 @@
    Liens d'ouverture directe (utilisés par les boutons « Contacter ») :
      messagerie.html?kind=store&ref=<id boutique>        vendeur Marketplace
      messagerie.html?kind=org&ref=<id organisation>      restaurant, hôtel, société…
-     messagerie.html?kind=rest&ref=<id restaurant>       restaurant du service de restauration
+     messagerie.html?kind=rest&ref=<id restaurant>       restaurant du ZUMUYA Restauration
      messagerie.html?kind=user&ref=<id utilisateur>      producteur agricole, particulier
      messagerie.html?kind=delivery_offer&ref=<id offre>  échange vendeur <-> société de livraison
      messagerie.html?to=<id utilisateur>                 ancien format, toujours accepté

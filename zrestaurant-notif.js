@@ -1,4 +1,4 @@
-/* Service de Restauration - bouton de notifications (🔔) + bouton de téléchargement de l'application Android (APK) */
+/* ZUMUYA Restauration - bouton de notifications (🔔) + bouton de téléchargement de l'application Android (APK) */
 (function(){
 var APK='GMR_Restaurant.apk',LSK='rg_seen_',sup=('Notification' in window);
 function ls(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}}

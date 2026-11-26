@@ -68,7 +68,7 @@ async function refresh(){if(!isPlatformOwner){await renderStaffConsole();return}
  const pend=(partners.data||[]).filter(x=>x.status==='pending');
  renderOverview(orgs.data||[],prof.count||0,ests.count||0,payments.data||[],pend,(oo2&&oo2.data)||[]);await loadWalletAdmin();
  renderServices();await loadProAdmin();renderPartners(partners.data||[]);renderCountries();renderOrgs(orgs.data||[]);renderPayments(payments.data||[]);renderActivity(records.data||[],orgNames);
- if(!rr)fail('Les données du Service de Restauration ne sont pas lisibles : exécutez supabase-setup.sql dans ce projet Supabase.');
+ if(!rr)fail('Les données du ZUMUYA Restauration ne sont pas lisibles : exécutez supabase-setup.sql dans ce projet Supabase.');
  const b=$('#pBadge');b.hidden=!pend.length;b.textContent=pend.length;$('#live').textContent='● Connecté · '+new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}
 
 /* ---------- Abonnements Pro natifs ZUMAYA ---------- */

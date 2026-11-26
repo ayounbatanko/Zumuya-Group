@@ -1,4 +1,4 @@
-/* Service de Restauration v2 - noyau des extensions. Charger APRÈS zrestaurant-db.js. Aucune modification des pages existantes requise. */
+/* ZUMUYA Restauration v2 - noyau des extensions. Charger APRÈS zrestaurant-db.js. Aucune modification des pages existantes requise. */
 (function(){
 var X=window.RGX=window.RGX||{};
 X.db=function(){return window.RGDB};

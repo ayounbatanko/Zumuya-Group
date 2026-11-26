@@ -1,17 +1,17 @@
 <!DOCTYPE html><html lang="fr"><head><script src="config.js"></script><script src="zguard.js" data-roles="owner"></script><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="manifest" href="zrestaurant-manifest.webmanifest"><meta name="theme-color" content="#14213d"><link rel="icon" type="image/png" href="zrestaurant-icon-192.png?v=3"><link rel="apple-touch-icon" href="zrestaurant-icon-192.png?v=3"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Restauration"><meta property="og:type" content="website">
 <meta property="og:locale" content="fr_FR">
-<meta property="og:site_name" content="Service de Restauration">
-<meta property="og:title" content="Service de Restauration - Gestion intelligente du restaurant">
-<meta property="og:description" content="Simplifiez la gestion de votre restaurant avec le Service de Restauration : caisse, stocks, menus, commandes en ligne et rapports.">
+<meta property="og:site_name" content="ZUMUYA Restauration">
+<meta property="og:title" content="ZUMUYA Restauration - Gestion intelligente du restaurant">
+<meta property="og:description" content="Simplifiez la gestion de votre restaurant avec le ZUMUYA Restauration : caisse, stocks, menus, commandes en ligne et rapports.">
 <meta property="og:image" content="zrestaurant-apercu-facebook.jpg">
 <meta property="og:image:secure_url" content="zrestaurant-apercu-facebook.jpg">
 <meta property="og:image:type" content="image/jpeg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Service de Restauration, gestion intelligente du restaurant">
+<meta property="og:image:alt" content="ZUMUYA Restauration, gestion intelligente du restaurant">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Service de Restauration - Gestion intelligente du restaurant">
-<meta name="twitter:description" content="Simplifiez la gestion de votre restaurant avec le Service de Restauration : caisse, stocks, menus, commandes en ligne et rapports.">
+<meta name="twitter:title" content="ZUMUYA Restauration - Gestion intelligente du restaurant">
+<meta name="twitter:description" content="Simplifiez la gestion de votre restaurant avec le ZUMUYA Restauration : caisse, stocks, menus, commandes en ligne et rapports.">
 <meta name="twitter:image" content="zrestaurant-apercu-facebook.jpg">
 <title>Propriétaire</title><style>:root{--bg:#f4f5f9;--card:#fff;--ink:#16213e;--mut:#6a7390;--bd:#e3e6ef;--navy:#14213d;--navy2:#26417a;--gold:#ffb703;--gold2:#fb8500;--ok:#12a36b;--bad:#e5383b;--acc:#fb8500;--kpi:#26417a;--sh:0 6px 22px rgba(20,33,61,.08)}
 @media(prefers-color-scheme:dark){:root{--bg:#0d1325;--card:#161f38;--ink:#eef1fb;--mut:#93a0c4;--bd:#27345a;--kpi:#ffc93c;--sh:0 6px 22px rgba(0,0,0,.35)}}
@@ -331,7 +331,7 @@ render(true);
 setInterval(()=>render(false),3000);
 function releasePanel(){
  const box=document.createElement('section');box.className='card col';box.style.margin='16px auto';box.style.maxWidth='1100px';
- box.innerHTML=`<h3>📣 Notifications & mises à jour</h3><p class="mut">Le bouton « 🔄 Mise à jour » n'apparaît en haut de l'écran des utilisateurs que lorsque vous publiez ce fichier zrestaurant-version.json (avec un nouveau numéro de version) sur GitHub.</p><label>Numéro de version<input id="releaseVersion" value="1.5.0" placeholder="1.5.0"></label><label>Message à afficher<textarea id="releaseMessage" rows="3" placeholder="Une nouvelle version du Service de Restauration est disponible."></textarea></label><button type="button" onclick="downloadReleaseManifest()">Générer le fichier zrestaurant-version.json</button><p class="mut" id="releaseHelp">Après téléchargement, remplacez zrestaurant-version.json à la racine de votre dépôt GitHub. Les utilisateurs en ligne verront le message lors de la prochaine vérification.</p>`;
+ box.innerHTML=`<h3>📣 Notifications & mises à jour</h3><p class="mut">Le bouton « 🔄 Mise à jour » n'apparaît en haut de l'écran des utilisateurs que lorsque vous publiez ce fichier zrestaurant-version.json (avec un nouveau numéro de version) sur GitHub.</p><label>Numéro de version<input id="releaseVersion" value="1.5.0" placeholder="1.5.0"></label><label>Message à afficher<textarea id="releaseMessage" rows="3" placeholder="Une nouvelle version du ZUMUYA Restauration est disponible."></textarea></label><button type="button" onclick="downloadReleaseManifest()">Générer le fichier zrestaurant-version.json</button><p class="mut" id="releaseHelp">Après téléchargement, remplacez zrestaurant-version.json à la racine de votre dépôt GitHub. Les utilisateurs en ligne verront le message lors de la prochaine vérification.</p>`;
  document.querySelector('main').appendChild(box);
 }
 function downloadReleaseManifest(){const version=document.getElementById('releaseVersion').value.trim(),message=document.getElementById('releaseMessage').value.trim();if(!version)return alert('Indiquez un numéro de version.');const data={version,message,notify:true,updatedAt:new Date().toISOString(),url:'./'};const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='zrestaurant-version.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);document.getElementById('releaseHelp').textContent='Fichier généré. Déposez-le à la racine de votre dépôt GitHub puis validez le commit.'}
