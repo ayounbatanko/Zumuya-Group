@@ -4,11 +4,11 @@
    NB : c'est un aiguillage d'interface. La vraie protection des données reste côté Supabase (règles RLS). */
 (()=>{'use strict';
 const me=document.currentScript,ROLES=(me&&me.dataset.roles||'').split(',').map(s=>s.trim()).filter(Boolean);
-const HOME={customer:'client-espace.html',restaurant:'resto-restaurant.html',hotel:'resto-restaurant.html',staff:'resto-restaurant.html',delivery:'resto-driver.html',agro_producer:'agro.html',agro_trader:'agro.html',marketplace:'marketplace.html',delivery_service:'livraison-entreprise.html'};
+const HOME={customer:'client-espace.html',restaurant:'zrestaurant-restaurant.html?portal=restaurant',hotel:'zrestaurant-restaurant.html?portal=hotel#hotel',staff:'zrestaurant-restaurant.html?portal=restaurant',delivery:'zrestaurant-driver.html',agro_producer:'agro.html',agro_trader:'agro.html',marketplace:'marketplace.html',delivery_service:'livraison-entreprise.html'};
 const PRO=['restaurant','hotel','delivery','staff','agro_producer','agro_trader','marketplace','delivery_service'];
 function session(){try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);
   if(/^sb-.*-auth-token$/.test(k)){const v=JSON.parse(localStorage.getItem(k)||'null'),s=v&&(v.currentSession||v);if(s&&s.access_token&&s.user&&s.user.id)return s}}}catch(e){}return null}
-const go=u=>{if(location.pathname.split('/').pop()!==u)location.replace(u)};
+const go=u=>{const target=new URL(u,location.href);if(location.pathname!==target.pathname||target.search!==location.search||target.hash!==location.hash)location.replace(target.href)};
 const s=session();
 if(!s){if(ROLES.length&&!ROLES.includes('public'))go('compte.html');return}
 const md=s.user.user_metadata||{},type=md.account_type;
