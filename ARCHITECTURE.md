@@ -13,11 +13,11 @@
 ```
 compte.html
    │
-   ├─ Client ──────────────────► client-espace.html / resto-client.html
-   ├─ Restaurant / Hôtel ──────► (compléter fiche partenaire) → resto-restaurant.html
-   ├─ Livreur ─────────────────► compte d'équipe créé par une organisation autorisée → resto-driver.html
+   ├─ Client ──────────────────► client-espace.html / zrestaurant-client.html
+   ├─ Restaurant / Hôtel ──────► (compléter fiche partenaire) → zrestaurant-restaurant.html
+   ├─ Livreur ─────────────────► compte d'équipe créé par une organisation autorisée → zrestaurant-driver.html
    ├─ Société de livraison ───► pôle professionnel autonome → livraison-entreprise.html
-   ├─ Employé ─────────────────► compte créé par un restaurant, droits personnalisés → resto-restaurant.html
+   ├─ Employé ─────────────────► compte créé par un restaurant, droits personnalisés → zrestaurant-restaurant.html
    ├─ Producteur / Commerçant ─► agro.html
    └─ Propriétaire (rôle serveur) ► proprietaire.html
 ```
@@ -32,7 +32,7 @@ Les comptes professionnels doivent compléter leur fiche d’organisation (GPS o
 
 ### Restauration (rg_*)
 - `rg_users`, `rg_rests`, `rg_orders`, `rg_menu_*`, etc.
-- Bridge : `resto-portal-bridge.js`
+- Bridge : `zrestaurant-portal-bridge.js`
 
 ### Agro (rg_agro_* ou z_agro_*)
 - `rg_agro_profiles`
@@ -69,7 +69,7 @@ Chaque page privée déclare les rôles autorisés :
 | `zguard.js` | Redirection par rôle |
 | `zcart.js` | Panier client |
 | `catalogue.js` | Affichage public |
-| `resto-*.js` | Modules restauration |
+| `zrestaurant-*.js` | Modules restauration |
 | `agro.js` | Espace agro |
 | `proprietaire.js` | Back-office |
 
