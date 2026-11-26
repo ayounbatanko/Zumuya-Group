@@ -29,5 +29,5 @@ async function hub(r){const h=r.hotel||{},sub=ZS.subOk(r);
   $('#t').innerHTML=os.slice(0,12).map(o=>'<tr><td>#'+esc(o.id)+'</td><td>'+esc(o.serviceType||'—')+'</td><td>'+esc(o.buildingNumber?(o.buildingNumber+' · '+(o.roomNumber||'')):'—')+'</td><td>'+ZS.money(o.total,r.currency)+'</td><td><span class="badge grey">'+esc(o.status)+'</span></td></tr>').join('')||'<tr><td colspan="5">Aucune commande pour le moment.</td></tr>'}
  catch(e){$('#t').innerHTML='<tr><td colspan="5">Impossible de charger les commandes.</td></tr>'}}
 })();
-</script><script src="account-shortcuts.js?v=1"></script>
+</script><script src="account-shortcuts.js?v=3"></script>
 </body></html>
