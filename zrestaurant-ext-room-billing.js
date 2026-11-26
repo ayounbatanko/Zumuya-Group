@@ -1,5 +1,5 @@
 /* Facturation sur la chambre : les commandes « Service en chambre » avec pay = « Ajouter à la note » sont cumulées par chambre. Export CSV pour la réception. */
-(function(){var X=window.RGX;if(!X)return;
+(function(){var X=window.ZUMUYA_EXT;if(!X)return;
 X.roomFolio=function(restId){var d=X.db().get(),f={};
   d.orders.filter(function(o){return o.restId==restId&&o.deliveryMode==='room'&&o.status!=='annulée'&&o.status!=='refusée'&&!o.settled}).forEach(function(o){
     var k=(o.buildingNumber||'?')+'-'+(o.roomNumber||'?');(f[k]=f[k]||{building:o.buildingNumber,room:o.roomNumber,total:0,orders:[]});f[k].total+=o.total;f[k].orders.push(o)});return f};
@@ -12,9 +12,9 @@ X.openFolio=function(){var u=X.me(),d=X.db().get(),r=d.rests.find(function(x){re
   var f=X.roomFolio(r.id),keys=Object.keys(f);
   var ready=d.orders.filter(function(o){return o.restId==r.id&&o.deliveryMode==='room'&&o.status==='préparée'});
   var hand=ready.length?'<div style="background:#fff4e0;border-radius:12px;padding:10px;margin-bottom:10px"><b>🛎️ À remettre en chambre ('+ready.length+')</b>'+ready.map(function(o){return '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0"><span>Bât. '+X.esc(o.buildingNumber||'?')+' · Ch. '+X.esc(o.roomNumber||'?')+' · '+X.money(o.total)+'</span><button data-h="'+X.esc(o.id)+'">Remis ✓</button></div>'}).join('')+'</div>':'';
-  var b=X.panel('rgx-folio','Notes de chambre',hand+(keys.length?keys.map(function(k){return '<div style="display:flex;justify-content:space-between;border-bottom:1px solid #e3e6ef;padding:8px 0"><span>Bât. '+X.esc(f[k].building)+' · Ch. '+X.esc(f[k].room)+'<br><small>'+f[k].orders.length+' commande(s)</small></span><span><b>'+X.money(f[k].total)+'</b><br><button data-k="'+X.esc(k)+'">Réglée</button></span></div>'}).join(''):'<p>Aucune note en cours.</p>')+'<button id="csv" style="width:100%;margin-top:10px;padding:10px;border:0;border-radius:10px;background:#26417a;color:#fff;font-weight:700">Exporter CSV pour la réception</button>');
+  var b=X.panel('zmy-ext-folio','Notes de chambre',hand+(keys.length?keys.map(function(k){return '<div style="display:flex;justify-content:space-between;border-bottom:1px solid #e3e6ef;padding:8px 0"><span>Bât. '+X.esc(f[k].building)+' · Ch. '+X.esc(f[k].room)+'<br><small>'+f[k].orders.length+' commande(s)</small></span><span><b>'+X.money(f[k].total)+'</b><br><button data-k="'+X.esc(k)+'">Réglée</button></span></div>'}).join(''):'<p>Aucune note en cours.</p>')+'<button id="csv" style="width:100%;margin-top:10px;padding:10px;border:0;border-radius:10px;background:#26417a;color:#fff;font-weight:700">Exporter CSV pour la réception</button>');
   b.querySelectorAll('[data-h]').forEach(function(x){x.onclick=function(){var id=x.getAttribute('data-h');if(typeof window.so==='function')window.so(id,'terminée');else X.patchOrder(id,{status:'terminée'});X.openFolio()}});
   b.querySelector('#csv').onclick=function(){X.exportFolioCSV(r.id)};
   b.querySelectorAll('[data-k]').forEach(function(x){x.onclick=function(){X.settleRoom(r.id,x.getAttribute('data-k'));X.openFolio()}})};
-X.ready(function(){var u=X.me(),d=X.db().get();if(u&&u.role==='restaurant'){var r=d.rests.find(function(x){return x.ownerId==u.id||x.userId==u.id||x.id==u.restId});if(r&&(r.hotel||r.hotelModule||r.isHotel||u.accountType==='hotel'))X.fab('rgx-fab-folio','🏨 Notes',X.openFolio,3)}});
+X.ready(function(){var u=X.me(),d=X.db().get();if(u&&u.role==='restaurant'){var r=d.rests.find(function(x){return x.ownerId==u.id||x.userId==u.id||x.id==u.restId});if(r&&(r.hotel||r.hotelModule||r.isHotel||u.accountType==='hotel'))X.fab('zmy-ext-fab-folio','🏨 Notes',X.openFolio,3)}});
 })();
