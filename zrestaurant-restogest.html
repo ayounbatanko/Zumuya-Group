@@ -264,13 +264,13 @@ async function initZumuyaRestoGest(){
  if(!SB){document.querySelector("#main").innerHTML='<section class="panel"><h2>Configuration Supabase absente</h2><p>Vérifiez config.js.</p></section>';return}
  try{
   const ss=await SB.auth.getSession(),session=ss.data?.session;if(ss.error||!session){document.querySelector("#main").innerHTML='<section class="panel"><h2>Connexion requise</h2><p>Connectez-vous depuis votre compte ZUMUYA GROUP.</p><a class="btn primary" href="compte.html">Ouvrir mon compte</a></section>';return}
-  CS.user=session.user;const md=session.user.user_metadata||{},orgId=md.org_map?.restaurant||md.organization_id||null;
-  let oq=orgId?await SB.from("rg_organizations").select("id,organization_type,public_name,legal_name,city,address,contact_phone,owner_id").eq("id",orgId).maybeSingle():await SB.from("rg_organizations").select("id,organization_type,public_name,legal_name,city,address,contact_phone,owner_id").eq("owner_id",session.user.id).eq("organization_type","restaurant").maybeSingle();
-  if(oq.error)throw oq.error;ZORG=oq.data;if(!ZORG||ZORG.organization_type!=="restaurant"){document.querySelector("#main").innerHTML='<section class="panel"><h2>Aucun restaurant rattaché à ce compte</h2><p>Activez le pôle Restaurant dans « Mes activités configurées » avec ce compte propriétaire.</p><a class="btn primary" href="compte.html">Retour à mon compte</a></section>';return}
+  CS.user=session.user;const md=session.user.user_metadata||{};const requestedType=new URLSearchParams(location.search).get("type")==="hotel"?"hotel":"restaurant";const orgId=md.org_map?.[requestedType]||md.organization_id||null;
+  let oq=orgId?await SB.from("rg_organizations").select("id,organization_type,public_name,legal_name,city,address,contact_phone,owner_id").eq("id",orgId).maybeSingle():await SB.from("rg_organizations").select("id,organization_type,public_name,legal_name,city,address,contact_phone,owner_id").eq("owner_id",session.user.id).eq("organization_type",requestedType).maybeSingle();
+  if(oq.error)throw oq.error;ZORG=oq.data;if(!ZORG||ZORG.organization_type!==requestedType){document.querySelector("#main").innerHTML='<section class="panel"><h2>Aucun établissement correspondant rattaché à ce compte</h2><p>Activez le pôle demandé dans « Mes activités configurées » avec ce compte propriétaire.</p><a class="btn primary" href="compte.html">Retour à mon compte</a></section>';return}
   KEY="zumuya_restogest_v1_"+ZORG.id;UKEY="zumuya_restogest_user_v1_"+ZORG.id;
   await pullCloud();db.settings.setup=true;if(!db.users?.length)db.users=[mkUser("Administrateur","admin")];
   const mainUser=db.users.find(u=>u.role==="admin")||db.users[0];mainUser.name=mainUser.name&&mainUser.name!=="Administrateur"?mainUser.name:(md.full_name||md.name||"Administrateur");
-  applyBrand();$("#brandName").textContent="ZUMUYA GROUP";$("#userChip").onclick=openUserMenu;uid=mainUser.id;applyPrefs();refreshChip();enter(mainUser);
+  applyBrand();$("#brandName").textContent="ZUMUYA GROUP";document.title=(requestedType==="hotel"?"ZUMUYA Hôtel — Restauration & F&B":"ZUMUYA Restaurant — Gestion complète");$("#userChip").onclick=openUserMenu;uid=mainUser.id;applyPrefs();refreshChip();enter(mainUser);
   SB.auth.onAuthStateChange((_event,next)=>{if(!next){location.replace("compte.html");return}CS.user=next.user});
   setInterval(()=>{if(dirty())pushCloud();else pullCloud()},45000);
   addEventListener("online",()=>{if(dirty())pushCloud()});
