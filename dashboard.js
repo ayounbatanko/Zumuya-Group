@@ -14,7 +14,7 @@ const MODS=[
 let sb=null,user=null,orgs=[],mods=[],busy=false;
 const say=(t,good)=>{const m=$('#dashMsg');if(m){m.textContent=t||'';m.className=good?'good':''}};
 function view(v){
-  $('#vOverview').hidden=v!=='overview';$('#vConfig').hidden=v!=='config';const vw=$('#vWallet');if(vw)vw.hidden=v!=='wallet';const vc=$('#vCatalogs');if(vc)vc.hidden=v!=='catalogs';
+  $('#vOverview').hidden=v!=='overview';$('#vConfig').hidden=v!=='config';const vw=$('#vWallet');if(vw)vw.hidden=v!=='wallet';const va=$('#vActivities');if(va)va.hidden=v!=='activities';
   $$('#dash .dside [data-view]').forEach(a=>a.classList.toggle('on',a.dataset.view===v||(v==='config'&&a.dataset.view==='activities')));
   closeSide();window.scrollTo({top:0});
 }
