@@ -83,3 +83,6 @@
 .dcard .dstate{padding:4px 11px;font-size:13px;margin:0 0 10px}
 .dcard .dtick{position:absolute;top:12px;right:12px;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;color:#fff;background:#2fa862;z-index:2}
 .dcard .dtick.warn{background:#e0a21a}.dcard .dtick.bad{background:#c94a4a}
+
+/* Libellés de regroupement du menu du compte unique. */
+#dash .dside-label{display:block;padding:10px 14px 3px;color:#aebfd0;font-size:10px;font-weight:800;letter-spacing:.12em}
