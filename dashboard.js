@@ -5,9 +5,9 @@ const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 /* cats = catégories du formulaire partenaire ; orgs = types d'organisation qui rendent l'activité « configurée » ; page = espace de gestion ; browse = page publique du pôle */
 const MODS=[
  {code:'marketplace',ico:'🛍️',title:'Marketplace',desc:'Boutique, produits et commandes',cats:['marketplace'],orgs:['marketplace','commerce'],page:'boutique.html',browse:'marketplace.html',def:'Ma boutique'},
- {code:'restaurant',ico:'🍽️',title:'Restauration',desc:'Restaurant, menus et commandes',cats:['restaurant'],orgs:['restaurant'],page:'hospitality.html?type=restaurant',browse:'zrestaurant-client.html',def:'Mon restaurant'},
+ {code:'restaurant',ico:'🍽️',title:'Restauration',desc:'Restaurant, menus et commandes',cats:['restaurant'],orgs:['restaurant'],page:'zrestaurant-restogest.html',browse:'zrestaurant-client.html',def:'Mon restaurant'},
  {code:'agro',ico:'🌱',title:'Agro',desc:'Producteurs, fournisseurs et acheteurs',cats:['agro','agro_trader'],orgs:['agro','agro_trader'],page:'agro.html',browse:'agro.html',def:'Mon activité agricole'},
- {code:'hotel',ico:'🏨',title:'Hôtel',desc:'Chambres et service en chambre',cats:['hotel'],orgs:['hotel'],page:'hospitality.html?type=hotel',browse:'hotel.html',def:'Mon hôtel'},
+ {code:'hotel',ico:'🏨',title:'Hôtel',desc:'Chambres et service en chambre',cats:['hotel'],orgs:['hotel'],page:'zrestaurant-restaurant.html?portal=hotel#hotel',browse:'hotel.html',def:'Mon hôtel'},
  {code:'delivery',ico:'🚚',title:'Livraison',desc:'Courses et suivi',cats:['delivery'],orgs:['delivery','delivery_service','logistics'],page:'livraison-entreprise.html',browse:'livraison.html',def:'Mon service de livraison'},
  {code:'prestations',ico:'🛠️',title:'Prestations',desc:'Services et rendez-vous',cats:[],orgs:['services'],page:'index.html#services',browse:'index.html#services',def:'Mes prestations',discover:true}
 ];
