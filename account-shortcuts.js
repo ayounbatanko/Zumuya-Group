@@ -30,7 +30,9 @@
  const bar=document.createElement('div');bar.id='zg-common-shortcuts';bar.setAttribute('aria-label','Accès communs du compte');
  const label=document.createElement('span');label.className='zg-common-label';label.textContent='Accès communs';bar.appendChild(label);
  visible.forEach(x=>{const a=document.createElement('a');a.href=x.href;a.textContent=x.label;bar.appendChild(a)});
- const nav=document.querySelector('.dside, nav, [role="navigation"], .tabs');
- if(nav&&nav.parentNode)nav.parentNode.insertBefore(bar,nav.nextSibling);
- else{const h=document.querySelector('header');if(h&&h.parentNode)h.parentNode.insertBefore(bar,h.nextSibling);else document.body.insertBefore(bar,document.body.firstChild)}
+ const nav=document.querySelector('.dside, nav, [role="navigation"], .tabs'),header=document.querySelector('header');
+ if(header&&nav&&header.contains(nav)&&header.parentNode)header.parentNode.insertBefore(bar,header.nextSibling);
+ else if(nav&&nav.parentNode)nav.parentNode.insertBefore(bar,nav.nextSibling);
+ else if(header&&header.parentNode)header.parentNode.insertBefore(bar,header.nextSibling);
+ else document.body.insertBefore(bar,document.body.firstChild)
 })();
