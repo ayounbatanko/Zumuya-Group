@@ -1,7 +1,7 @@
 /* ZUMUYA GROUP — service worker commun au portail et aux pôles métier.
    Précharge uniquement les pages et dépendances natives ZUMUYA.
    Réseau d'abord, cache en secours hors ligne. */
-const CACHE='zumuya-v35-20261126';
+const CACHE='zumuya-v36-20261126';
 const FILES=[
  './index.html','./compte.html','./compte.css','./compte.js','./config.js','./zguard.js','./zsession.js',
  './dashboard.css','./dashboard.js','./module-manager.js','./modules.js','./parametres.html','./parametres.js',
@@ -9,7 +9,7 @@ const FILES=[
  './client-espace.html','./client-espace.js','./mes-commandes.html','./historique.html','./portefeuille.html','./catalogues.html',
  './marketplace.html','./market.js','./market.css','./boutique.html','./boutique.js','./boutique.css',
  './agro.html','./agro.js','./agro.css','./agro-collaboration.js','./zsupply.js',
- './restauration.html','./hotels-public.html','./hotel.html','./livraison.html','./livraison-entreprise.html','./livraison-pro.js',
+ './restauration.html','./hotels-public.html','./hotel.html','./hospitality.html','./hospitality.css','./hospitality.js','./hospitality-catalog.html','./hospitality-catalog.js','./livraison.html','./livraison-entreprise.html','./livraison-pro.js',
  './messagerie.html','./messagerie.js','./ecosysteme.html',
  './wallet.js','./account-shortcuts.js','./catalogue.js','./zcart.js','./zcart.css','./zchat.js','./zteam.js','./zdelivery.js','./zservice.css','./logo.svg',
  './manifest.webmanifest','./icon-180.png','./icon-192.png','./icon-512.png','./icon-maskable-512.png',
