@@ -1,13 +1,13 @@
 # Déploiement ZUMUYA GROUP
 
-1. Publier le contenu de ce dossier sur GitHub Pages ou un hébergement HTTPS.
-2. Configurer `config.js` avec l'URL Supabase et la clé publique `anon` uniquement.
-3. Supabase > SQL Editor : coller et exécuter `SUPABASE-INSTALLATION-COMPLETE.sql`.
-4. Authentication > Providers > Phone : activer Phone et configurer le fournisseur SMS. Configurer les URL de redirection autorisées.
-5. Tester avec un compte de test avant production.
+Suivez `INSTALLATION_ZUMUYA_GROUP.md` pour l’ordre exact des migrations et le déploiement des Edge Functions.
 
-Clients : numéro international E.164 + mot de passe (8 caractères minimum). Aucun e-mail client n'est demandé.
-Les comptes professionnels créés via le formulaire sont enregistrés comme vérifiés et leur espace est activé.
-Les produits Agro comportent un prix/unité, description et photo. Le bucket `zumuya-agro-products` est créé par le SQL.
+1. Publier le contenu de ce dossier à la racine du dépôt GitHub Pages.
+2. Vérifier `config.js` : URL Supabase et clé publique uniquement.
+3. Appliquer le socle SQL et les migrations métier selon le guide.
+4. Appliquer `z_hospitality_native.sql`, puis `19_pilotage_rapports_exports_equipe_proprietaire.sql`.
+5. Déployer `z-hospitality-team` et `platform-team-admin` avec Supabase CLI.
+6. Configurer Authentication → URL Configuration avec le domaine GitHub Pages.
+7. Tester chaque catégorie de compte et les permissions avant ouverture au public.
 
-IMPORTANT : les comptes RestoGest historiques sont encore fondés sur son ancien système local. Le SQL ne les convertit pas automatiquement. Le pont RestoGest doit écrire l'UUID Supabase dans les champs `authId`, `ownerAuthId`, `clientAuthId`, `driverAuthId` et `restaurantOwnerAuthId` pour respecter les politiques RLS. Ne désactive pas RLS et ne publie jamais la clé `service_role`.
+La clé `service_role` ne doit jamais apparaître dans GitHub ni dans un fichier JavaScript du navigateur.

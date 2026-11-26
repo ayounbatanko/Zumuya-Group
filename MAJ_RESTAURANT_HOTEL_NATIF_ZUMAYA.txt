@@ -1,7 +1,7 @@
 ZUMAYA GROUP — Mise à jour native Restaurant & Hôtel
 
 Cette mise à jour remplace le routage des espaces Restaurant/Hôtel et ajoute un module professionnel natif ZUMAYA.
-Elle ne dépend pas de l'ancien backend ni des anciennes tables locales RestoGest.
+Elle ne dépend pas de l'ancien backend ni des anciennes tables locales ZUMUYA.
 
 FICHIERS À REMPLACER À LA RACINE DU DÉPÔT GITHUB :
 - compte.html
@@ -50,7 +50,7 @@ SÉCURITÉ :
 
 IMPORTANT :
 La migration SQL et la fonction Edge ont déjà été appliquées/déployées sur Supabase pendant cette intervention.
-Ne pas exécuter les anciens scripts RESET ou les migrations RestoGest.
+Ne pas exécuter les anciens scripts RESET ou les migrations ZUMUYA.
 Après remplacement des fichiers GitHub, attendre le déploiement Pages, puis actualiser le navigateur (au besoin vider le cache du site).
 
 Limites de validation : contrôles de syntaxe JavaScript et vérification de présence des objets SQL/Edge effectués. Le parcours complet dans un navigateur avec de vrais comptes et une commande client n'a pas encore été testé. Les notifications push, paiements en ligne, suivi GPS temps réel, fidélité avancée et cuisine KDS dédiée restent à compléter dans une phase suivante.

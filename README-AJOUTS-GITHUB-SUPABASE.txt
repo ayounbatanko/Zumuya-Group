@@ -7,7 +7,7 @@ A. SUPABASE
 2. SQL Editor > New query.
 3. Coller d'abord le script consolidé SUPABASE-INSTALLATION-COMPLETE.sql uniquement si la base n'a pas encore été installée.
 4. Pour une base déjà installée avec le ZIP précédent, coller uniquement ZUMUYA_EXTENSION_ESSAI.sql et cliquer RUN.
-5. Ne pas réexécuter les anciens scripts RestoGest séparément : le script consolidé les inclut déjà.
+5. Ne pas réexécuter les anciens scripts ZUMUYA séparément : le script consolidé les inclut déjà.
 
 Configuration Auth pour le test sans SMS :
 - Supabase Dashboard > Authentication > Sign In / Providers > Phone.
@@ -48,6 +48,6 @@ D. ORDRE DE DÉPLOIEMENT
 
 E. LIMITES À CONNAÎTRE
 ----------------------
-- Le suivi de commandes de restauration existant reste dans le module RestoGest déjà présent ; ce patch ne remplace pas son moteur de commande.
+- Le suivi de commandes de restauration existant reste dans le module ZUMUYA déjà présent ; ce patch ne remplace pas son moteur de commande.
 - Les paiements en ligne, la vérification d'identité des vendeurs, la modération et les preuves de livraison nécessitent une phase supplémentaire avant une mise en production.
 - La désactivation de la confirmation SMS est réservée à l'essai : un numéro non confirmé peut être usurpé.

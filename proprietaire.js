@@ -1,7 +1,7 @@
 (()=>{'use strict';
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-let sb,session,countries=[],rests=[],orders=[];
-const TITLES={overview:'Vue d’ensemble',services:'Services : restauration, hôtel, livraison',partners:'Partenaires',countries:'Déploiement par pays',orgs:'Organisations',payments:'Transactions',wallet:'Portefeuille & commissions',activity:'Activité métier',subscriptions:'Abonnements Pro'};
+let sb,session,countries=[],rests=[],orders=[],isPlatformOwner=false,platformPermissions=[];
+const TITLES={overview:'Vue d’ensemble',services:'Services : restauration, hôtel, livraison',partners:'Partenaires',countries:'Déploiement par pays',orgs:'Organisations',payments:'Transactions',wallet:'Portefeuille & commissions',activity:'Activité métier',subscriptions:'Abonnements Pro',team:'Gestion du groupe',exports:'Exports de l’infrastructure',staff:'Mon espace de gestion'};
 const msg=s=>{$('#loginMsg').textContent=s};
 const fail=s=>{const e=$('#err');e.hidden=!s;e.textContent=s||''};
 const dt=x=>x?new Date(x).toLocaleDateString('fr-FR'):'—';
@@ -11,7 +11,8 @@ const subOk=r=>{const n=Date.now();return r.sub==='suspended'?false:r.sub==='act
 const subLabel=r=>r.sub==='suspended'?['Désactivé','bad']:r.sub==='active'?(r.subEnd>Date.now()?['Pro actif','good']:['Pro expiré','bad']):(r.trialEnd>Date.now()?['Essai gratuit','warn']:['Essai terminé','bad']);
 
 /* ---------- Navigation par onglets ---------- */
-function show(){const t=(location.hash||'#overview').slice(1),k=TITLES[t]?t:'overview';
+function show(){let t=(location.hash||'#overview').slice(1),k=TITLES[t]?t:'overview';
+ if(!isPlatformOwner){k='staff';if(location.hash!=='#staff')history.replaceState(null,'','#staff')}
  $$('[data-p]').forEach(s=>s.hidden=s.dataset.p!==k);$$('#tabs a').forEach(a=>a.classList.toggle('on',a.dataset.t===k));$('#title').textContent=TITLES[k];scrollTo(0,0)}
 addEventListener('hashchange',show);
 
@@ -27,9 +28,15 @@ async function start(){
  sb=window.supabase.createClient(ZUMAYA_CONFIG.SUPABASE_URL,ZUMAYA_CONFIG.SUPABASE_ANON_KEY);
  const {data:{session:s}}=await sb.auth.getSession();if(s)await verify(s)}
 async function verify(s){session=s;
- const {data,error}=await sb.rpc('rg_is_platform_owner');if(error)throw error;
- if(data!==true){await sb.auth.signOut();session=null;throw Error('Ce compte ne figure pas dans la liste d’autorisation du propriétaire.')}
- $('#login').hidden=true;$('#shell').hidden=false;$('#who').textContent=s.user.email;show();await refresh()}
+ const {data,error}=await sb.rpc('rg_platform_access');
+ if(error){const legacy=await sb.rpc('rg_is_platform_owner');if(legacy.error||legacy.data!==true)throw error;isPlatformOwner=true;platformPermissions=['all'];}
+ else{isPlatformOwner=data?.is_owner===true;platformPermissions=data?.permissions||[];}
+ if(!isPlatformOwner&&!platformPermissions.length){await sb.auth.signOut();session=null;throw Error('Ce compte ne possède aucune autorisation de gestion ZUMUYA.')}
+ $('#login').hidden=true;$('#shell').hidden=false;$('#who').textContent=s.user.email;
+ if(!isPlatformOwner){const secure=document.querySelector('.secure');if(secure)secure.textContent='✓ Accès membre limité vérifié';}
+ if(isPlatformOwner){$$('#tabs a').forEach(a=>a.hidden=false);show();await refresh();await loadPlatformTeam()}
+ else{$$('#tabs a').forEach(a=>a.hidden=true);$('#refresh').hidden=true;$('#live').textContent='● Accès limité';show();await renderStaffConsole()}
+}
 
 /* ---------- Chargement des données ---------- */
 async function optional(p){try{const r=await p;return r.error?null:r}catch(e){return null}}
@@ -43,8 +50,8 @@ async function loadWalletAdmin(){
  if(!c.error&&c.data){$('#ownerCommissionCurrent').textContent=c.data.commission_percent+' %';$('#commissionPercent').value=c.data.commission_percent}
  if(!wd.error)$('#ownerWithdrawals').innerHTML=(wd.data||[]).map(x=>`<div class="entry"><b>${Number(x.amount_minor).toLocaleString('fr-FR')} FCFA</b> · ${esc(x.status)} · ${esc(x.payment_method?.type||'')} · ${esc(x.payment_method?.destination||'')}<small> · ${dt(x.created_at)}</small></div>`).join('')||'Aucune demande de retrait.';
 }
-async function refresh(){fail('');
- const [orgs,ests,records,partners,payments,c,prof,rr,oo]=await Promise.all([
+async function refresh(){if(!isPlatformOwner){await renderStaffConsole();return}fail('');
+ const [orgs,ests,records,partners,payments,c,prof,rr,oo,oo2]=await Promise.all([
   sb.from('rg_organizations').select('id,legal_name,public_name,country_code,organization_type,verification_status,created_at').order('created_at',{ascending:false}).limit(100),
   sb.from('rg_establishments').select('id',{count:'exact',head:true}),
   sb.from('rg_service_records').select('id,organization_id,module_code,record_type,status,created_at').order('created_at',{ascending:false}).limit(15),
@@ -53,12 +60,13 @@ async function refresh(){fail('');
   sb.from('rg_countries').select('code,name,enabled').order('name'),
   sb.from('rg_profiles').select('user_id',{count:'exact',head:true}),
   optional(sb.from('rg_rests').select('id,data').order('seq',{ascending:true})),
-  optional(sb.from('rg_orders').select('id,data').order('seq',{ascending:false}).limit(500))]);
+  optional(sb.from('rg_orders').select('id,data').order('seq',{ascending:false}).limit(500)),
+  optional(sb.from('rg_activity_events').select('id,created_at,module_code,action').order('created_at',{ascending:false}).limit(5000))]);
  for(const r of [orgs,ests,records,partners,payments,c,prof])if(r.error)throw r.error;
  countries=c.data||[];rests=(rr&&rr.data||[]).map(x=>x.data).filter(Boolean);orders=(oo&&oo.data||[]).map(x=>x.data).filter(o=>o&&o.restId&&!String(o.id).startsWith('__'));
  const orgNames=Object.fromEntries((orgs.data||[]).map(x=>[x.id,x.public_name]));
  const pend=(partners.data||[]).filter(x=>x.status==='pending');
- renderOverview(orgs.data||[],prof.count||0,ests.count||0,payments.data||[],pend);await loadWalletAdmin();
+ renderOverview(orgs.data||[],prof.count||0,ests.count||0,payments.data||[],pend,(oo2&&oo2.data)||[]);await loadWalletAdmin();
  renderServices();await loadProAdmin();renderPartners(partners.data||[]);renderCountries();renderOrgs(orgs.data||[]);renderPayments(payments.data||[]);renderActivity(records.data||[],orgNames);
  if(!rr)fail('Les données du Service de Restauration ne sont pas lisibles : exécutez supabase-setup.sql dans ce projet Supabase.');
  const b=$('#pBadge');b.hidden=!pend.length;b.textContent=pend.length;$('#live').textContent='● Connecté · '+new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}
@@ -94,7 +102,7 @@ $('#subscriptions')?.addEventListener('submit',e=>{if(e.target.id==='proMethodFo
 $('#subscriptions')?.addEventListener('click',e=>{if(e.target.id==='saveProPlans')run(async()=>{const fields=[...document.querySelectorAll('[data-plan-type]')];for(const el of fields){const {error}=await sb.from('zrh_subscription_plans').upsert({service_type:el.dataset.planType,months:+el.dataset.planMonths,amount_minor:+el.value,currency_code:'XOF',active:+el.value>0},{onConflict:'service_type,months'});if(error)throw error}await loadProAdmin();alert('Tarifs Pro enregistrés.')})});
 
 /* ---------- Rendus ---------- */
-function renderOverview(orgs,users,ests,pays,pend){
+function renderOverview(orgs,users,ests,pays,pend,activityEvents=[]){
  const hotels=rests.filter(isHotel),restos=rests.filter(r=>!isHotel(r)),done=['terminée','refusée','annulée'],act=orders.filter(o=>!done.includes(o.status));
  $('#stats').innerHTML=stat('Organisations',orgs.length)+stat('Comptes ZUMUYA',users)+stat('Établissements',ests)+stat('Transactions',pays.length)+stat('Restaurants',restos.length,restos.filter(subOk).length+' actifs')+stat('Hôtels',hotels.length,hotels.filter(subOk).length+' actifs')+stat('Commandes en cours',act.length,orders.length+' au total');
  const sales=orders.reduce((n,o)=>n+(Number(o.total)||0),0),completed=orders.filter(o=>o.status==='terminée').length;
@@ -110,7 +118,11 @@ function renderOverview(orgs,users,ests,pays,pend){
   roomShare=orders.filter(o=>isHotel(rests.find(r=>r.id===o.restId))).length,restoShare=orders.length-roomShare;
  const line=(l,v)=>`<div><p><span>${l}</span><span>${v}</span></p><div class="track"><i style="width:${v/tot*100}%"></i></div></div>`;
  $('#split').innerHTML='<div class="split">'+line('🍽️ Restauration',restoShare)+line('🏨 Hôtel (restauration d’hôtel)',roomShare)+line('📦 Livraison (hors chambre)',del)+line('🛏️ Service en chambre',room)+'</div>';
- $('#pendingList').innerHTML=pend.length?pend.slice(0,4).map(x=>`<div class="partner"><strong>${esc(x.organization_name)}</strong><small>${esc(x.country_code)} · ${esc(x.category)} · ${esc(x.city)}</small></div>`).join(''):'<div class="empty">Aucune demande en attente.</div>'}
+ $('#pendingList').innerHTML=pend.length?pend.slice(0,4).map(x=>`<div class="partner"><strong>${esc(x.organization_name)}</strong><small>${esc(x.country_code)} · ${esc(x.category)} · ${esc(x.city)}</small></div>`).join(''):'<div class="empty">Aucune demande en attente.</div>';
+ const hist=[...Array(30)].map((_,i)=>{const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-29+i);return d});
+ const histCounts=hist.map(d=>activityEvents.filter(x=>new Date(x.created_at).toDateString()===d.toDateString()).length),histMax=Math.max(1,...histCounts);
+ const activityChart=$('#activityChart');if(activityChart){$('#activityTotal').textContent=activityEvents.length+' événements chargés';activityChart.innerHTML='<div class="bars">'+hist.map((d,i)=>`<div class="bar"><b>${histCounts[i]}</b><i style="height:${Math.max(3,histCounts[i]/histMax*110)}%"></i><span>${d.toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'})}</span></div>`).join('')+'</div>'}
+}
 function renderServices(){
  const q=($('#q').value||'').toLowerCase(),f=$('#f').value;
  const cntBy=id=>orders.filter(o=>o.restId===id).length;
@@ -124,6 +136,55 @@ function renderOrgs(a){$('#orgCount').textContent=a.length+' affichée(s)';$('#o
 function renderPayments(a){$('#payments').innerHTML=a.map(x=>`<tr><td>${dt(x.created_at)}</td><td>${esc(x.module_code)}</td><td>${Number(x.amount_minor).toLocaleString('fr-FR')}</td><td>${esc(x.currency_code)}</td><td>${esc(x.provider)}</td><td><span class="badge">${esc(x.status)}</span></td></tr>`).join('')||'<tr><td colspan="6">Aucune transaction.</td></tr>'}
 function renderActivity(a,names){$('#activity').innerHTML=a.map(x=>`<tr><td>${dt(x.created_at)}</td><td>${esc(names[x.organization_id]||'Organisation')}</td><td>${esc(x.module_code)}</td><td>${esc(x.record_type)}</td><td><span class="badge">${esc(x.status)}</span></td></tr>`).join('')||'<tr><td colspan="5">Aucune activité.</td></tr>'}
 
+/* ---------- Gestion des comptes secondaires du propriétaire ---------- */
+async function platformTeamRequest(payload){
+ const {data:{session:s}}=await sb.auth.getSession();
+ const res=await fetch(ZUMAYA_CONFIG.SUPABASE_URL+'/functions/v1/platform-team-admin',{
+  method:'POST',headers:{'Content-Type':'application/json','apikey':ZUMAYA_CONFIG.SUPABASE_ANON_KEY,'Authorization':'Bearer '+s.access_token},body:JSON.stringify(payload)});
+ const j=await res.json().catch(()=>({}));if(!res.ok||j.error)throw Error(j.error||'Action impossible.');return j;
+}
+async function loadPlatformTeam(){
+ if(!isPlatformOwner)return;
+ const {data,error}=await sb.from('rg_platform_team_members').select('id,user_id,full_name,email,permissions,status,created_at').order('created_at',{ascending:false});
+ if(error){$('#platformTeamList').textContent='Migration 19 non exécutée : '+error.message;return}
+ const perms=[['dashboard','Tableau de bord'],['partners','Partenaires'],['organizations','Organisations'],['subscriptions','Abonnements'],['payments','Transactions'],['reports','Rapports'],['team','Gestion du groupe']];
+ $('#platformTeamList').innerHTML=(data||[]).map(m=>`<article class="entry" style="padding:12px;border-bottom:1px solid #e5ebf0"><b>${esc(m.full_name)}</b> · ${esc(m.email)} <span class="badge ${m.status==='active'?'good':'bad'}">${esc(m.status)}</span><p class="muted">${(m.permissions||[]).map(esc).join(' · ')}</p><details><summary>Modifier les accès</summary><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px;margin:10px 0">${perms.map(([v,l])=>`<label><input type="checkbox" data-ptperm="${v}" ${m.permissions.includes(v)?'checked':''}> ${l}</label>`).join('')}</div><button class="smallbtn" data-ptsave="${m.id}">Enregistrer les accès</button></details><button class="smallbtn" data-ptstatus="${m.id}" data-status="${m.status}">${m.status==='active'?'Suspendre':'Réactiver'}</button></article>`).join('')||'<p>Aucun compte secondaire créé.</p>';
+}
+$('#platformTeamForm')?.addEventListener('submit',e=>{e.preventDefault();run(async()=>{
+ const permissions=$$('#platformTeamForm input[name="ptPermission"]:checked').map(x=>x.value);
+ if(!permissions.length)throw Error('Sélectionnez au moins une autorisation.');
+ $('#ptMessage').textContent='Création du compte…';
+ await platformTeamRequest({action:'create',full_name:$('#ptName').value.trim(),email:$('#ptEmail').value.trim(),password:$('#ptPassword').value,permissions});
+ $('#ptMessage').textContent='Compte secondaire créé. Communiquez ses identifiants par un canal sécurisé.';
+ e.target.reset();await loadPlatformTeam();
+})});
+$('#platformTeamList')?.addEventListener('click',e=>run(async()=>{
+ const save=e.target.closest('[data-ptsave]'),status=e.target.closest('[data-ptstatus]');
+ if(save){const article=save.closest('article'),permissions=[...article.querySelectorAll('[data-ptperm]:checked')].map(x=>x.dataset.ptperm);await platformTeamRequest({action:'update',id:save.dataset.ptsave,permissions});await loadPlatformTeam();return}
+ if(status){const action=status.dataset.status==='active'?'suspend':'reactivate';if(!confirm(action==='suspend'?'Suspendre ce compte de gestion ?':'Réactiver ce compte ?'))return;await platformTeamRequest({action,id:status.dataset.ptstatus});await loadPlatformTeam()}
+}));
+$('#ownerExportBtn')?.addEventListener('click',()=>run(async()=>{
+ const from=$('#ownerExportFrom').value||null,to=$('#ownerExportTo').value||null;
+ if(from&&to&&from>to)throw Error('La date de début doit précéder la date de fin.');
+ $('#ownerExportMsg').textContent='Préparation de l’export sécurisé…';
+ const {data,error}=await sb.rpc('rg_platform_export_all',{p_from:from,p_to:to});if(error)throw error;
+ const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');
+ a.href=url;a.download=`zumuya-group-export-${from||'debut'}-${to||'fin'}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1500);
+ $('#ownerExportMsg').textContent='Export téléchargé.';
+}));
+async function renderStaffConsole(){
+ const root=$('#staffSections');if(!root)return;
+ const sections=platformPermissions.filter(x=>['dashboard','partners','organizations','subscriptions','payments','reports','team'].includes(x));
+ if(!sections.length){root.innerHTML='<p>Votre compte est actif, mais aucune rubrique de consultation ne vous a été attribuée.</p>';return}
+ const titles={dashboard:'Tableau de bord',partners:'Partenaires',organizations:'Organisations',subscriptions:'Abonnements',payments:'Transactions',reports:'Rapports',team:'Gestion du groupe'};
+ root.innerHTML='<p>Rubriques autorisées : '+sections.map(x=>esc(titles[x])).join(' · ')+'</p><div id="staffCards"></div>';
+ const cards=$('#staffCards');
+ for(const section of sections){
+  const {data,error}=await sb.rpc('rg_platform_staff_snapshot',{p_section:section});
+  if(error){cards.insertAdjacentHTML('beforeend',`<div class="entry"><b>${esc(titles[section])}</b><p>${esc(error.message)}</p></div>`);continue}
+  cards.insertAdjacentHTML('beforeend',`<div class="entry" style="margin:12px 0;padding:14px"><b>${esc(titles[section])}</b><pre style="white-space:pre-wrap;overflow:auto;max-height:320px">${esc(JSON.stringify(data,null,2))}</pre></div>`);
+ }
+}
 /* ---------- Actions ---------- */
 const run=async f=>{try{await f()}catch(e){fail(e.message||'Action impossible')}};
 $('#loginForm').onsubmit=e=>{e.preventDefault();run(async()=>{try{msg('Connexion…');const {data,error}=await sb.auth.signInWithPassword({email:$('#email').value.trim(),password:$('#password').value});if(error)throw error;await verify(data.session);msg('')}catch(x){msg(x.message||'Connexion impossible')}})};

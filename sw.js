@@ -7,6 +7,9 @@ const FILES=[
   './agro.css',
   './agro.html',
   './agro.js',
+  './analytics.html',
+  './zanalytics.css',
+  './zanalytics.js',
   './app.js',
   './catalogue.js',
   './client-espace.html',
@@ -46,35 +49,35 @@ const FILES=[
   './proprietaire.html',
   './proprietaire.js',
   './restauration.html',
-  './resto-apercu-facebook.jpg',
-  './resto-card.html',
-  './resto-charts.js',
-  './resto-chat.js',
-  './resto-client.html',
-  './resto-db.js',
-  './resto-driver.html',
-  './resto-ext-core.js',
-  './resto-ext-dispatch.js',
-  './resto-ext-kds.js',
-  './resto-ext-loader.js',
-  './resto-ext-realtime.js',
-  './resto-ext-room-billing.js',
-  './resto-ext-tracking.js',
-  './resto-icon-192.png',
-  './resto-icon-512.png',
-  './resto-icon-maskable-192.png',
-  './resto-icon-maskable-512.png',
-  './resto-index.html',
-  './resto-manifest.webmanifest',
-  './resto-notif.js',
-  './resto-owner-pro.js',
-  './resto-owner.html',
-  './resto-portal-bridge.js',
-  './resto-qr.js',
-  './resto-rest-report.js',
-  './resto-restaurant.html',
-  './resto-splash.js',
-  './resto-version.json',
+  './zrestaurant-apercu-facebook.jpg',
+  './zrestaurant-card.html',
+  './zrestaurant-charts.js',
+  './zrestaurant-chat.js',
+  './zrestaurant-client.html',
+  './zrestaurant-db.js',
+  './zrestaurant-driver.html',
+  './zrestaurant-ext-core.js',
+  './zrestaurant-ext-dispatch.js',
+  './zrestaurant-ext-kds.js',
+  './zrestaurant-ext-loader.js',
+  './zrestaurant-ext-realtime.js',
+  './zrestaurant-ext-room-billing.js',
+  './zrestaurant-ext-tracking.js',
+  './zrestaurant-icon-192.png',
+  './zrestaurant-icon-512.png',
+  './zrestaurant-icon-maskable-192.png',
+  './zrestaurant-icon-maskable-512.png',
+  './zrestaurant-index.html',
+  './zrestaurant-manifest.webmanifest',
+  './zrestaurant-notif.js',
+  './zrestaurant-owner-pro.js',
+  './zrestaurant-owner.html',
+  './zrestaurant-portal-bridge.js',
+  './zrestaurant-qr.js',
+  './zrestaurant-rest-report.js',
+  './zrestaurant-restaurant.html',
+  './zrestaurant-splash.js',
+  './zrestaurant-version.json',
   './styles.css',
   './wallet.js',
   './sw.js',
@@ -95,7 +98,7 @@ self.addEventListener('install',e=>{
   self.skipWaiting();
 });
 self.addEventListener('activate',e=>{
-  e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>(k.startsWith('zumaya-portal-')||k.startsWith('restogest-static-')||k.startsWith('zumuya-'))&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));
+  e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>(k.startsWith('zumaya-portal-')||k.startsWith('zumuya-restaurant-static-')||k.startsWith('zumuya-'))&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));
 });
 self.addEventListener('message',e=>{if(e.data&&e.data.type==='SKIP_WAITING')self.skipWaiting()});
 self.addEventListener('fetch',e=>{
@@ -110,7 +113,7 @@ self.addEventListener('fetch',e=>{
     if(hit)return hit;
     if(r.mode==='navigate'){
       const path=u.pathname.split('/').pop()||'index.html';
-      const fallback=path.startsWith('resto-')?'./resto-index.html':'./index.html';
+      const fallback=path.startsWith('zrestaurant-')?'./zrestaurant-index.html':'./index.html';
       return caches.match(fallback);
     }
     return Response.error();
@@ -120,7 +123,7 @@ self.addEventListener('notificationclick',e=>{
   e.notification.close();
   e.waitUntil(self.clients.matchAll({type:'window',includeUncontrolled:true}).then(list=>{
     for(const c of list){if('focus' in c)return c.focus()}
-    return self.clients.openWindow('./resto-index.html');
+    return self.clients.openWindow('./zrestaurant-index.html');
   }));
 });
 self.addEventListener('push',e=>{

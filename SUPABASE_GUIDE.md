@@ -1,79 +1,45 @@
 # Guide Supabase — ZUMUYA GROUP
 
-## Fichier principal
+Le dépôt utilise le projet Supabase indiqué dans `config.js`. Le SQL consolidé et les migrations sont fournis dans ce dépôt. Ne jamais publier une clé `service_role`.
 
-**`00_RESET_ET_SCHEMA_COMPLET.sql`** — script unique qui :
+## Installation / mise à niveau
 
-1. Propose une **réinitialisation** (section 0, commentée par défaut)
-2. Crée tout le schéma organisé :
-   - Portail (pays, propriétaires, organisations, demandes partenaires)
-   - Client (profils, adresses, favoris)
-   - Agro (profils, produits, demandes, groupes de coopération)
-   - Restauration / Hôtel / Livraison (tables JSONB + dispatch livreur)
-3. Active les **RLS** et les grants
-4. Configure le **cron** de dispatch (si `pg_cron` est disponible)
+Lire impérativement `INSTALLATION_ZUMUYA_GROUP.md`. Sur une base existante, faire une sauvegarde et ne jamais exécuter un script RESET sans avoir vérifié son impact.
 
-Les anciens scripts (`sql-portail.sql`, `supabase-setup.sql`, `ZUMUYA_EXTENSION_ESSAI.sql`) restent dans le dépôt pour référence, mais le script maître les remplace.
+Le nouvel ensemble de fonctionnalités est installé par :
+1. `z_hospitality_native.sql` — espaces restaurant / hôtel, équipes, journal d’audit natif.
+2. `19_pilotage_rapports_exports_equipe_proprietaire.sql` — journal transversal de tous les pôles, accès secondaires du propriétaire et export complet.
+3. Déploiement des Edge Functions `z-hospitality-team` et `platform-team-admin`.
 
----
+La migration 19 doit être exécutée après le socle portail et les migrations métier qui créent `rg_organizations`, `rg_platform_owners`, `rg_service_records` et les tables des pôles.
 
-## Procédure recommandée
+## Configuration navigateur
 
-### A. Projet Supabase neuf
+`config.js` ne contient que :
+- URL du projet Supabase ;
+- clé publique anon / publishable.
 
-1. Ouvrez **SQL Editor**
-2. Collez et exécutez **`00_RESET_ET_SCHEMA_COMPLET.sql`** en entier (section 0 reste commentée)
-3. Activez l’extension **pg_cron** (Database → Extensions) si le message l’indique, puis relancez la partie cron si besoin
-4. Dans Authentication → Providers, activez **Email**
-5. Créez un compte sur `compte.html`
-6. Créez votre compte sur `compte.html`, confirmez l’e-mail, puis exécutez dans le SQL Editor le bloc propriétaire (section 6 du script) avec **votre** e-mail — sans le committer dans Git.
+Ne jamais y mettre `service_role`, clé privée, mot de passe de base de données ou secret de fonction.
 
-### B. Réinitialiser un projet déjà configuré
+## Fonctions Edge
 
-1. **Sauvegardez** si nécessaire (données perdues sur les tables `rg_*`)
-2. Dans `00_RESET_ET_SCHEMA_COMPLET.sql`, **décommentez** toute la section `0. RÉINITIALISATION` (le bloc `DO $$ ... $$;`)
-3. Exécutez le fichier complet
-4. Recréez le compte propriétaire comme ci-dessus
+Sources :
+- `supabase/functions/z-hospitality-team/index.ts`
+- `supabase/functions/platform-team-admin/index.ts`
 
-> Les utilisateurs dans `auth.users` ne sont **pas** supprimés. Seules les tables métier ZUMUYA le sont.
-
----
-
-## config.js
-
-```js
-window.ZUMAYA_CONFIG = {
-  SUPABASE_URL: 'https://VOTRE-PROJET.supabase.co',
-  SUPABASE_ANON_KEY: 'votre-clé-anon'
-};
+Déploiement :
+```bash
+supabase link --project-ref azfunhfjmybekzakhtbu
+supabase functions deploy z-hospitality-team
+supabase functions deploy platform-team-admin
 ```
 
-Ne mettez **jamais** la clé `service_role` dans le front.
+Les fonctions contrôlent le JWT et le rôle propriétaire côté serveur. Les secrets Supabase sont fournis à l’environnement d’exécution ; ne pas les committer.
 
----
+## Vérifications
 
-## Tables créées (résumé)
-
-| Domaine | Tables |
-|---------|--------|
-| Portail | `rg_countries`, `rg_platform_owners`, `rg_profiles`, `rg_organizations`, `rg_establishments`, `rg_service_records`, `rg_payment_transactions`, `rg_partner_applications` |
-| Client | `rg_customer_profiles`, `rg_customer_addresses`, `rg_customer_favorites` |
-| Agro | `rg_agro_profiles`, `rg_agro_products`, `rg_agro_requests`, `rg_agro_groups`, `rg_agro_group_members`, `rg_agro_group_offers`, `rg_agro_group_messages`, `rg_agro_group_orders`, `rg_agro_group_order_members` |
-| Resto / Livraison | `rg_users`, `rg_rests`, `rg_orders`, `rg_chats` (+ vue `rg_room_folios`) |
-
----
-
-## Sécurité
-
-- Portail, client et agro : RLS basées sur `auth.uid()` et rôle propriétaire.
-- Tables `rg_users` / `rg_rests` / `rg_orders` / `rg_chats` : policies ouvertes pour compatibilité avec le front actuel (JSONB). À restreindre progressivement.
-- Fonctions sensibles (`rg_dispatch_*`) en `SECURITY DEFINER`.
-
----
-
-## Après le script
-
-1. Vérifier Authentication → URL de redirection (votre domaine + `compte.html`)
-2. Tester inscription Client + Restaurant + Agro
-3. Désigner le propriétaire
-4. Ouvrir `proprietaire.html` et valider les partenaires si besoin
+- `rg_platform_access()` doit renvoyer `is_owner=true` pour le propriétaire principal.
+- `rg_platform_team_members` ne contient que les comptes secondaires créés par le propriétaire.
+- Les membres n’accèdent qu’aux sections autorisées.
+- `rg_activity_events` enregistre les actions des tables métier rattachées à une organisation ou un utilisateur.
+- `rg_platform_export_all(date,date)` est réservé au propriétaire principal.

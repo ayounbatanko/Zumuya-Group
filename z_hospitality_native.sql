@@ -1,4 +1,4 @@
--- ZUMAYA NATIF : modules Restaurant & Hôtel (indépendants de l'ancien moteur RestoGest)
+-- ZUMAYA NATIF : modules Restaurant & Hôtel (indépendants de l'ancien moteur ZUMUYA)
 create table if not exists public.z_hospitality_team (
  id uuid primary key default gen_random_uuid(), org_id uuid not null references public.rg_organizations(id) on delete cascade,
  user_id uuid not null references auth.users(id) on delete cascade,
@@ -50,7 +50,21 @@ create policy z_hosp_team_read on public.z_hospitality_team for select to authen
 drop policy if exists z_hosp_team_owner_all on public.z_hospitality_team;
 create policy z_hosp_team_owner_all on public.z_hospitality_team for all to authenticated using(public.z_hosp_is_owner(org_id)) with check(public.z_hosp_is_owner(org_id));
 drop policy if exists z_hosp_records_read on public.z_hospitality_records;
-create policy z_hosp_records_read on public.z_hospitality_records for select to authenticated using(public.z_hosp_can(org_id,null));
+create policy z_hosp_records_read on public.z_hospitality_records for select to authenticated using(
+ public.z_hosp_can(org_id,'reports')
+ or public.z_hosp_can(org_id,case record_type
+   when 'menu_item' then 'menu'
+   when 'order' then 'orders'
+   when 'sale' then 'sales'
+   when 'stock_item' then 'stock'
+   when 'stock_move' then 'stock'
+   when 'room' then 'rooms'
+   when 'reservation' then 'reservations'
+   when 'promotion' then 'promotions'
+   when 'review' then 'orders'
+   when 'delivery' then 'deliveries'
+   else 'settings' end)
+);
 drop policy if exists z_hosp_records_public_menu on public.z_hospitality_records;
 create policy z_hosp_records_public_menu on public.z_hospitality_records for select to anon,authenticated using(record_type='menu_item' and is_public=true and coalesce((data->>'is_available')::boolean,true));
 drop policy if exists z_hosp_records_insert on public.z_hospitality_records;

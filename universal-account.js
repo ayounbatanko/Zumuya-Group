@@ -67,7 +67,7 @@ async function loadNotifications(){
  if(error)return;
  const counts={};(data||[]).forEach(x=>counts[x.module_code]=(counts[x.module_code]||0)+1);
  const mapping={
-  marketplace:'marketplace.html',restauration:'resto-client.html',hotel:'hotel.html',agro:'agro.html',
+  marketplace:'marketplace.html',restauration:'zrestaurant-client.html',hotel:'hotel.html',agro:'agro.html',
   livraison:'livraison.html',transport:'livraison.html',prestations:'index.html#services',
   evenements:'index.html#services',commerce:'marketplace.html',voyage:'index.html#services',
   paiement:null,entreprise:'ecosysteme.html'

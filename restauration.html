@@ -15,7 +15,7 @@
 (()=>{'use strict';
 const $=s=>document.querySelector(s),esc=ZS.esc;let pos=null,rests=[],q='',sort='near',open={},err='';
 const who=ZS.who();
-if(who){const a=$('#who');a.textContent='Connecté';a.className='zpill';a.href=who.kind==='resto'?'resto-index.html':'compte.html'}
+if(who){const a=$('#who');a.textContent='Connecté';a.className='zpill';a.href=who.kind==='resto'?'zrestaurant-index.html':'compte.html'}
 function chips(){const c=[];c.push('<span class="zchip">● '+(rests.length)+' restaurant'+(rests.length>1?'s':'')+' partenaire'+(rests.length>1?'s':'')+'</span>');
  c.push(pos?'<span class="zchip">📍 Position active</span>':'<span class="zchip warn">📍 Localisation requise</span>');$('#chips').innerHTML=c.join('')}
 function lock(){$('#app').innerHTML='<div class="card lock"><span class="eyebrow" style="color:#0b7d6f">ACCÈS CONNECTÉ</span><h2>Connectez-vous pour voir les restaurants proches</h2><p>Les catalogues, les prix et les frais de livraison s’affichent selon la position de l’utilisateur connecté.</p><a class="btn btn-gold" href="compte.html">Se connecter</a><a class="btn btn-line" href="compte.html?mode=signup">Créer un compte</a></div>'}

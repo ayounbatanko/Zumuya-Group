@@ -1,0 +1,7 @@
+{
+  "version": "3.0.0",
+  "message": "Correctifs portail et paramètres : type de compte masqué à la connexion, revalidation e-mail/téléphone, suppression de compte renforcée et cache PWA actualisé.",
+  "notify": true,
+  "updatedAt": "2026-11-20T13:40:00Z",
+  "product": "ZUMUYA GROUP"
+}

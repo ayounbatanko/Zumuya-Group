@@ -1,6 +1,6 @@
 /* ZUMUYA GROUP — panier du catalogue, partagé par l'accueil (catalogue.js) et la page Restauration.
    Règles : consultation libre ; ajout réservé aux comptes « Client » connectés ; un panier = un seul restaurant ;
-   « Passer la commande » reprend le panier dans resto-client.html (adresse, paiement, frais de livraison) ; le suivi
+   « Passer la commande » reprend le panier dans zrestaurant-client.html (adresse, paiement, frais de livraison) ; le suivi
    pas à pas se fait dans « Mes commandes ». Dépend de zsession.js (ZS). */
 (()=>{'use strict';
 if(!window.ZS)return;
@@ -47,8 +47,8 @@ function add(rid,i,d){
  cart.items=cart.items.filter(x=>x.q>0);write();refresh()}
 function checkout(){
  if(!isClient())return say('Connectez-vous avec un compte <b>Client</b> pour passer commande. <a href="compte.html">Se connecter</a>');
- if(!cart)return;const r=restOf(cart.rid);if(!isOpen(r))return say('Impossible d’envoyer la commande : ce restaurant est fermé. Ouverture à '+(r?.openAt||'08:00')+'.');try{localStorage.setItem('rg_target',cart.slug)}catch(e){}location.href='resto-client.html'}
-function track(){try{localStorage.setItem('rg_tab','myorders')}catch(e){}location.href='resto-client.html'}
+ if(!cart)return;const r=restOf(cart.rid);if(!isOpen(r))return say('Impossible d’envoyer la commande : ce restaurant est fermé. Ouverture à '+(r?.openAt||'08:00')+'.');try{localStorage.setItem('rg_target',cart.slug)}catch(e){}location.href='zrestaurant-client.html'}
+function track(){try{localStorage.setItem('rg_tab','myorders')}catch(e){}location.href='zrestaurant-client.html'}
 
 /* ---------- affichage ---------- */
 /* Bouton « Ajouter » ou sélecteur de quantité d'un plat (rid = restaurant, i = rang du plat dans son menu). */

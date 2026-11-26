@@ -1,9 +1,9 @@
-ZUMAYA GROUP — RESTAURATION COMPLETE RESTOGEST + HOTEL
+ZUMAYA GROUP — RESTAURATION COMPLETE ZUMUYA + HOTEL
 
-Cette archive contient le projet complet ZUMAYA (fichiers racine), avec restauration des modules métier RestoGest :
+Cette archive contient le projet complet ZUMAYA (fichiers racine), avec restauration des modules métier ZUMUYA :
 - Restaurant : caisse/ventes, catalogue/menu, commandes, cuisine (KDS), stocks, promotions/fidélité, statistiques/export, avis clients, suivi et dispatch livraison.
 - Hôtel : espace hôtel, commandes en chambre, numéro/bâtiment de chambre et facturation sur note de chambre (folio/export CSV), en lien avec le module restauration.
-- Connexion : les pages métier restent reliées à la session Supabase ZUMAYA via resto-db.js et resto-portal-bridge.js.
+- Connexion : les pages métier restent reliées à la session Supabase ZUMAYA via zrestaurant-db.js et zrestaurant-portal-bridge.js.
 
 INSTALLATION
 1. Télécharger et décompresser cette archive.
@@ -17,7 +17,7 @@ SUPABASE
 - Les fonctionnalités utilisent les tables et RPC déjà prévues par la base ZUMAYA. Cette archive ne prouve pas à elle seule qu’un parcours réel est validé sur tous les comptes.
 
 SOURCE HISTORIQUE
-Le dossier RestoGest_Original_Reference conserve le code source multiservices historique. Il est fourni comme référence ; ne pas le copier par-dessus les fichiers actifs à la racine.
+Le dossier ZUMUYA_Original_Reference conserve le code source multiservices historique. Il est fourni comme référence ; ne pas le copier par-dessus les fichiers actifs à la racine.
 
 IMPORTANT
 Les notifications Web Push nécessitent une clé VAPID et un déploiement de fonction serveur ; elles ne sont pas activées automatiquement sans configuration.
@@ -27,6 +27,6 @@ GESTION D’EQUIPE, LIVREURS, JOURNAL ET QR
 - Le module « Mon équipe » permet au compte principal de créer les comptes employés et livreurs, d’attribuer des permissions aux employés, de suspendre/réactiver les accès et de réinitialiser les mots de passe.
 - Les comptes livreurs sont créés par l’établissement via la fonction Supabase « team-admin » ; il n’y a pas d’inscription publique autonome de livreur. Les courses sont limitées à l’établissement auquel le livreur est rattaché.
 - Le « Journal des actions » est réservé au compte principal. Le code actuel journalise les opérations de gestion d’équipe et d’approvisionnement ainsi que la navigation dans les onglets. Il ne faut pas le considérer comme un audit exhaustif de chaque clic/action métier tant que les événements de caisse, commandes, menu, stock et livraison n’ont pas tous été instrumentés.
-- Le QR code de chaque établissement ouvre maintenant directement sa fiche/catalogue public via resto-card.html?r=SLUG, sans passer par l’écran de connexion. Pour un hôtel, le QR renvoie vers le catalogue de restauration de l’établissement hôtelier.
+- Le QR code de chaque établissement ouvre maintenant directement sa fiche/catalogue public via zrestaurant-card.html?r=SLUG, sans passer par l’écran de connexion. Pour un hôtel, le QR renvoie vers le catalogue de restauration de l’établissement hôtelier.
 - Prérequis backend : exécuter le script 11_equipes_livreurs_approvisionnement.sql dans le SQL Editor du projet Supabase, puis déployer supabase/functions/team-admin. Le dépôt GitHub Pages ne déploie pas automatiquement une Edge Function.
 - Avant utilisation en production, tester la création de comptes depuis un compte restaurant et un compte hôtel, les permissions avec un compte employé, le cloisonnement des livreurs entre établissements et le scan du QR depuis un téléphone non connecté.
