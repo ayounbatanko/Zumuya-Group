@@ -10,4 +10,4 @@ Clients : numéro international E.164 + mot de passe (8 caractères minimum). Au
 Les comptes professionnels créés via le formulaire sont enregistrés comme vérifiés et leur espace est activé.
 Les produits Agro comportent un prix/unité, description et photo. Le bucket `zumuya-agro-products` est créé par le SQL.
 
-IMPORTANT : les comptes RestoGest historiques sont encore fondés sur son ancien système local. Le SQL ne les convertit pas automatiquement. Le pont RestoGest doit écrire l'UUID Supabase dans les champs `authId`, `ownerAuthId`, `clientAuthId`, `driverAuthId` et `restaurantOwnerAuthId` pour respecter les politiques RLS. Ne désactive pas RLS et ne publie jamais la clé `service_role`.
+IMPORTANT : les comptes Restaurant et Hôtel utilisent le portail d’authentification Supabase commun de ZUMUYA GROUP. Le pont `zrestaurant-portal-bridge.js` rattache la session du portail à l’organisation métier correspondante. Conserve les politiques RLS actives et ne publie jamais la clé `service_role`.
