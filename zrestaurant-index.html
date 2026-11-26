@@ -178,7 +178,7 @@ document.addEventListener('click',()=>{try{window.Notification&&Notification.per
 /* AIGUILLAGE : ce fichier n'affiche plus aucune connexion ni création de compte.
    Seul compte.html (portail ZUMUYA GROUP) authentifie. Selon la catégorie du compte, l'utilisateur arrive dans son espace. */
 (async()=>{
- const go={restaurant:'zrestaurant-restaurant.html',client:'zrestaurant-client.html',driver:'zrestaurant-driver.html',owner:'zrestaurant-owner.html'};
+ const go={restaurant:'zrestaurant-restaurant.html',client:'zrestaurant-client.html',driver:'zrestaurant-driver.html',owner:'proprietaire.html'};
  const qp=new URLSearchParams(location.search);
  try{const q=qp.get('resto');if(q)store.s('l','rg_target',q)}catch(e){}
  const cu=me();
@@ -190,7 +190,7 @@ document.addEventListener('click',()=>{try{window.Notification&&Notification.per
    if(r.ok&&(await r.json())===true){
     const d=D.get(),md=s.user.user_metadata||{};let u=d.users.find(x=>x.portalId===s.user.id&&x.role==='owner');
     if(!u){u={id:uid(),role:'owner',phone:String(s.user.email||'').toLowerCase(),name:String(md.name||s.user.email||'Propriétaire'),portalId:s.user.id};d.users.push(u);D.save(d)}
-    store.s('s','uid',u.id);navTo('zrestaurant-owner.html');return}}catch(e){}
+    store.s('s','uid',u.id);navTo('proprietaire.html');return}}catch(e){}
   const t=(s.user.user_metadata||{}).account_type;
   if(t==='agro_producer'||t==='agro_trader'){location.replace('agro.html');return}
   location.replace('compte.html');return}
