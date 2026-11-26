@@ -1,4 +1,57 @@
-<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#102b45"><title>Messagerie — ZUMUYA GROUP"><link rel="stylesheet" href="styles.css"><style>
-:root{--navy:#102b45;--gold:#c59a42}.chat-wrap{max-width:1180px;margin:20px auto;padding:0 16px 28px}.chat-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}.chat-layout{display:grid;grid-template-columns:minmax(260px,340px) minmax(0,1fr);gap:16px;margin-top:18px;align-items:stretch}.chat-card{background:#fff;border:1px solid #dce4eb;border-radius:20px;padding:18px;min-width:0;box-shadow:0 12px 34px #102b4510}.chat-list{display:grid;gap:8px;max-height:65vh;overflow:auto}.chat-thread{width:100%;text-align:left;border:1px solid #e2e8ef;background:#fff;border-radius:12px;padding:12px;cursor:pointer;color:#102b45}.chat-thread.active{border-color:var(--gold);background:#fffaf0}.chat-thread small{display:block;color:#657587;margin-top:4px}.chat-messages{height:min(62vh,680px);overflow:auto;display:flex;flex-direction:column;gap:10px;padding:8px;background:#f4f7fa;border-radius:12px}.chat-bubble{max-width:82%;padding:10px 13px;border-radius:14px;background:#fff;border:1px solid #e1e7ed;overflow-wrap:anywhere}.chat-bubble.mine{align-self:flex-end;background:#102b45;color:#fff;border-color:#102b45}.chat-bubble small{display:block;opacity:.7;font-size:.72rem;margin-top:4px}.chat-send{display:flex;gap:8px;margin-top:10px}.chat-send textarea{flex:1;min-width:0;resize:vertical;border:1px solid #ccd5df;border-radius:10px;padding:10px;font:inherit}.chat-send button,.chat-action{border:0;border-radius:10px;padding:11px 15px;background:#102b45;color:white;font-weight:800;cursor:pointer}.chat-note{color:#657587;font-size:.9rem}.chat-empty{padding:30px 10px;text-align:center;color:#657587}.chat-head{padding:16px 18px;border-radius:18px;background:linear-gradient(120deg,#102b45,#1c4867);color:#fff}.chat-head .eyebrow{color:#65e2d2}.chat-head h1{margin:4px 0}.chat-head .chat-note{color:#d1e0e8}.chat-action{display:inline-flex;text-decoration:none;align-items:center}.chat-list{max-height:36vh}.chat-send{position:sticky;bottom:0;background:#fff;padding-top:8px}.chat-send button{min-width:110px}.chat-card h2,.chat-card h3{color:#102b45}
-@media(max-width:700px){.chat-wrap{margin:10px auto;padding:0 10px 18px}.chat-layout{grid-template-columns:1fr}.chat-card{padding:13px}.chat-list{max-height:24vh}.chat-messages{height:42vh;min-height:260px}.chat-head{align-items:flex-start}.chat-action{width:100%;justify-content:center}}
-</style></head><body><main class="chat-wrap"><header class="chat-head"><div><p class="eyebrow">ZUMUYA GROUP</p><h1>💬 Messagerie</h1><p class="chat-note">Échangez directement avec les clients, producteurs, commerçants et partenaires.</p></div><a class="chat-action" href="javascript:history.back()">← Retour à mon espace</a></header><div id="chatStatus" class="chat-note" role="status">Connexion à la messagerie…</div><section class="chat-layout"><aside class="chat-card"><h2>Conversations</h2><div id="chatThreads" class="chat-list"><p class="chat-empty">Chargement…</p></div><h3>Acteurs à contacter</h3><input id="actorSearch" type="search" placeholder="Rechercher un vendeur / partenaire"><div id="chatDirectory" class="chat-list"><p class="chat-empty">Chargement des partenaires…</p></div></aside><section class="chat-card"><div id="chatTitle"><h2>Vos messages</h2><p class="chat-note">Sélectionnez une conversation pour commencer.</p></div><div id="chatMessages" class="chat-messages"><p class="chat-empty">Aucune conversation sélectionnée.</p></div><form id="chatSend" class="chat-send"><textarea id="chatBody" rows="2" maxlength="4000" placeholder="Écrivez votre message…" required disabled></textarea><button type="submit" disabled>Envoyer</button></form></section></section></main><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js"></script><script src="messagerie.js"></script></body></html>
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#102b45"><title>Messagerie — ZUMUYA GROUP</title><link rel="icon" href="logo.svg" type="image/svg+xml"><link rel="stylesheet" href="styles.css"><style>
+:root{--navy:#102b45;--gold:#c59a42;--line:#dce4eb;--mut:#657587}
+*{box-sizing:border-box}
+.chat-wrap{max-width:1180px;margin:16px auto;padding:0 14px 24px}
+.chat-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:16px 18px;border-radius:18px;background:linear-gradient(120deg,#102b45,#1c4867);color:#fff}
+.chat-head h1{margin:2px 0;font-size:22px}.chat-head .eyebrow{color:#65e2d2;margin:0;font-size:12px;letter-spacing:.12em}.chat-note{color:var(--mut);font-size:.9rem;margin:2px 0}.chat-head .chat-note{color:#d1e0e8}
+.chat-action{display:inline-flex;text-decoration:none;align-items:center;border:0;border-radius:10px;padding:10px 14px;background:var(--gold);color:#172b3b;font-weight:800;cursor:pointer}
+#chatStatus{margin:10px 2px;min-height:18px}
+.chat-layout{display:grid;grid-template-columns:minmax(280px,360px) minmax(0,1fr);gap:14px;align-items:stretch}
+.chat-card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:14px;min-width:0;box-shadow:0 10px 30px #102b4510}
+.chat-side{display:flex;flex-direction:column;gap:10px;height:min(78vh,760px)}
+.chat-side h2{margin:0;font-size:17px;color:var(--navy);display:flex;justify-content:space-between;align-items:center;gap:8px}
+.chat-side input[type=search]{width:100%;border:1px solid #ccd5df;border-radius:10px;padding:10px;font:inherit}
+.chat-list{display:grid;gap:6px;overflow:auto;align-content:start;flex:1;min-height:80px}
+.chat-thread{width:100%;text-align:left;border:1px solid #e2e8ef;background:#fff;border-radius:12px;padding:10px 12px;cursor:pointer;color:var(--navy);font:inherit;display:block}
+.chat-thread:hover{background:#f7fafc}.chat-thread.active{border-color:var(--gold);background:#fffaf0}
+.chat-thread .t1{display:flex;justify-content:space-between;gap:8px;align-items:baseline}.chat-thread b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chat-thread .t2{color:var(--mut);font-size:.84rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:3px}
+.chat-thread time{color:var(--mut);font-size:.75rem;white-space:nowrap}.chat-thread.unread .t2{color:#17212b;font-weight:700}
+.badge{background:#e63946;color:#fff;border-radius:99px;padding:1px 7px;font-size:.72rem;font-weight:800;margin-left:6px}
+.tag{display:inline-block;border-radius:99px;padding:1px 8px;font-size:.72rem;font-weight:700;background:#eaf0f5;color:var(--navy);margin-right:4px}
+.chat-main{display:flex;flex-direction:column;height:min(78vh,760px)}
+.chat-top{display:flex;gap:10px;align-items:center;border-bottom:1px solid var(--line);padding-bottom:10px;margin-bottom:8px}
+.chat-top h2{margin:0;font-size:18px;color:var(--navy)}.chat-top .back{display:none;border:0;background:#eef2f5;border-radius:10px;padding:8px 11px;font-weight:800;color:var(--navy);cursor:pointer}
+.chat-messages{flex:1;overflow:auto;display:flex;flex-direction:column;gap:6px;padding:10px;background:#f4f7fa;border-radius:12px;min-height:200px}
+.chat-bubble{max-width:82%;padding:9px 12px;border-radius:14px;background:#fff;border:1px solid #e1e7ed;overflow-wrap:anywhere;align-self:flex-start}
+.chat-bubble.mine{align-self:flex-end;background:var(--navy);color:#fff;border-color:var(--navy)}
+.chat-bubble small{display:block;opacity:.7;font-size:.7rem;margin-top:3px;text-align:right}
+.chat-sys{align-self:center;max-width:92%;background:#eaf6ef;color:#0b5d36;border:1px solid #c9e8d6;border-radius:12px;padding:8px 12px;font-size:.88rem;text-align:center}
+.chat-day{align-self:center;color:var(--mut);font-size:.75rem;background:#e8eef3;border-radius:99px;padding:2px 10px;margin:6px 0}
+.chat-empty{padding:26px 10px;text-align:center;color:var(--mut)}
+.chat-send{display:flex;gap:8px;margin-top:10px;align-items:flex-end}
+.chat-send textarea{flex:1;min-width:0;resize:none;border:1px solid #ccd5df;border-radius:12px;padding:10px;font:inherit;max-height:140px}
+.chat-send button{border:0;border-radius:12px;padding:12px 16px;background:var(--navy);color:#fff;font-weight:800;cursor:pointer}.chat-send button:disabled{opacity:.5;cursor:not-allowed}
+details.dir{border:1px solid var(--line);border-radius:12px;padding:8px 10px}details.dir summary{cursor:pointer;font-weight:800;color:var(--navy)}
+.dir-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}.dir-tabs button{border:0;background:#eef2f5;color:var(--navy);border-radius:99px;padding:6px 11px;font-size:.8rem;font-weight:700;cursor:pointer}.dir-tabs button.on{background:var(--navy);color:#fff}
+.dir-list{max-height:190px;overflow:auto;display:grid;gap:6px;margin-top:6px}
+@media(max-width:800px){.chat-layout{grid-template-columns:1fr}.chat-side,.chat-main{height:auto;min-height:0}.chat-side{height:72vh}.chat-main{height:78vh}
+ .chat-layout.thread-open .chat-side{display:none}.chat-layout:not(.thread-open) .chat-main{display:none}.chat-top .back{display:inline-block}.chat-bubble{max-width:90%}}
+</style></head><body><main class="chat-wrap">
+<header class="chat-head"><div><p class="eyebrow">ZUMUYA GROUP</p><h1>💬 Messagerie</h1><p class="chat-note">Échangez avec les vendeurs, acheteurs, restaurants, hôtels, producteurs et sociétés de livraison.</p></div><a class="chat-action" href="javascript:history.back()">← Retour</a></header>
+<div id="chatStatus" class="chat-note" role="status">Connexion à la messagerie…</div>
+<section class="chat-layout" id="layout">
+<aside class="chat-card chat-side"><h2>Conversations <span id="unreadTotal"></span></h2>
+<input id="threadSearch" type="search" placeholder="Rechercher une conversation" aria-label="Rechercher une conversation">
+<div id="chatThreads" class="chat-list"><p class="chat-empty">Chargement…</p></div>
+<details class="dir" id="dir"><summary>＋ Nouvelle conversation</summary>
+<div class="dir-tabs" id="dirTabs"><button type="button" data-d="store" class="on">🛍️ Boutiques</button><button type="button" data-d="rest">🍽️ Restaurants &amp; hôtels</button><button type="button" data-d="agro">🌾 Producteurs</button></div>
+<input id="actorSearch" type="search" placeholder="Rechercher un nom ou une ville" aria-label="Rechercher un contact">
+<div id="chatDirectory" class="dir-list"><p class="chat-empty">Ouvrez pour charger…</p></div></details>
+</aside>
+<section class="chat-card chat-main">
+<div class="chat-top"><button type="button" class="back" id="backBtn">← Retour</button><div id="chatTitle"><h2>Vos messages</h2><p class="chat-note">Sélectionnez une conversation pour commencer.</p></div></div>
+<div id="chatMessages" class="chat-messages"><p class="chat-empty">Aucune conversation sélectionnée.</p></div>
+<form id="chatSend" class="chat-send"><textarea id="chatBody" rows="1" maxlength="4000" placeholder="Écrivez votre message… (Entrée pour envoyer)" required disabled></textarea><button type="submit" disabled>Envoyer</button></form>
+</section></section></main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js"></script><script src="messagerie.js?v=2"></script></body></html>

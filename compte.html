@@ -6,14 +6,9 @@
 <meta name="theme-color" content="#102b45">
 <title>Mon compte — ZUMUYA GROUP</title>
 <link rel="icon" href="logo.svg" type="image/svg+xml">
-<link rel="stylesheet" href="compte.css?v=8">
+<link rel="stylesheet" href="compte.css?v=10">
+<link rel="stylesheet" href="dashboard.css?v=4">
 <style>
-.category-picker{margin:18px 0}.category-picker h2{font-size:1.25rem;color:#102b45}.category-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-.category-card{display:flex;flex-direction:column;align-items:flex-start;text-align:left;gap:7px;padding:17px;border:1px solid #dce4eb;border-radius:15px;background:#fff;color:#102b45;cursor:pointer;min-height:130px;transition:.18s}
-.category-card:hover,.category-card:focus{border-color:#c59a42;box-shadow:0 8px 22px #102b4518;transform:translateY(-2px)}
-.category-card span{font-size:1.8rem}.category-card b{font-size:1rem}.category-card small{color:#657587;line-height:1.4}
-.category-back{margin:0 0 12px;border:0;background:transparent;color:#31516e;font-weight:700;cursor:pointer}
-@media(max-width:480px){.category-grid{grid-template-columns:1fr}.category-card{min-height:unset}}
 </style>
 </head>
 <body>
@@ -26,32 +21,7 @@
     <button type="button" role="tab" class="active" id="tabIn" data-mode="in" aria-selected="true">Connexion</button>
     <button type="button" role="tab" id="tabUp" data-mode="up" aria-selected="false">Créer un compte</button>
   </div>
-  <div id="categoryPicker" class="category-picker" hidden>
-    <h2>Quel type de compte souhaitez-vous créer ?</h2><button type="button" class="category-back" id="categoryBack" hidden>← Modifier la catégorie</button>
-    <p class="lead">Choisissez votre catégorie pour afficher le formulaire adapté.</p>
-    <div class="category-grid">
-      <button type="button" class="category-card" data-account-type="customer"><span>🛍️</span><b>Client</b><small>Acheter, commander et suivre mes commandes</small></button>
-      <button type="button" class="category-card" data-account-type="agro_producer"><span>🌾</span><b>Producteur agricole</b><small>Publier et vendre mes récoltes</small></button>
-      <button type="button" class="category-card" data-account-type="restaurant"><span>🍽️</span><b>Restaurant</b><small>Gérer mon établissement et mes commandes</small></button>
-      <button type="button" class="category-card" data-account-type="hotel"><span>🏨</span><b>Hôtel / hébergement</b><small>Gérer mon établissement</small></button>
-      <button type="button" class="category-card" data-account-type="agro_trader"><span>🧺</span><b>Commerçant agricole</b><small>Approvisionner et vendre des produits</small></button>
-      <button type="button" class="category-card" data-account-type="marketplace"><span>🛍️</span><b>Vendeur Marketplace</b><small>Ouvrir ma boutique et vendre en ligne</small></button>
-      <button type="button" class="category-card" data-account-type="delivery_service"><span>📦</span><b>Service de livraison</b><small>Société ou coursier : proposer mes livraisons</small></button>
-    </div>
-  </div>
   <form id="authForm" novalidate>
-    <label id="categoryWrap" hidden>Type de compte (à l’inscription)
-      <select id="accountCategory" required>
-        <option value="customer">Client — achat en ligne</option>
-        <option value="restaurant">Restaurant partenaire</option>
-        <option value="hotel">Hôtel / hébergement</option>
-        <option value="agro_producer">Producteur agricole</option>
-        <option value="agro_trader">Commerçant agricole</option>
-        <option value="marketplace">Vendeur Marketplace</option>
-        <option value="delivery_service">Service de livraison</option>
-      </select>
-      <small id="categoryHelp">Choisissez votre espace uniquement lors de la création du compte. À la connexion, ZUMAYA reconnaît automatiquement votre compte.</small>
-    </label>
     <label id="nameWrap" hidden>Nom complet<input id="displayName" type="text" autocomplete="name" placeholder="Ex. Aïssata Moussa"></label>
     <label id="emailWrap">Adresse e-mail<input id="email" type="email" autocomplete="username" inputmode="email" placeholder="vous@exemple.com" required></label>
     <label>Mot de passe
@@ -88,6 +58,7 @@
   </dl>
   <p class="notice" id="ownerNotice" hidden>Vous êtes <b>propriétaire de la plateforme</b> : vous gérez toute l'infrastructure ZUMUYA GROUP depuis l'espace propriétaire.</p>
   <div class="services">
+    <a class="btn small" href="index.html#services">🌐 Explorer tous les pôles ZUMAYA</a>
     <a class="btn small" id="mySpace" href="client-espace.html" hidden>🏠 Ouvrir mon espace</a>
     <a class="btn small" id="clientOrder" href="resto-client.html" hidden>🍽️ Restaurants et commandes</a>
     <a class="btn small" id="ownerLink" href="proprietaire.html" hidden>⚙️ Espace propriétaire</a>
@@ -95,6 +66,12 @@
     <a class="btn small" href="parametres.html">⚙️ Paramètres du compte</a>
   </div>
   <p class="lead" id="roleLead" style="margin-top:12px" hidden></p>
+
+  <section class="module-manager" id="moduleManager" hidden aria-labelledby="moduleManagerTitle">
+    <div class="module-manager-heading"><div><h2 id="moduleManagerTitle">Mes activités ZUMAYA</h2><p>Active ou mets en pause les pôles dont tu as besoin. Un seul compte suffit pour plusieurs activités.</p></div><button type="button" class="module-refresh" id="moduleRefresh">Actualiser</button></div>
+    <p class="module-msg" id="moduleMsg" aria-live="polite"></p>
+    <div id="moduleGrid" class="module-config-grid"><p>Chargement des pôles…</p></div>
+  </section>
 
   <div class="partner" id="pwPanel">
     <div class="phead"><div><h2>Mot de passe</h2><p class="lead">Vous pouvez le modifier à tout moment.</p></div><button class="btn small" type="button" id="togglePw">Changer</button></div>
@@ -131,8 +108,91 @@
   <button class="btn ghost" type="button" id="logout">Se déconnecter</button>
 </section>
 </main>
+
+<div id="dash" hidden>
+  <header class="dtop">
+    <button type="button" class="dburger" id="dBurger" aria-label="Ouvrir le menu">☰</button>
+    <a class="dbrand" href="index.html"><img src="logo.svg" alt=""><span>ZUMAYA <b>GROUP</b></span></a>
+    <label class="dsearch"><input id="dSearch" type="search" placeholder="Rechercher un service ou une activité…" aria-label="Rechercher un service ou une activité"></label>
+    <div class="dtop-r">
+      <a class="dbell" id="dBell" href="messagerie.html" aria-label="Notifications">🔔<i hidden>0</i></a>
+      <div class="dacc" id="dAcc"><button type="button" aria-haspopup="true"><span class="dav" id="dAv">Z</span><span class="t">Mon compte ▾</span></button>
+        <div class="dmenu" id="dMenu"><div class="who" id="dWho"></div><a href="parametres.html">⚙️ Paramètres du compte</a><a href="messagerie.html">💬 Messagerie</a><button type="button" id="dLogout">⏻ Se déconnecter</button></div></div>
+    </div>
+  </header>
+  <aside class="dside" id="dSide" aria-label="Menu principal">
+    <a href="#" class="on" data-view="overview"><span class="ic">▦</span>Vue d’ensemble</a>
+    <a href="#" data-view="activities"><span class="ic">🧩</span>Mes activités</a>
+    <a href="marketplace.html"><span class="ic">🛍️</span>Marketplace</a>
+    <a href="resto-client.html"><span class="ic">🍴</span>Restauration</a>
+    <a href="hotel.html"><span class="ic">🛏️</span>Hôtel</a>
+    <a href="agro.html"><span class="ic">🌿</span>Agro</a>
+    <a href="livraison.html"><span class="ic">🛵</span>Livraison</a>
+    <a href="ecosysteme.html"><span class="ic">🔗</span>Collaborations</a>
+    <a href="index.html#services"><span class="ic">🛠️</span>Prestations</a>
+    <a href="#" data-view="basket"><span class="ic">🛒</span>Mon panier <i class="zcount" id="basketCount" hidden>0</i></a>
+    <a href="#" data-view="wallet"><span class="ic">👛</span>Mon portefeuille</a>
+    <hr>
+    <a href="parametres.html"><span class="ic">⚙️</span>Paramètres</a>
+    <div class="dsig"><div class="af" aria-hidden="true">🌍</div><b>ZUMAYA <i>GROUP</i></b><em>Un seul écosystème, mille opportunités.</em></div>
+  </aside>
+  <div class="dscrim" id="dScrim"></div>
+  <main class="dmain">
+    <section class="dhero">
+      <div class="dart" aria-hidden="true"><svg viewBox="0 0 640 260" preserveAspectRatio="xMaxYMid slice"><defs><linearGradient id="dsky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#dcecf2"/><stop offset="1" stop-color="#f6f1e4"/></linearGradient></defs><rect width="640" height="260" fill="url(#dsky)"/>
+        <g fill="#cfd9de"><rect x="40" y="150" width="46" height="110"/><rect x="92" y="130" width="38" height="130"/><rect x="136" y="160" width="52" height="100"/><rect x="200" y="140" width="40" height="120"/></g>
+        <g fill="#b9c6cc" opacity=".8"><rect x="50" y="158" width="6" height="8"/><rect x="64" y="158" width="6" height="8"/><rect x="50" y="176" width="6" height="8"/><rect x="64" y="176" width="6" height="8"/><rect x="100" y="140" width="6" height="8"/><rect x="114" y="140" width="6" height="8"/><rect x="100" y="160" width="6" height="8"/><rect x="114" y="160" width="6" height="8"/></g>
+        <g fill="#d9c9a4"><path d="M330 260 L360 70 L372 20 L388 70 L420 260 Z"/><path d="M400 260 L430 110 L440 70 L452 110 L480 260 Z" opacity=".9"/><path d="M270 260 L300 120 L310 90 L322 120 L350 260 Z" opacity=".9"/></g>
+        <g fill="none" stroke="#b8a678" stroke-width="3"><path d="M372 20 V8"/><path d="M300 260 Q372 130 452 260"/></g>
+        <path d="M0 232 Q160 218 320 232 T640 228 V260 H0Z" fill="#e9dcc0"/>
+        <g fill="#4f8a3c"><circle cx="540" cy="190" r="34"/><circle cx="580" cy="205" r="28"/><circle cx="500" cy="212" r="22"/></g><g fill="#6b4a2b"><rect x="536" y="205" width="8" height="40"/><rect x="576" y="218" width="7" height="30"/></g></svg></div>
+      <h1>Bonjour, bienvenue sur ZUMAYA</h1>
+      <p class="sub">Un seul compte pour toutes vos activités.</p>
+      <div class="dok"><span class="ck">✓</span><div><b>Compte unique actif</b><span>Vous pouvez activer plusieurs activités</span></div></div>
+    </section>
+    <div id="vOverview">
+      <h2 class="dh2">🚀 Explorez et activez vos activités</h2>
+      <div class="dgrid" id="dCards"></div>
+      <section class="z-public-catalog">
+        <h2 class="dh2">🌍 Catalogues publics de tous les pôles</h2>
+        <p class="dwalletnote">Explorez les offres publiques, même sans avoir activé le pôle correspondant.</p>
+        <label class="z-search">Rechercher une offre<input id="zOfferSearch" type="search" placeholder="Produit, service, catégorie, fournisseur…"></label>
+        <div id="zPublicOffers" class="z-offers" aria-live="polite"><p class="muted">Chargement du catalogue…</p></div>
+      </section>
+      <p id="dashMsg" role="status" aria-live="polite"></p>
+      <div class="dbottom">
+        <div><h2 class="dh2">💼 Mes activités configurées</h2><div class="dlist" id="dList"></div></div>
+        <aside class="dhelp"><div class="face" aria-hidden="true">🎧</div><div><h3>Besoin d’aide ?</h3><p>Configurez uniquement les activités qui correspondent à vos besoins.</p><a class="dbtn" href="mailto:zumuyagroup@gmail.com?subject=Assistance%20ZUMAYA">❓ Assistance</a></div></aside>
+      </div>
+    </div>
+    <section id="vBasket" hidden>
+      <h2 class="dh2">🛒 Mon panier et mes commandes</h2>
+      <p class="dwalletnote">Retrouvez vos articles sélectionnés et suivez chaque commande jusqu’à sa livraison.</p>
+      <div class="z-basket-layout"><div><h3>Articles sélectionnés</h3><div id="zCartItems"></div><div class="z-checkout"><label>Mode de paiement<select id="zPaymentMode"><option value="cash_on_delivery">Espèces à la livraison</option><option value="wallet">Portefeuille ZUMAYA</option></select></label><label>Adresse de livraison<input id="zDeliveryAddress" placeholder="Ville, quartier, adresse précise"></label><button type="button" class="dbtn gold" id="zCheckout">Confirmer les commandes →</button></div></div>
+      <div><h3>Suivi de mes commandes</h3><div id="zMyOrders"><p class="muted">Chargement…</p></div></div></div>
+    </section>
+    <section id="vWallet" hidden>
+      <h2 class="dh2">👛 Mon portefeuille</h2>
+      <section class="panel wallet-panel" id="walletPanel">
+        <div class="wallet-head"><div><span class="wallet-kicker">PORTEFEUILLE ZUMAYA</span><h2>Mon solde disponible</h2><p class="muted">Un seul portefeuille pour toutes vos activités.</p></div><strong id="walletBalance">Chargement…</strong></div>
+        <h3>Recharger mon portefeuille</h3><p class="muted">Choisissez un moyen de dépôt configuré par l'administrateur. Le crédit intervient après vérification du paiement.</p>
+        <form id="zDepositForm" class="z-deposit-form"><label>Moyen de dépôt<select id="zDepositMethod" required><option value="">Chargement des moyens…</option></select></label><label>Montant (FCFA)<input id="zDepositAmount" type="number" min="1" step="1" required></label><label>Référence de transaction<input id="zDepositReference" placeholder="Référence du transfert"></label><label>Preuve de paiement (lien)<input id="zDepositProof" type="url" placeholder="https://…"></label><button class="dbtn gold" type="submit">Envoyer la demande de recharge</button></form>
+        <p id="walletNotice" class="muted" role="status"></p><h3>Historique des opérations</h3><div id="walletLedger" class="wallet-ledger"></div>
+      </section>
+    </section>
+    <div id="vConfig" hidden>
+      <h2 class="dh2">🧩 Configurer une activité</h2>
+      <button type="button" class="dbtn line" id="dBack">← Retour à la vue d’ensemble</button>
+      <div class="dpanel" id="dPartnerSlot"></div>
+    </div>
+  </main>
+</div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
-<script src="compte.js?v=11"></script>
-</body>
+<script src="module-manager.js?v=1"></script>
+<script src="wallet.js?v=3"></script>
+<script src="dashboard.js?v=8"></script>
+<script src="universal-account.js?v=1"></script>
+<script src="compte.js?v=15"></script>
+<script src="zchat.js"></script></body>
 </html>

@@ -37,8 +37,8 @@ Livraison par zone de desserte + messagerie entre tous les utilisateurs
 4) FICHIERS A ENVOYER SUR GITHUB (racine du depot, remplacer les fichiers existants)
    Nouveaux : zdelivery.js, zchat.js, livraison-pro.js, 17_livraison_zones_offres_messagerie.sql
    Modifies : messagerie.html, messagerie.js, livraison-entreprise.html, boutique.js, boutique.html,
-   market.js, market.css, catalogue.js, agro.js, agro.html, zsupply.js, zrestaurant-restaurant.html,
-   zrestaurant-driver.html, client-espace.html, compte.html, marketplace.html, proprietaire.html, sw.js
+   market.js, market.css, catalogue.js, agro.js, agro.html, zsupply.js, resto-restaurant.html,
+   resto-driver.html, client-espace.html, compte.html, marketplace.html, proprietaire.html, sw.js
    Apres publication, recharger le site (le cache passe en v32).
 
 5) POUR TESTER

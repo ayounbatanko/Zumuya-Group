@@ -2,9 +2,9 @@ CORRECTION DE L'OUVERTURE DES ESPACES RESTAURANT ET HOTEL
 
 Fichiers à remplacer à la racine du dépôt GitHub :
 - dashboard.js
-- zrestaurant-portal-bridge.js
+- resto-portal-bridge.js
 - zguard.js
-- zrestaurant-restaurant.html
+- resto-restaurant.html
 - compte.html
 
 Cause corrigée : le tableau de bord ouvrait le même fichier pour Restaurant et Hôtel sans transmettre le pôle demandé. Le pont Supabase pouvait alors sélectionner le dernier établissement configuré. La correction transmet ?portal=restaurant ou ?portal=hotel et recherche l'organisation correspondante dans rg_organizations. Elle prend aussi en charge les anciens comptes restaurant/hôtel dont organization_id manque dans les métadonnées, si l'organisation existe bien dans Supabase.

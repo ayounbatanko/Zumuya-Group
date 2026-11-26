@@ -153,3 +153,10 @@ Chaque compte ouvre **uniquement** son propre espace (contrôlé par `zguard.js`
 ---
 
 *Document généré pour la version organisée de la plateforme ZUMUYA GROUP.*
+
+## Écosystème multi-pôles (migration 16)
+- Pôles indépendants : restaurant, hôtel, agriculture, Marketplace et service de livraison.
+- Compte unique avec activation et configuration des activités.
+- Console `ecosysteme.html` pour rechercher des entreprises vérifiées, demander/valider des collaborations et traiter les événements entrants.
+- Couche SQL commune `rg_business_links` et `rg_workflow_events` pour relier les flux métier sans fusionner les bases métier des pôles.
+- Espace d'accueil distinct pour les sociétés de livraison : `livraison-entreprise.html`.

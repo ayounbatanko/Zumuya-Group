@@ -3,9 +3,9 @@ MISE A JOUR ZUMAYA — ABONNEMENTS PRO ET RAPPORTS PROFESSIONNELS
 FICHIERS A REMPLACER SUR GITHUB (5 fichiers, tous à la racine) :
 - proprietaire.html
 - proprietaire.js
-- hospitality.js
-- hospitality.html?type=restaurant
-- hospitality.html?type=hotel
+- zrh-native.js
+- restaurant-gestion.html
+- hotel-gestion.html
 
 FONCTIONNEMENT ABONNEMENT PRO :
 - Le compte propriétaire autorisé ouvre Espace propriétaire > Abonnements Pro.
@@ -14,7 +14,7 @@ FONCTIONNEMENT ABONNEMENT PRO :
 - Il reçoit les demandes, transmet les instructions, vérifie la référence de paiement, accepte ou rejette.
 - Il peut prolonger, suspendre et réactiver un abonnement.
 - Le compte principal Restaurant/Hôtel consulte son statut, demande une formule et transmet sa référence de paiement.
-- Les paiements ne sont pas débités automatiquement : validation manuelle par le propriétaire, comme dans l'ancien ZUMUYA.
+- Les paiements ne sont pas débités automatiquement : validation manuelle par le propriétaire, comme dans l'ancien RestoGest.
 
 RAPPORTS :
 - Les espaces Restaurant et Hôtel ont un onglet « Rapport professionnel ».

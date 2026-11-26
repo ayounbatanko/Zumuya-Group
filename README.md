@@ -140,3 +140,6 @@ Code fourni pour déploiement et évolution de la plateforme ZUMUYA GROUP.
 Adapter `config.js` à votre projet Supabase avant mise en production.
 
 © ZUMUYA GROUP — L’Afrique de l’Ouest en réseau.
+
+### Écosystème multi-pôles
+La migration `16_ecosysteme_poles_interconnectes.sql` ajoute le catalogue des pôles, leur activation sur le compte unique, l'association organisation/pôle, les relations inter-entreprises et le flux commun d'événements métier. La console de collaboration est `ecosysteme.html`; l'espace entreprise de livraison est `livraison-entreprise.html`.

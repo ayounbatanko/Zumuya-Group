@@ -4,7 +4,7 @@ Tous les fichiers sont à la racine du dépôt GitHub (branche main, dossier /).
 Nouveautés :
 1. Tableau de bord du compte unique (comme l'image 1) dès la connexion : tout est dans compte.html + dashboard.css + dashboard.js.
 2. Activation immédiate des pôles, sans validation par un tiers (compte.js, dashboard.js, 14_activation_immediate.sql).
-3. Plus de déconnexion à l'ouverture de l'espace Restauration / Hôtel après activation (zrestaurant-portal-bridge.js).
+3. Plus de déconnexion à l'ouverture de l'espace Restauration / Hôtel après activation (resto-portal-bridge.js).
 4. Service worker : cache v24 (sw.js).
 
 À faire après publication : actualiser la page 2 fois, se déconnecter puis se reconnecter une fois.
@@ -12,5 +12,5 @@ Facultatif : exécuter 14_activation_immediate.sql dans Supabase > SQL Editor.
 
 MISE À JOUR 2 — Portefeuille unique + onglets en rangées
 5. Un seul portefeuille, affiché sur le tableau de bord (compte.html). Retiré des espaces client, livreur, restaurant/hôtel et agro.
-6. Onglets rangés en rangées (grille) sur téléphone comme sur ordinateur, au lieu d'une barre qui défile horizontalement (agro, boutique, marketplace, espace client, ZUMUYA Restauration, espace propriétaire).
+6. Onglets rangés en rangées (grille) sur téléphone comme sur ordinateur, au lieu d'une barre qui défile horizontalement (agro, boutique, marketplace, espace client, Service de Restauration, espace propriétaire).
 Cache : sw.js v25.
