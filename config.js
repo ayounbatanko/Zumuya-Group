@@ -1,5 +1,5 @@
-/* PROJET SUPABASE UNIQUE : portail ET Service de Restauration lisent cette configuration.
-   Projet « Gestion resto » (dusznqvwhrklcqhmbylu). URL et clé publishable proviennent du MÊME projet.
+/* Configuration Supabase unique de ZUMUYA GROUP.
+   Le portail, la restauration, l'hôtel, les commandes et les catalogues partagent ce projet.
    Ne jamais mettre de clé service_role dans ce fichier. */
 window.ZUMAYA_CONFIG = {
   SUPABASE_URL: 'https://dusznqvwhrklcqhmbylu.supabase.co',
