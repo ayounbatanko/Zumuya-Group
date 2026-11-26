@@ -5,6 +5,8 @@ if(['index.html','resto-index.html','resto-card.html','compte.html'].includes(pa
 let session=null;
 try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(/^sb-.*-auth-token$/.test(k)){const v=JSON.parse(localStorage.getItem(k)||'null');session=v&&(v.currentSession||v);if(session&&session.user)break;}}}catch(e){}
 if(!session||!session.user)return;
+/* Ne pas ajouter une seconde barre aux pages qui possèdent déjà leur propre navigation. */
+if(document.querySelector('nav, [role="navigation"], .dside, .tabs'))return;
 if(document.getElementById('zg-common-shortcuts'))return;
 const css=document.createElement('style');css.textContent=`
 #zg-common-shortcuts{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:8px 12px;background:#f3f6fa;border-bottom:1px solid #dce4ed;z-index:40}
