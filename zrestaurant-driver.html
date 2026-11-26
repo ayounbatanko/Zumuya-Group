@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="fr"><head><script src="config.js"></script><script src="zguard.js" data-roles="delivery"></script><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="manifest" href="zrestaurant-manifest.webmanifest"><meta name="theme-color" content="#14213d"><link rel="icon" type="image/png" href="zrestaurant-icon-192.png?v=3"><link rel="apple-touch-icon" href="zrestaurant-icon-192.png?v=3"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Restauration"><meta property="og:type" content="website">
+<!DOCTYPE html><html lang="fr"><head><script src="config.js"></script><script src="zguard.js?v=4" data-roles="delivery"></script><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="manifest" href="zrestaurant-manifest.webmanifest"><meta name="theme-color" content="#14213d"><link rel="icon" type="image/png" href="zrestaurant-icon-192.png?v=3"><link rel="apple-touch-icon" href="zrestaurant-icon-192.png?v=3"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Restauration"><meta property="og:type" content="website">
 <meta property="og:locale" content="fr_FR">
 <meta property="og:site_name" content="ZUMUYA Restauration">
 <meta property="og:title" content="ZUMUYA Restauration - Gestion intelligente du restaurant">
@@ -181,7 +181,7 @@ const stages=['préparée','colis récupéré','en route','arrivé','terminée']
 const nextStage={'préparée':'colis récupéré','colis récupéré':'en route','en route':'arrivé','arrivé':'terminée'};
 const stageLabel={'préparée':'À récupérer au restaurant','colis récupéré':'Colis récupéré','en route':'Commande en route 🛵','arrivé':'Commande arrivée 📍','terminée':'Livraison terminée'};
 function mapUrl(o){const dest=o.cLat!=null&&o.cLng!=null?o.cLat+','+o.cLng: o.addr;const origin=myPos?myPos.join(','):'';return 'https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(dest)+(origin?'&origin='+encodeURIComponent(origin):'')+'&travelmode=driving'}
-function driverBar(){return `<div class="row driver-tabs" style="gap:8px;flex-wrap:wrap;margin-bottom:10px">`+[['jobs','🚚 Livraisons'],['chat','💬 Support'],['acc','🔑 Paramètres du compte']].map(([k,l])=>`<button type="button" class="${dTab==k?'':'sec'}" onclick="dTab='${k}';render()">${l}</button>`).join('')+`<a class="driver-nav-action" href="messagerie.html">💬 Messagerie</a></div>`}
+function driverBar(){return `<div class="row driver-tabs" style="gap:8px;flex-wrap:wrap;margin-bottom:10px">`+[['jobs','🚚 Mes livraisons'],['chat','🆘 Assistance'],['acc','⚙️ Mon compte']].map(([k,l])=>`<button type="button" class="${dTab==k?'':'sec'}" onclick="dTab='${k}';render()">${l}</button>`).join('')+`<a class="driver-nav-action" href="portefeuille.html">👛 Portefeuille</a><a class="driver-nav-action" href="messagerie.html">💬 Messagerie</a></div>`}
 function render(){const wallet=document.getElementById('walletPanel');if(wallet){wallet.hidden=true;if(wallet.parentNode!==document.body)document.body.appendChild(wallet)}const d=D.get(),rs=rest();hdr('Espace livreur — '+U.name+(rs?' · '+rs.name:''));const jobs=mine(),done=d.orders.filter(o=>o.driverId==U.id&&o.status=='terminée').reverse().slice(0,10);
  if(dTab=='acc'){m.innerHTML=driverBar()+passwordCard();return}
  if(dTab=='chat'){m.innerHTML=driverBar()+RGChat.userView(U);return}
@@ -228,7 +228,7 @@ render();
  if('serviceWorker' in navigator && location.protocol.startsWith('http')){navigator.serviceWorker.register('./sw.js?v=9').catch(()=>{})}
 })();
 </script>
-<script src="zrestaurant-ext-loader.js"></script>
+<script src="zrestaurant-ext-loader.js?v=2"></script>
 <style>
 
 
