@@ -14,7 +14,7 @@ FONCTIONNEMENT ABONNEMENT PRO :
 - Il reçoit les demandes, transmet les instructions, vérifie la référence de paiement, accepte ou rejette.
 - Il peut prolonger, suspendre et réactiver un abonnement.
 - Le compte principal Restaurant/Hôtel consulte son statut, demande une formule et transmet sa référence de paiement.
-- Les paiements ne sont pas débités automatiquement : validation manuelle par le propriétaire, comme dans l'ancien RestoGest.
+- Les paiements ne sont pas débités automatiquement : le propriétaire valide manuellement les demandes selon le processus de ZUMUYA GROUP.
 
 RAPPORTS :
 - Les espaces Restaurant et Hôtel ont un onglet « Rapport professionnel ».
