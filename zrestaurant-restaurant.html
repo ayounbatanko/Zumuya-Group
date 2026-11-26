@@ -184,7 +184,7 @@ const U=guard('restaurant');U&&RGChat.watch(U.id);var setSub='rest';let tab=null
 const R=()=>D.get().rests.find(r=>r.id==U.restId);
 const upd=f=>{const d=D.get();f(d.rests.find(r=>r.id==U.restId),d);D.save(d)};
 const day=ts=>new Date(ts).toISOString().slice(0,10);
-const tabs=['sub','dash','hotel','pos','orders','menu','hist','report','drivers','team','supply','audit','support','settings'];
+const tabs=['dash','pos','orders','menu','hist','report','hotel','drivers','team','supply','audit','sub','support','settings'];
 /* Droits : le compte principal a tout ; un employé n'ouvre que les rubriques accordées par le restaurant (contrôle serveur : voir 11_*.sql). */
 const IS_STAFF=!!(U&&U.staff),PERM=(window.ZPERM&&window.ZPERM.permissions)||[];
 const TABPERM={dash:'dash',pos:'pos',orders:'orders',hotel:'orders',menu:'menu',hist:'hist',report:'report',drivers:'drivers',supply:'supply',settings:'settings',team:'team'};
@@ -208,11 +208,11 @@ const tabMeta={
 };
 function isHotelAccount(){const r=R();return !!(r&&(r.businessType==='hotel'||(r.hotel&&r.hotel.enabled)))}
 function homeGrid(){const pend=D.get().orders.filter(o=>o.restId==U.restId&&o.status=='en attente').length;
- const order=[ 'sub','dash',...(isHotelAccount()?['hotel']:[]),'pos','orders','menu','hist','report','drivers','team','supply','audit','support','settings'].filter(can);
+ const order=['dash','pos','orders','menu','hist','report',...(isHotelAccount()?['hotel']:[]),'drivers','team','supply','audit','sub','support','settings'].filter(can);
  const btns=order.map(k=>{const m=tabMeta[k];const badge=(k=='orders'&&pend)?` <span class="badge">${pend}</span>`:'';
   const cls=(k==='settings'||k==='sub')?'hg-btn full':'hg-btn';
   return `<button class="${cls}" onclick="tab='${k}';render()"><span class="ico">${m.ico}</span><span>${m.label}${badge}</span></button>`}).join('');
- return `<div class="home-grid-wrap"><div class="card"><h2 style="margin:0 0 14px;text-align:center">ZUMUYA Restauration</h2><div class="home-grid">${btns}<a class="hg-btn full" href="index.html#catalogue-public" style="text-decoration:none"><span class="ico">🌾</span><span>Voir les fournisseurs agricoles</span></a><a class="hg-btn" href="messagerie.html" style="text-decoration:none"><span class="ico">💬</span><span>Messagerie</span></a></div></div></div>`}
+ return `<div class="home-grid-wrap"><div class="card"><h2 style="margin:0 0 14px;text-align:center">${isHotelAccount()?"ZUMUYA Hôtel":"ZUMUYA Restauration"}</h2><div class="home-grid">${btns}<a class="hg-btn full" href="index.html#catalogue-public" style="text-decoration:none"><span class="ico">🌾</span><span>Voir les fournisseurs agricoles</span></a><a class="hg-btn" href="messagerie.html" style="text-decoration:none"><span class="ico">💬</span><span>Messagerie</span></a></div></div></div>`}
 function proUI(r,s){
  const e=s.end?new Date(s.end).toLocaleDateString():'';
  // Formulaire de paiement reçu du propriétaire
