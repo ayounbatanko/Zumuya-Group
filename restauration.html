@@ -47,4 +47,4 @@ async function locate(){try{pos=await ZS.locate();err=''}catch(e){err='Position 
 async function load(){try{const a=await ZS.rests();rests=a.filter(r=>ZS.subOk(r)&&!ZS.isHotel(r));ZC.setData(rests,pos)}catch(e){err='Impossible de charger les restaurants. Vérifiez votre connexion.'}draw()}
 ZC.init({onChange:draw});draw();load();locate();setInterval(load,60000)
 })();
-</script><script src="account-shortcuts.js?v=1"></script></body></html>
+</script><script src="account-shortcuts.js?v=3"></script></body></html>
