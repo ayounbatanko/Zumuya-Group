@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="fr"><head><script src="config.js"></script><script src="zguard.js?v=3" data-roles="restaurant,hotel,staff"></script><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="manifest" href="zrestaurant-manifest.webmanifest"><meta name="theme-color" content="#14213d"><link rel="icon" type="image/png" href="zrestaurant-icon-192.png?v=3"><link rel="apple-touch-icon" href="zrestaurant-icon-192.png?v=3"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Restauration"><meta property="og:type" content="website">
+<!DOCTYPE html><html lang="fr"><head><script src="config.js"></script><script src="zguard.js?v=4" data-roles="restaurant,hotel,staff"></script><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="manifest" href="zrestaurant-manifest.webmanifest"><meta name="theme-color" content="#14213d"><link rel="icon" type="image/png" href="zrestaurant-icon-192.png?v=3"><link rel="apple-touch-icon" href="zrestaurant-icon-192.png?v=3"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Restauration"><meta property="og:type" content="website">
 <meta property="og:locale" content="fr_FR">
 <meta property="og:site_name" content="ZUMUYA Restauration">
 <meta property="og:title" content="ZUMUYA Restauration - Gestion intelligente du restaurant">
@@ -79,8 +79,10 @@ textarea{width:100%;font:inherit}
 .badge[data-s="pro"]{background:rgba(18,163,107,.18);color:#0a7a4f}.badge[data-s="off"]{background:rgba(229,56,59,.15);color:#c1272b}
 
 /* Home grid navigation for restaurant space */
-.home-grid-wrap{max-width:420px;margin:0 auto}
-.home-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.home-grid-wrap{max-width:620px;margin:0 auto}
+.hg-section+.hg-section{margin-top:20px;padding-top:16px;border-top:1px solid var(--bd)}
+.hg-section-title{font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:var(--mut);margin:0 0 10px}
+.home-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 .home-grid .hg-btn{
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;
   background:#14213d;color:#fff;border:0;border-radius:16px;padding:22px 12px;
@@ -193,26 +195,38 @@ function can(k){if(!IS_STAFF)return true;if(k==='support'||k==='account')return 
 const ORGID=()=>{const r=R();return (r&&r.portalOrgId)||(window.ZPERM&&window.ZPERM.org_id)||null};
 try{const h=(location.hash||'').slice(1);if(tabs.includes(h))tab=h}catch(e){}
 const tabMeta={
- sub:{label:'Abonnement Pro',ico:'⭐'},
  dash:{label:'Tableau de bord',ico:'⊞'},
- pos:{label:'Caisse',ico:'🧮'},
  orders:{label:'Commandes en ligne',ico:'🛒'},
- menu:{label:'Menu',ico:'🍴'},
+ pos:{label:'Caisse',ico:'🧮'},
+ menu:{label:'Carte / Menu',ico:'🍴'},
  hist:{label:'Historique des ventes',ico:'🕐'},
+ report:{label:'Rapports et statistiques',ico:'📈'},
+ hotel:{label:'Gestion de l’hôtel et service en chambre',ico:'🏨'},
  drivers:{label:'Gestion des livreurs',ico:'🚚'},
- team:{label:'Mon équipe',ico:'👥'},supply:{label:'Approvisionnement agricole',ico:'🌾'},audit:{label:'Journal des actions',ico:'🧾'},
- report:{label:'Rapport du chiffre d\'affaires',ico:'📈'},
- support:{label:'Support (écrire à l\'administrateur)',ico:'💬'},
- hotel:{label:'Module hôtel',ico:'🏨'},
+ team:{label:'Mon équipe',ico:'👥'},
+ supply:{label:'Approvisionnement agricole',ico:'🌾'},
+ audit:{label:'Journal des actions',ico:'🧾'},
+ sub:{label:'Abonnement Pro',ico:'⭐'},
+ support:{label:'Assistance ZUMUYA',ico:'💬'},
  settings:{label:'Paramètres et réglages',ico:'⚙️'}
 };
 function isHotelAccount(){const r=R();return !!(r&&(r.businessType==='hotel'||(r.hotel&&r.hotel.enabled)))}
-function homeGrid(){const pend=D.get().orders.filter(o=>o.restId==U.restId&&o.status=='en attente').length;
- const order=['dash','pos','orders','menu','hist','report',...(isHotelAccount()?['hotel']:[]),'drivers','team','supply','audit','sub','support','settings'].filter(can);
- const btns=order.map(k=>{const m=tabMeta[k];const badge=(k=='orders'&&pend)?` <span class="badge">${pend}</span>`:'';
-  const cls=(k==='settings'||k==='sub')?'hg-btn full':'hg-btn';
-  return `<button class="${cls}" onclick="tab='${k}';render()"><span class="ico">${m.ico}</span><span>${m.label}${badge}</span></button>`}).join('');
- return `<div class="home-grid-wrap"><div class="card"><h2 style="margin:0 0 14px;text-align:center">${isHotelAccount()?"ZUMUYA Hôtel":"ZUMUYA Restauration"}</h2><div class="home-grid">${btns}<a class="hg-btn full" href="index.html#catalogue-public" style="text-decoration:none"><span class="ico">🌾</span><span>Voir les fournisseurs agricoles</span></a><a class="hg-btn" href="messagerie.html" style="text-decoration:none"><span class="ico">💬</span><span>Messagerie</span></a></div></div></div>`}
+function homeGrid(){
+ const pend=D.get().orders.filter(o=>o.restId==U.restId&&o.status=='en attente').length;
+ const groups=[
+  {title:'Pilotage et ventes',items:['dash','orders','pos','menu','hist','report']},
+  ...(isHotelAccount()?[{title:'Services hôteliers',items:['hotel']}]:[]),
+  {title:'Équipe et opérations',items:['drivers','team','supply','audit']},
+  {title:'Compte et assistance',items:['sub','support','settings']}
+ ];
+ const html=groups.map(g=>{
+  const items=g.items.filter(can);if(!items.length)return '';
+  const btns=items.map(k=>{const m=tabMeta[k];const badge=(k==='orders'&&pend)?` <span class="badge">${pend}</span>`:'';const cls=(k==='settings'||k==='sub')?'hg-btn full':'hg-btn';
+   return `<button type="button" class="${cls}" onclick="tab='${k}';render()"><span class="ico">${m.ico}</span><span>${m.label}${badge}</span></button>`}).join('');
+  return `<section class="hg-section"><h3 class="hg-section-title">${g.title}</h3><div class="home-grid">${btns}</div></section>`;
+ }).join('');
+ return `<div class="home-grid-wrap"><div class="card"><h2 style="margin:0 0 14px;text-align:center">${isHotelAccount()?"ZUMUYA Hôtel":"ZUMUYA Restauration"}</h2>${html}</div></div>`;
+}
 function proUI(r,s){
  const e=s.end?new Date(s.end).toLocaleDateString():'';
  // Formulaire de paiement reçu du propriétaire
@@ -264,7 +278,7 @@ function banner(r,s){const go=` <a href="#" onclick="tab='sub';render();return f
  return ''}
 function render(){const r=R(),s=subInfo(r);if(tab==='hotel'&&!isHotelAccount())tab=null;if(tab&&!can(tab))tab=null;const wallet=document.getElementById('walletPanel');if(wallet){wallet.hidden=true;if(wallet.parentNode!==document.body)document.body.appendChild(wallet)}
  const title=tab&&tabMeta[tab]?tabMeta[tab].label:r.name;
- hdr(title);nav.innerHTML='<a class="znav-action" href="index.html#catalogue-public">🌾 Fournisseurs proches</a><a class="znav-action" href="messagerie.html">💬 Messagerie</a>';
+ hdr(title);nav.innerHTML='<a class="znav-action" href="index.html#catalogue-public">🌾 Fournisseurs agricoles</a><a class="znav-action" href="portefeuille.html">👛 Portefeuille</a><a class="znav-action" href="messagerie.html">💬 Messagerie</a>';
  // Bouton retour dans l'en-tête quand on est dans une section
  if(tab){
   const lo=document.getElementById('lo');
@@ -483,7 +497,7 @@ render();
  if('serviceWorker' in navigator && location.protocol.startsWith('http')){navigator.serviceWorker.register('./sw.js?v=9').catch(()=>{})}
 })();
 </script>
-<script src="zrestaurant-ext-loader.js?v=4"></script>
+<script src="zrestaurant-ext-loader.js?v=5"></script>
 <style>
 
 
