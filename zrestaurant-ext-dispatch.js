@@ -1,9 +1,9 @@
 /* Pôle 5 — Attribution des courses. L'attribution (livreur libre le plus proche, délai 90 s, puis suivant) est faite CÔTÉ SERVEUR
    (supabase-setup.sql : rg_dispatch_tick + déclencheur + pg_cron), donc elle marche même appli du restaurant fermée.
    Repli : si le script SQL n'est pas installé, l'ancien mécanisme (navigateur du restaurant) reste actif. */
-(function(){var X=window.RGX;if(!X)return;
+(function(){var X=window.ZUMUYA_EXT;if(!X)return;
 var TIMEOUT=90*1000,server=null;
-function rpc(fn,args){return fetch(window.RGX_SUPABASE_URL+'/rest/v1/rpc/'+fn,{method:'POST',headers:{apikey:window.RGX_ANON_KEY,Authorization:'Bearer '+window.RGX_ANON_KEY,'Content-Type':'application/json'},body:JSON.stringify(args||{})})}
+function rpc(fn,args){return fetch(window.ZUMUYA_EXT_SUPABASE_URL+'/rest/v1/rpc/'+fn,{method:'POST',headers:{apikey:window.ZUMUYA_EXT_ANON_KEY,Authorization:'Bearer '+window.ZUMUYA_EXT_ANON_KEY,'Content-Type':'application/json'},body:JSON.stringify(args||{})})}
 /* détection du mode serveur */
 rpc('rg_dispatch_tick').then(function(r){server=r.ok},function(){server=false});
 
@@ -28,10 +28,10 @@ X.driverRefuse=function(id){var u=X.me();if(!u)return;
   if(server)return rpc('rg_driver_refuse',{p_order:String(id),p_driver:String(u.id)}).then(function(){X.db().refresh&&X.db().refresh()});
   var d=X.db().get(),o=d.orders.find(function(x){return x.id==id});if(o&&o.offer){o.offer.expires=0;X.db().save(d)}};
 function driverTick(){var u=X.me();if(!u||u.role!=='driver')return;var d=X.db().get();
-  var o=d.orders.find(function(x){return x.offer&&x.offer.driverId==u.id&&x.offer.expires>Date.now()&&!x.driverId});var b=document.getElementById('rgx-offer');
+  var o=d.orders.find(function(x){return x.offer&&x.offer.driverId==u.id&&x.offer.expires>Date.now()&&!x.driverId});var b=document.getElementById('zmy-ext-offer');
   if(!o){if(b)b.remove();return}
-  if(!b){b=document.createElement('div');b.id='rgx-offer';b.style.cssText='position:fixed;left:8px;right:8px;top:8px;z-index:99998;background:#14213d;color:#fff;border-radius:14px;padding:12px;font:14px system-ui;box-shadow:0 8px 24px rgba(0,0,0,.4)';document.body.appendChild(b)}
-  b.innerHTML='🛵 <b>Nouvelle course</b> · '+X.money(o.total)+'<br>'+X.esc(o.addr||'')+(o.distKm?' · '+o.distKm+' km':'')+'<br><button style="margin:8px 6px 0 0;padding:8px 14px;border:0;border-radius:10px;background:#12a36b;color:#fff;font-weight:700" onclick="RGX.driverAccept(\''+o.id+'\');this.parentNode.remove()">Accepter</button><button style="padding:8px 14px;border:0;border-radius:10px;background:#e63946;color:#fff;font-weight:700" onclick="RGX.driverRefuse(\''+o.id+'\');this.parentNode.remove()">Refuser</button>'}
+  if(!b){b=document.createElement('div');b.id='zmy-ext-offer';b.style.cssText='position:fixed;left:8px;right:8px;top:8px;z-index:99998;background:#14213d;color:#fff;border-radius:14px;padding:12px;font:14px system-ui;box-shadow:0 8px 24px rgba(0,0,0,.4)';document.body.appendChild(b)}
+  b.innerHTML='🛵 <b>Nouvelle course</b> · '+X.money(o.total)+'<br>'+X.esc(o.addr||'')+(o.distKm?' · '+o.distKm+' km':'')+'<br><button style="margin:8px 6px 0 0;padding:8px 14px;border:0;border-radius:10px;background:#12a36b;color:#fff;font-weight:700" onclick="ZUMUYA_EXT.driverAccept(\''+o.id+'\');this.parentNode.remove()">Accepter</button><button style="padding:8px 14px;border:0;border-radius:10px;background:#e63946;color:#fff;font-weight:700" onclick="ZUMUYA_EXT.driverRefuse(\''+o.id+'\');this.parentNode.remove()">Refuser</button>'}
 setInterval(function(){tick();driverTick()},4000);
 /* Le livreur publie sa position de disponibilité */
 X.ready(function(){var u=X.me();if(u&&u.role==='driver'&&navigator.geolocation)navigator.geolocation.watchPosition(function(p){var d=X.db().get(),m=d.users.find(function(x){return x.id==u.id});if(m&&(m.lat==null||Math.abs(m.lat-p.coords.latitude)>0.0005||Math.abs(m.lng-p.coords.longitude)>0.0005)){m.lat=p.coords.latitude;m.lng=p.coords.longitude;X.db().save(d)}},function(){},{enableHighAccuracy:true,maximumAge:30000})});
