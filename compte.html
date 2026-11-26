@@ -123,11 +123,9 @@
   </header>
   <aside class="dside" id="dSide" aria-label="Menu principal">
     <a href="#" class="on" data-view="overview"><span class="ic">▦</span>Vue d’ensemble</a>
-    <a href="#" data-view="activities"><span class="ic">🧩</span>Mes activités</a>
     <a href="#" data-view="wallet"><span class="ic">👛</span>Mon portefeuille</a>
     <a href="mes-commandes.html"><span class="ic">🛍️</span>Mes commandes</a>
     <a href="historique.html"><span class="ic">📊</span>Historique & rapports</a>
-    <a href="#" data-view="catalogs"><span class="ic">📚</span>Catalogues publics</a>
     <a href="marketplace.html"><span class="ic">🛍️</span>Marketplace</a>
     <a href="resto-client.html"><span class="ic">🍴</span>Restauration</a>
     <a href="hotel.html"><span class="ic">🛏️</span>Hôtel</a>
@@ -135,6 +133,7 @@
     <a href="livraison.html"><span class="ic">🛵</span>Livraison</a>
     <a href="ecosysteme.html"><span class="ic">🔗</span>Collaborations</a>
     <a href="index.html#services"><span class="ic">🛠️</span>Prestations</a>
+    <a href="#" data-view="activities"><span class="ic">🧩</span>Mes activités configurées</a>
     <hr>
     <a href="parametres.html"><span class="ic">⚙️</span>Paramètres</a>
     <div class="dsig"><div class="af" aria-hidden="true">🌍</div><b>ZUMAYA <i>GROUP</i></b><em>Un seul écosystème, mille opportunités.</em></div>
@@ -157,10 +156,8 @@
       <h2 class="dh2">🚀 Explorez et activez vos activités</h2>
       <div class="dgrid" id="dCards"></div>
       <p id="dashMsg" role="status" aria-live="polite"></p>
-      <div class="dbottom">
-        <div><h2 class="dh2">💼 Mes activités configurées</h2><div class="dlist" id="dList"></div></div>
-        <aside class="dhelp"><div class="face" aria-hidden="true">🎧</div><div><h3>Besoin d’aide ?</h3><p>Configurez uniquement les activités qui correspondent à vos besoins.</p><a class="dbtn" href="mailto:zumuyagroup@gmail.com?subject=Assistance%20ZUMAYA">❓ Assistance</a></div></aside>
-      </div>
+      <section class="catalog-inline" aria-labelledby="catalogInlineTitle"><h2 class="dh2" id="catalogInlineTitle">📚 Catalogues publics des partenaires</h2><p class="dwalletnote">Restaurants, hôtels, producteurs agricoles et boutiques partenaires : leurs contenus sont visibles directement depuis votre compte.</p><div id="pubCatalog" class="pc" aria-live="polite"><p class="empty">Chargement des catalogues publics…</p></div></section>
+      <aside class="dhelp"><div class="face" aria-hidden="true">🎧</div><div><h3>Besoin d’aide ?</h3><p>Configurez uniquement les activités qui correspondent à vos besoins.</p><a class="dbtn" href="mailto:zumuyagroup@gmail.com?subject=Assistance%20ZUMAYA">❓ Assistance</a></div></aside>
     </div>
     <div id="vWallet" hidden>
       <h2 class="dh2">👛 Mon portefeuille unique</h2>
@@ -178,10 +175,10 @@
   <h3>Historique des opérations</h3><div id="walletLedger" class="wallet-ledger"><p class="muted">Chargement…</p></div>
 </section></div>
     </div>
-    <div id="vCatalogs" hidden>
-      <h2 class="dh2">📚 Catalogues publics des partenaires</h2>
-      <p class="dwalletnote">Retrouvez ici les restaurants, hôtels, producteurs agricoles et boutiques partenaires. Tous les catalogues publics sont regroupés dans cet espace.</p>
-      <div id="pubCatalog" class="pc" aria-live="polite"><p class="empty">Chargement des catalogues publics…</p></div>
+    <div id="vActivities" hidden>
+      <h2 class="dh2">🧩 Mes activités configurées</h2>
+      <p class="dwalletnote">Retrouvez ici les pôles que vous avez activés et accédez à leur espace de gestion.</p>
+      <div class="dlist" id="dList"></div>
     </div>
     <div id="vConfig" hidden>
       <h2 class="dh2">🧩 Configurer une activité</h2>
