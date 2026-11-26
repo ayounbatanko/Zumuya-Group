@@ -33,7 +33,7 @@ create index if not exists rg_team_members_org_idx on public.rg_team_members(org
 
 -- Modules de permission reconnus (staff) :
 --   dash, pos, orders, menu, hist, report, drivers, stock, supply, finance, settings, team
--- Un livreur n'a aucune permission de gestion : son espace est fixe (zrestaurant-driver.html).
+-- Un livreur n'a aucune permission de gestion : son espace est fixe (resto-driver.html).
 create or replace function public.rg_valid_permissions(p text[]) returns boolean
 language sql immutable as $$
   select coalesce(p <@ array['dash','pos','orders','menu','hist','report','drivers','stock','supply','finance','settings','team'], true)
