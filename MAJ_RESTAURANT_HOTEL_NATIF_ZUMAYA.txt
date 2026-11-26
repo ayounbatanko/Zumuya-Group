@@ -1,7 +1,7 @@
 ZUMAYA GROUP — Mise à jour native Restaurant & Hôtel
 
-Cette mise à jour remplace le routage des espaces Restaurant/Hôtel et ajoute un module professionnel natif ZUMAYA.
-Elle ne dépend pas de un backend séparé ni des tables locales : les données sont gérées par le projet Supabase commun ZUMUYA GROUP.
+Cette mise à jour remplace le routage des espaces Restaurant/Hôtel et ajoute un module professionnel natif ZUMUYA GROUP.
+La migration SQL et la fonction serveur du module Hospitality sont installées sur le projet Supabase cible ZUMUYA GROUP. Avant de considérer le raccordement terminé, config.js doit être aligné sur l'URL et la clé publique de ce même projet. Ne pas mélanger une URL et une clé provenant de deux projets différents.
 
 FICHIERS À REMPLACER À LA RACINE DU DÉPÔT GITHUB :
 - compte.html
@@ -23,9 +23,10 @@ FICHIERS SUPABASE À AJOUTER :
 - z_hospitality_native.sql (migration déjà appliquée au projet Supabase ZUMAYA)
 - supabase/functions/z-hospitality-team/index.ts (fonction déjà déployée sous le nom z-hospitality-team)
 
-BASE SUPABASE : azfunhfjmybekzakhtbu
+PROJET SUPABASE CIBLE : azfunhfjmybekzakhtbu
 Migration appliquée : z_hospitality_native_core + correctifs catalogue, audit et permissions.
 Edge Function : z-hospitality-team, version 2, ACTIVE.
+Clé publique anon/publishable du projet cible à renseigner dans config.js avant le basculement final. Ne jamais utiliser la clé service_role.
 
 FONCTIONNALITÉS NATIVES DISPONIBLES DANS LE CODE :
 - Tableau de bord Restaurant/Hôtel
