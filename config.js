@@ -1,5 +1,7 @@
-/* PROJET SUPABASE UNIQUE : portail ET Service de Restauration lisent cette configuration. */
+/* PROJET SUPABASE UNIQUE : portail ET Service de Restauration lisent cette configuration.
+   Projet « Gestion resto » (dusznqvwhrklcqhmbylu). URL et clé publishable proviennent du MÊME projet.
+   Ne jamais mettre de clé service_role dans ce fichier. */
 window.ZUMAYA_CONFIG = {
   SUPABASE_URL: 'https://dusznqvwhrklcqhmbylu.supabase.co',
-  SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR1c3pucXZ3aHJrbGNxaG1ieWx1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM5MTMxODUsImV4cCI6MjEwOTQ4OTE4NX0.K_xKjAzdQi0UyZlc4OoogCBVHCd9Ooc2dVupr7KyjYI'
+  SUPABASE_ANON_KEY: 'sb_publishable_dP4t9uGYrTM-zAwnSw5Ahg_ec-1Qk9A'
 };

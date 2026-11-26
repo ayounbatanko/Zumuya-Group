@@ -4,7 +4,7 @@
    NB : c'est un aiguillage d'interface. La vraie protection des données reste côté Supabase (règles RLS). */
 (()=>{'use strict';
 const me=document.currentScript,ROLES=(me&&me.dataset.roles||'').split(',').map(s=>s.trim()).filter(Boolean);
-const HOME={customer:'client-espace.html',restaurant:'resto-restaurant.html',hotel:'resto-restaurant.html',staff:'resto-restaurant.html',delivery:'resto-driver.html',agro_producer:'agro.html',agro_trader:'agro.html',marketplace:'marketplace.html',delivery_service:'livraison.html'};
+const HOME={customer:'client-espace.html',restaurant:'resto-restaurant.html',hotel:'resto-restaurant.html',staff:'resto-restaurant.html',delivery:'resto-driver.html',agro_producer:'agro.html',agro_trader:'agro.html',marketplace:'marketplace.html',delivery_service:'livraison-entreprise.html'};
 const PRO=['restaurant','hotel','delivery','staff','agro_producer','agro_trader','marketplace','delivery_service'];
 function session(){try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);
   if(/^sb-.*-auth-token$/.test(k)){const v=JSON.parse(localStorage.getItem(k)||'null'),s=v&&(v.currentSession||v);if(s&&s.access_token&&s.user&&s.user.id)return s}}}catch(e){}return null}
@@ -19,6 +19,7 @@ function isOwner(){
    .then(r=>r.ok?r.json():false).then(v=>{const o=v===true;try{sessionStorage.setItem('zg_owner_'+s.user.id,o?'1':'0')}catch(e){}return o}).catch(()=>false)}
 function decide(owner){
   if(ROLES.includes('any'))return;
+  if(md.account_type==='universal' && !ROLES.includes('owner'))return;
   if(owner){if(!ROLES.includes('owner'))go('proprietaire.html');return}
   if(ROLES.includes('owner')&&!ROLES.includes(type)){go(HOME[type]||'compte.html');return}
   if(!ROLES.includes(type)){go(HOME[type]||'compte.html');return}
@@ -30,6 +31,7 @@ if(ROLES.includes('owner')){/* page réservée au propriétaire : on attend la r
 }else{
   /* décision immédiate pour les catégories ; le propriétaire (rôle serveur) est vérifié ensuite */
   if(ROLES.includes('any'))return;
+  if(md.account_type==='universal' && !ROLES.includes('owner'))return;
   if(ROLES.includes(type)){decide(false);isOwner().then(o=>{if(o)go('proprietaire.html')})}
   else isOwner().then(decide);
 }

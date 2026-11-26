@@ -43,12 +43,3 @@ input,select{border:1px solid var(--line);border-radius:10px;padding:11px 12px;f
 @media(max-width:900px){.mob{display:inline-block}.shell{display:block}.side{position:sticky;height:auto;z-index:30;padding:10px 12px;flex-direction:row;align-items:center;gap:10px;flex-wrap:wrap;overflow:visible}.side .brand span{display:none}.side nav{flex-direction:row;flex-wrap:wrap}.side nav a{white-space:nowrap;padding:9px 11px}.sidefoot{display:none}.grid2{grid-template-columns:1fr}.top h1{font-size:24px}}
 
 .owner-insight{margin:14px 0 20px}.owner-insight .stats{margin-top:12px}.owner-insight .stat{min-width:140px}
-/* Abonnements Pro — contrôles compacts et adaptés au mobile */
-.smallbtn{border:0;border-radius:8px;padding:7px 10px;margin:3px;background:#102b45;color:#fff;font:700 11px inherit;cursor:pointer;white-space:nowrap}
-[data-p="subscriptions"] .tools{align-items:end;margin:10px 0}
-[data-p="subscriptions"] .tools label{min-width:90px}
-[data-p="subscriptions"] .tools input,[data-p="subscriptions"] select{max-width:100%;width:100%}
-[data-p="subscriptions"] .grid2{margin-top:14px}
-[data-p="subscriptions"] .card>div:not(.ch){padding:14px}
-@media(max-width:600px){[data-p="subscriptions"] .smallbtn{white-space:normal}[data-p="subscriptions"] .tools{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media print{.side,.topact,[data-p="subscriptions"]{display:none!important}}

@@ -5,17 +5,16 @@ const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 /* cats = catégories du formulaire partenaire ; orgs = types d'organisation qui rendent l'activité « configurée » ; page = espace de gestion ; browse = page publique du pôle */
 const MODS=[
  {code:'marketplace',ico:'🛍️',title:'Marketplace',desc:'Boutique, produits et commandes',cats:['marketplace'],orgs:['marketplace','commerce'],page:'boutique.html',browse:'marketplace.html',def:'Ma boutique'},
- {code:'restaurant',dbCode:'restauration',ico:'🍽️',title:'Restauration',desc:'Restaurant, menus et commandes',cats:['restaurant'],orgs:['restaurant'],page:'hospitality.html?type=restaurant',browse:'hospitality-catalog.html',def:'Mon restaurant'},
+ {code:'restaurant',ico:'🍽️',title:'Restauration',desc:'Restaurant, menus et commandes',cats:['restaurant'],orgs:['restaurant'],page:'resto-restaurant.html',browse:'resto-client.html',def:'Mon restaurant'},
  {code:'agro',ico:'🌱',title:'Agro',desc:'Producteurs, fournisseurs et acheteurs',cats:['agro','agro_trader'],orgs:['agro','agro_trader'],page:'agro.html',browse:'agro.html',def:'Mon activité agricole'},
- {code:'hotel',ico:'🏨',title:'Hôtel',desc:'Chambres et service en chambre',cats:['hotel'],orgs:['hotel'],page:'hospitality.html?type=hotel',browse:'hospitality-catalog.html',def:'Mon hôtel'},
- {code:'delivery',dbCode:'livraison',ico:'🚚',title:'Livraison',desc:'Courses et suivi',cats:['delivery'],orgs:['delivery','delivery_service','logistics'],page:'livraison-entreprise.html',browse:'livraison.html',def:'Mon service de livraison'},
+ {code:'hotel',ico:'🏨',title:'Hôtel',desc:'Chambres et service en chambre',cats:['hotel'],orgs:['hotel'],page:'resto-restaurant.html',browse:'hotel.html',def:'Mon hôtel'},
+ {code:'delivery',ico:'🚚',title:'Livraison',desc:'Courses et suivi',cats:['delivery'],orgs:['delivery','delivery_service','logistics'],page:'livraison-entreprise.html',browse:'livraison.html',def:'Mon service de livraison'},
  {code:'prestations',ico:'🛠️',title:'Prestations',desc:'Services et rendez-vous',cats:[],orgs:['services'],page:'index.html#services',browse:'index.html#services',def:'Mes prestations',discover:true}
 ];
 let sb=null,user=null,orgs=[],mods=[],busy=false;
 const say=(t,good)=>{const m=$('#dashMsg');if(m){m.textContent=t||'';m.className=good?'good':''}};
 function view(v){
   $('#vOverview').hidden=v!=='overview';$('#vConfig').hidden=v!=='config';
-  const vb=$('#vBasket'),vw=$('#vWallet');if(vb)vb.hidden=v!=='basket';if(vw)vw.hidden=v!=='wallet';
   $$('#dash .dside [data-view]').forEach(a=>a.classList.toggle('on',a.dataset.view===v||(v==='config'&&a.dataset.view==='activities')));
   closeSide();window.scrollTo({top:0});
 }
@@ -23,7 +22,7 @@ function openSide(){$('#dSide').classList.add('open');$('#dScrim').classList.add
 function closeSide(){$('#dSide').classList.remove('open');$('#dScrim').classList.remove('open')}
 function status(m){
   const o=orgs.find(x=>m.orgs.includes(x.organization_type));
-  const row=mods.find(x=>x.module_code===(m.dbCode||m.code)&&x.status!=='paused'&&x.status!=='suspended');
+  const row=mods.find(x=>x.module_code===m.code&&x.status!=='paused'&&x.status!=='suspended');
   if(o){
     /* Activation immédiate : aucune validation par un tiers. Seule une suspension décidée par la plateforme est signalée. */
     const sus=o.verification_status==='suspended';
@@ -60,7 +59,7 @@ async function configure(code){
   try{
     /* activation du pôle sur le compte (sans effet bloquant si la table n'est pas accessible) */
     const org=orgs.find(o=>m.orgs.includes(o.organization_type));
-    const {error:activationError}=await sb.rpc('rg_ecosystem_set_module',{p_module:m.dbCode||m.code,p_org:org?.id||null,p_configuration:{},p_status:'active'});
+    const {error:activationError}=await sb.rpc('rg_ecosystem_set_module',{p_module:code,p_org:org?.id||null,p_configuration:{},p_status:'active'});
     if(activationError)throw activationError;
     if(!window.ZPARTNER)throw new Error('Le formulaire n’est pas disponible.');
     view('config');
@@ -81,7 +80,7 @@ function init(){
   $('#dAcc').addEventListener('click',e=>{e.stopPropagation();$('#dMenu').classList.toggle('open')});
   document.addEventListener('click',()=>$('#dMenu').classList.remove('open'));
   $('#dash').addEventListener('click',e=>{const b=e.target.closest('[data-conf]');if(b)configure(b.dataset.conf)});
-  const go=e=>{if(e.target.closest('a,button'))return;const c=e.target.closest('[data-go]');if(c&&/^[a-z0-9._-]+\.html(?:\?[a-z0-9_=&-]+)?(?:#[\w-]*)?$/i.test(c.dataset.go))location.href=c.dataset.go};
+  const go=e=>{if(e.target.closest('a,button'))return;const c=e.target.closest('[data-go]');if(c&&/^[a-z0-9._-]+\.html(#[\w-]*)?$/i.test(c.dataset.go))location.href=c.dataset.go};
   $('#dash').addEventListener('click',go);
   $('#dash').addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.closest('[data-go]')&&!e.target.closest('a,button')){e.preventDefault();go(e)}});
   $('#dLogout').addEventListener('click',()=>{const l=document.getElementById('logout');if(l)l.click()});
@@ -98,7 +97,6 @@ window.ZDASH={
     mount();say('');
     document.body.classList.add('dash-on');$('#dash').hidden=false;$('#account').hidden=true;
     view('overview');load();
-    if(window.ZUniversalAccount)window.ZUniversalAccount.open(sb,user);
     if(window.RGWalletLoad)window.RGWalletLoad();
   },
   hide(){document.body.classList.remove('dash-on');const d=$('#dash');if(d)d.hidden=true}

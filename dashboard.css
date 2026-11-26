@@ -83,30 +83,3 @@
 .dcard .dstate{padding:4px 11px;font-size:13px;margin:0 0 10px}
 .dcard .dtick{position:absolute;top:12px;right:12px;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;color:#fff;background:#2fa862;z-index:2}
 .dcard .dtick.warn{background:#e0a21a}.dcard .dtick.bad{background:#c94a4a}
-
-/* Refonte universelle : panier, portefeuille, catalogues et compteurs par pôle */
-.dside a .zcount{margin-left:auto;min-width:20px;height:20px;padding:0 6px;border-radius:99px;background:#e0342f;color:#fff;font:700 11px/20px inherit;text-align:center;font-style:normal}
-.z-public-catalog{margin:26px 0}.z-search{display:grid;gap:7px;max-width:560px;font-weight:700;color:var(--navy);margin:12px 0}
-.z-search input,.z-checkout input,.z-checkout select,.z-deposit-form input,.z-deposit-form select{width:100%;min-height:42px;border:1px solid #cbd5df;border-radius:9px;padding:9px 12px;font:inherit;background:#fff;color:var(--ink)}
-.z-offers{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
-.z-offer{background:#fff;border:1px solid var(--line);border-radius:14px;padding:15px;display:flex;flex-direction:column;gap:8px;min-width:0}
-.z-offer h3{margin:0;color:var(--navy);font-size:17px}.z-offer p{margin:0;color:var(--mut);font-size:14px;line-height:1.4}.z-offer .price{font-weight:800;color:#91620b}
-.z-offer .dbtn{align-self:flex-start;margin-top:auto}.z-offer .module{font-size:12px;color:#526579;text-transform:uppercase;letter-spacing:.05em}
-.z-basket-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,1fr);gap:20px}
-.z-cart-line,.z-order{background:#fff;border:1px solid var(--line);border-radius:12px;padding:13px;margin:9px 0}
-.z-cart-line{display:flex;align-items:center;justify-content:space-between;gap:12px}.z-cart-line button{border:0;background:#fbe6e6;color:#9d2828;border-radius:8px;padding:7px 10px}
-.z-checkout,.z-deposit-form{display:grid;gap:12px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:15px;margin-top:14px}
-.z-checkout label,.z-deposit-form label{display:grid;gap:6px;font-weight:600;color:var(--navy)}
-.z-order strong{color:var(--navy)}.z-order .status{display:inline-block;background:#eaf1f7;border-radius:99px;padding:5px 9px;font-size:12px;font-weight:700}
-.z-order .timeline{font-size:13px;color:var(--mut);margin-top:7px}
-#walletPanel{margin-top:12px}.wallet-head{display:flex;justify-content:space-between;gap:15px;align-items:center;flex-wrap:wrap}
-#walletBalance{font-size:clamp(22px,4vw,32px);color:var(--navy)}
-@media(max-width:900px){.z-offers{grid-template-columns:repeat(2,minmax(0,1fr))}.z-basket-layout{grid-template-columns:1fr}}
-@media(max-width:560px){.z-offers{grid-template-columns:1fr}.z-cart-line{align-items:flex-start;flex-direction:column}}
-
-/* ZUMAYA account marketplace media + supplier contact */
-.z-offer-media{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin:-2px -2px 6px;overflow:hidden;border-radius:10px}
-.z-offer-media img,.z-offer-media video{display:block;width:100%;height:150px;object-fit:cover;background:#eef2f5;border-radius:8px}
-.z-offer-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:auto;align-items:center}
-.z-offer-actions .dbtn{margin-top:0}
-@media(max-width:560px){.z-offer-media img,.z-offer-media video{height:180px}.z-offer-actions{display:grid;grid-template-columns:1fr}.z-offer-actions .dbtn{justify-content:center}}
