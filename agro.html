@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="fr"><head><script src="config.js"></script><script src="zguard.js" data-roles="agro_producer,agro_trader"></script><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#102b45"><title>ZUMUYA Agro — Réseau d’approvisionnement</title><link rel="stylesheet" href="agro.css"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js"></script><style>
+<html lang="fr"><head><script src="config.js"></script><script src="zguard.js?v=4" data-roles="agro_producer,agro_trader"></script><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#102b45"><title>ZUMUYA Agro — Réseau d’approvisionnement</title><link rel="stylesheet" href="agro.css"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js"></script><style>
 
 
 
@@ -30,7 +30,8 @@
 <button type="button" data-agro-tab="orders" role="tab">🧾 Commandes pro <span id="agroOrdersBadge"></span></button>
 <button type="button" data-agro-tab="requests" role="tab">📥 Demandes</button>
 <button type="button" data-agro-tab="cooperation" role="tab">🤝 Coopération</button>
-<a href="messagerie.html" role="tab">💬 Messagerie</a>
+<a href="portefeuille.html" role="tab">👛 Portefeuille</a>
+ <a href="messagerie.html" role="tab">💬 Messagerie</a>
 <a href="ecosysteme.html" role="tab">🔗 Collaborations</a>
 <button type="button" data-agro-tab="account" role="tab">⚙️ Mon compte</button>
 </nav>
@@ -46,5 +47,5 @@
 <h3>Créer un besoin d’achat groupé</h3><form id="pooledOrderForm" class="formgrid"><label>Produit recherché<input name="product_name" required></label><label>Quantité cible<input name="quantity_target" type="number" min="0.01" step="0.01" required></label><label>Unité<select name="unit"><option>kg</option><option>sac</option><option>tonne</option><option>caisse</option></select></label><label>Prix cible par unité (FCFA)<input name="target_price" type="number" min="0"></label><label>Ville de livraison<input name="delivery_city"></label><button class="primary">Lancer le besoin collectif</button></form><div id="groupOrders" class="cards"></div></div></section>
 <section class="panel" data-agro-section="orders" hidden><div id="agroSupply"></div></section>
 <section class="panel" data-agro-section="requests" hidden><h2 id="requestsTitle">Demandes d’approvisionnement</h2><div id="requests" class="cards"><p class="muted">Chargement…</p></div></section></section>
-<section class="panel" data-agro-section="account" hidden><h2>Mon compte professionnel</h2><p>Gérez votre profil, votre localisation et vos coordonnées depuis les paramètres sécurisés.</p><div class="account-links"><a href="parametres.html">⚙️ Paramètres du compte</a><a href="resto-index.html">🍽️ Gestion RestoGest</a><button id="agroLogout" type="button" class="danger">Déconnexion</button></div></section><p id="message" class="message" role="status"></p></main><script src="zdelivery.js"></script><script src="zsupply.js"></script><script src="zdelivery.js"></script><script src="agro.js?v=5"></script><script src="agro-collaboration.js"></script><script src="zchat.js"></script><script src="account-shortcuts.js?v=1"></script>
+<section class="panel" data-agro-section="account" hidden><h2>Mon compte professionnel</h2><p>Gérez votre profil, votre localisation et vos coordonnées depuis les paramètres sécurisés.</p><div class="account-links"><a href="parametres.html">⚙️ Paramètres du compte</a><a href="restauration.html">🍽️ Découvrir la restauration</a><button id="agroLogout" type="button" class="danger">Déconnexion</button></div></section><p id="message" class="message" role="status"></p></main><script src="zdelivery.js"></script><script src="zsupply.js"></script><script src="agro.js?v=5"></script><script src="agro-collaboration.js"></script><script src="zchat.js"></script><script src="account-shortcuts.js?v=1"></script>
 </body></html>
