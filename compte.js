@@ -37,7 +37,7 @@ function updateMatch(){
 }
 async function showAccount(user){
   const type=user.user_metadata?.account_type;
-  const routes={customer:'client-espace.html',restaurant:'zrestaurant-restaurant.html?portal=restaurant',hotel:'zrestaurant-restaurant.html?portal=hotel#hotel',staff:'zrestaurant-restaurant.html?portal=restaurant',delivery:'zrestaurant-driver.html',agro_producer:'agro.html',agro_trader:'agro.html',marketplace:'marketplace.html',delivery_service:'livraison-entreprise.html'};
+  const routes={customer:'client-espace.html',restaurant:'hospitality.html?type=restaurant',hotel:'hospitality.html?type=hotel',staff:'hospitality.html?type=restaurant',delivery:'zrestaurant-driver.html',agro_producer:'agro.html',agro_trader:'agro.html',marketplace:'marketplace.html',delivery_service:'livraison-entreprise.html'};
   const managed=type==='delivery'||type==='staff';
   const universal=type==='universal'||!type;   /* comptes gérés : jamais de fiche partenaire */
   const stay=/parametres|stay/.test(location.hash);
