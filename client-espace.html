@@ -66,7 +66,7 @@ header.bar{display:flex;align-items:center;justify-content:space-between;padding
     </form>
   </section></section>
 <section class="tabcontent" id="tab-settings"><div class="panel"><h2>Paramètres et sécurité</h2><p class="muted">Gérez la sécurité et les préférences générales de votre compte.</p><a class="btn" href="parametres.html">⚙️ Ouvrir les paramètres complets</a></div></section>
-</main><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="client-espace.js"></script>
+</main><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="client-espace.js?v=2"></script>
 <script>
 (()=>{const tabs=[...document.querySelectorAll('.tab[data-tab]')];function openTab(id){tabs.forEach(t=>t.setAttribute('aria-selected',String(t.dataset.tab===id)));document.querySelectorAll('.tabcontent').forEach(p=>p.classList.toggle('active',p.id==='tab-'+id));}tabs.forEach(t=>t.addEventListener('click',()=>openTab(t.dataset.tab)));document.querySelectorAll('[data-open-tab]').forEach(b=>b.addEventListener('click',()=>openTab(b.dataset.openTab)));})();
 </script><script src="zchat.js"></script><script src="account-shortcuts.js?v=1"></script>
