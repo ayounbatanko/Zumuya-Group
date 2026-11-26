@@ -1,0 +1,90 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#14213d"><title>Historique et rapports — ZUMUYA GROUP</title><link rel="icon" href="logo.svg" type="image/svg+xml">
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f3f6fa;color:#17243a;font-family:system-ui,Arial,sans-serif}
+header{background:#14213d;color:#fff;padding:15px 20px;font-weight:800}header a{color:#fff;text-decoration:none}
+main{max-width:1100px;margin:22px auto;padding:14px}.tools{display:flex;gap:9px;flex-wrap:wrap;align-items:center;margin:12px 0}
+button,input{font:inherit}button{border:0;border-radius:9px;padding:10px 14px;background:#14213d;color:white;font-weight:700;cursor:pointer}
+input{padding:10px;border:1px solid #ccd5df;border-radius:9px;background:white}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+.card{background:#fff;border:1px solid #dfe6ee;border-radius:15px;padding:16px;box-shadow:0 6px 18px #14213d08;margin:12px 0}
+.kpi small{display:block;color:#66758a}.kpi b{display:block;font-size:clamp(22px,4vw,30px);color:#14213d;margin-top:6px}
+.muted{color:#6a778b;font-size:13px}.chart{width:100%;overflow:hidden}.chart svg{width:100%;height:auto;display:block}
+table{border-collapse:collapse;width:100%;font-size:13px}th,td{text-align:left;padding:10px 7px;border-bottom:1px solid #e8edf3}th{color:#66758a}
+.status{display:inline-block;border-radius:20px;background:#edf1f6;padding:3px 8px;font-size:12px}
+@media(max-width:600px){main{padding:9px}.card{padding:13px}.tools input{width:100%}}
+@media print{header,.tools,#zg-common-shortcuts{display:none!important}body{background:#fff}main{margin:0;max-width:none}.card{box-shadow:none;break-inside:avoid}}
+</style></head><body>
+<header><a href="compte.html">ZUMUYA GROUP</a> · Historique & rapports</header>
+<main><h1>📊 Historique et statistiques</h1><p class="muted">Synthèse de vos commandes, ventes et activités enregistrées.</p>
+<div class="tools"><label>Du <input id="from" type="date"></label><label>Au <input id="to" type="date"></label><button id="apply">Appliquer</button><button id="csv">Télécharger CSV</button><button id="pdf">Télécharger / Imprimer PDF</button></div>
+<div id="stats" class="grid"></div>
+<section class="card"><h2>Évolution de l’activité</h2><div id="chart" class="chart"></div></section>
+<section class="card"><h2>Répartition des commandes</h2><div id="statusChart" class="chart"></div></section>
+<section class="card"><h2>Historique détaillé</h2><div style="overflow:auto"><table><thead><tr><th>Date</th><th>Référence</th><th>Établissement</th><th>Type</th><th>Montant</th><th>Étape</th></tr></thead><tbody id="rows"><tr><td colspan="6">Chargement…</td></tr></tbody></table></div></section>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js"></script><script src="resto-db.js?v=4"></script><script src="resto-portal-bridge.js?v=4"></script>
+<script>
+(()=>{'use strict';
+const $=s=>document.querySelector(s),money=n=>new Intl.NumberFormat('fr-FR',{maximumFractionDigits:0}).format(Number(n||0))+' FCFA';
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let session=null,localUser=null,all=[],visible=[];
+const today=new Date(),ymd=d=>{const x=new Date(d);return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0')};
+$('#to').value=ymd(today);const d0=new Date(today);d0.setDate(d0.getDate()-29);$('#from').value=ymd(d0);
+function kpi(label,value){return '<div class="card kpi"><small>'+label+'</small><b>'+value+'</b></div>'}
+function svgBars(data){if(!data.length)return '<p class="muted">Aucune donnée pour cette période.</p>';
+ const max=Math.max(1,...data.map(x=>x.v)),w=760,h=230,L=36,B=30,gap=(w-L-10)/data.length,bw=Math.max(4,gap*.62);
+ let svg='<svg viewBox="0 0 '+w+' '+h+'" role="img" aria-label="Graphique de l’activité">';
+ for(let j=0;j<5;j++){let y=12+(h-B-12)*(j/4);svg+='<line x1="'+L+'" y1="'+y+'" x2="'+(w-8)+'" y2="'+y+'" stroke="#e6ebf1"/>'}
+ data.forEach((x,i)=>{let bh=(h-B-20)*x.v/max,xx=L+i*gap+(gap-bw)/2;svg+='<rect x="'+xx+'" y="'+(h-B-bh)+'" width="'+bw+'" height="'+bh+'" rx="4" fill="#26417a"/>';if(i%Math.max(1,Math.ceil(data.length/8))===0)svg+='<text x="'+(xx+bw/2)+'" y="'+(h-8)+'" font-size="10" text-anchor="middle" fill="#65738a">'+esc(x.l)+'</text>'});
+ return svg+'</svg>'}
+function donut(rows){const total=rows.reduce((a,x)=>a+x.v,0);if(!total)return '<p class="muted">Aucune commande sur la période.</p>';
+ const colors=['#26417a','#ffb703','#12a36b','#fb8500','#e63946','#8d99ae'];let angle=0,circles='';
+ rows.forEach((x,i)=>{const p=x.v/total*100;circles+='<circle cx="21" cy="21" r="15.9" fill="none" stroke="'+colors[i%colors.length]+'" stroke-width="7" stroke-dasharray="'+p+' '+(100-p)+'" stroke-dashoffset="'+(25-angle)+'"/>';angle+=p});
+ return '<div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap"><svg viewBox="0 0 42 42" width="145">'+circles+'</svg><div>'+rows.map((x,i)=>'<div style="margin:5px 0"><i style="display:inline-block;width:10px;height:10px;border-radius:3px;background:'+colors[i%colors.length]+'"></i> '+esc(x.l)+' : <b>'+x.v+'</b></div>').join('')+'</div></div>'}
+function render(){
+ const from=$('#from').value,to=$('#to').value;
+ visible=all.filter(x=>x.ts>=new Date(from+'T00:00:00').getTime()&&x.ts<new Date(to+'T23:59:59').getTime()+1000);
+ const placed=visible.filter(x=>['Commande passée','Commande Marketplace','Approvisionnement'].includes(x.kind)),received=visible.filter(x=>x.kind==='Commande reçue'),sales=visible.filter(x=>x.kind==='Vente en caisse'),debits=visible.filter(x=>x.kind==='Débit portefeuille'),credits=visible.filter(x=>x.kind==='Crédit portefeuille');
+ const spent=placed.reduce((a,x)=>a+x.amount,0)+debits.reduce((a,x)=>a+x.amount,0),income=received.reduce((a,x)=>a+x.amount,0)+sales.reduce((a,x)=>a+x.amount,0)+credits.reduce((a,x)=>a+x.amount,0);
+ $('#stats').innerHTML=kpi('Commandes passées',placed.length)+kpi('Dépenses enregistrées',money(spent))+kpi('Commandes reçues',received.length)+kpi('Revenus et crédits',money(income));
+ const by={};visible.forEach(x=>{const k=ymd(x.ts);by[k]=(by[k]||0)+x.amount});
+ const days=Object.keys(by).sort().map(k=>({l:k.slice(8)+'/'+k.slice(5,7),v:by[k]}));$('#chart').innerHTML=svgBars(days);
+ const counts={};placed.concat(received).forEach(x=>counts[x.status||'En attente']=(counts[x.status||'En attente']||0)+1);
+ $('#statusChart').innerHTML=donut(Object.keys(counts).map(k=>({l:k,v:counts[k]})));
+ $('#rows').innerHTML=visible.slice().sort((a,b)=>b.ts-a.ts).map(x=>'<tr><td>'+new Date(x.ts).toLocaleString('fr-FR')+'</td><td>'+esc(x.ref)+'</td><td>'+esc(x.org)+'</td><td>'+esc(x.kind)+'</td><td>'+money(x.amount)+'</td><td><span class="status">'+esc(x.status)+'</span></td></tr>').join('')||'<tr><td colspan="6">Aucune activité pour cette période.</td></tr>';
+}
+async function init(){
+ try{const {data:{session:s}}=await window.supabase.createClient(ZUMAYA_CONFIG.SUPABASE_URL,ZUMAYA_CONFIG.SUPABASE_ANON_KEY).auth.getSession();session=s;if(!session){location.replace('compte.html');return}}catch(e){location.replace('compte.html');return}
+ const sb=window.supabase.createClient(ZUMAYA_CONFIG.SUPABASE_URL,ZUMAYA_CONFIG.SUPABASE_ANON_KEY);const D=window.RGDB;if(!D){$('#rows').innerHTML='<tr><td colspan="6">Données indisponibles.</td></tr>';return}
+ const d=D.get();localUser=(d.users||[]).find(u=>u.portalId===session.user.id);
+ let platformOwner=false;try{const own=await sb.rpc('rg_is_platform_owner');platformOwner=own.data===true}catch(e){}
+ const orders=d.orders||[],rests=d.rests||[];
+ orders.forEach(o=>{
+  const r=rests.find(x=>x.id===o.restId),own=localUser&&localUser.restId===o.restId;
+  const mine=(localUser&&o.clientId===localUser.id)||o.clientAuthId===session.user.id;
+  if(mine)all.push({ts:Number(o.created||Date.now()),ref:o.id,org:r?.name||'Plateforme',kind:'Commande passée',amount:Number(o.total||0),status:o.status||'En attente'});
+  if(own||platformOwner)all.push({ts:Number(o.created||Date.now()),ref:o.id,org:r?.name||'Mon établissement',kind:'Commande reçue',amount:Number(o.total||0),status:o.status||'En attente'});
+ });
+ if(localUser&&localUser.restId){const r=rests.find(x=>x.id===localUser.restId);(r?.sales||[]).forEach(x=>all.push({ts:Number(x.date||Date.now()),ref:x.id||'V-'+ymd(x.date),org:r.name,kind:'Vente en caisse',amount:Number(x.total||0),status:'Enregistrée'}))}
+ else if(platformOwner){rests.forEach(r=>(r.sales||[]).forEach(x=>all.push({ts:Number(x.date||Date.now()),ref:x.id||'V-'+ymd(x.date),org:r.name,kind:'Vente en caisse',amount:Number(x.total||0),status:'Enregistrée'})))}
+ // Commandes Marketplace passées depuis n'importe quel type de compte.
+ try{const q=await sb.from('commerce_orders').select('id,order_number,status,subtotal,delivery_fee,created_at').eq('buyer_id',session.user.id).order('created_at',{ascending:false}).limit(200);
+  (q.data||[]).forEach(x=>all.push({ts:new Date(x.created_at).getTime(),ref:x.order_number||x.id,org:'Marketplace ZUMUYA',kind:'Commande Marketplace',amount:Number(x.subtotal||0)+Number(x.delivery_fee||0),status:x.status||'En attente'}))}catch(e){}
+ // Commandes reçues par les boutiques appartenant à ce compte.
+ try{const stores=await sb.from('commerce_stores').select('id,store_name').eq('owner_id',session.user.id);for(const st of (stores.data||[])){const q=await sb.from('commerce_orders').select('id,order_number,status,subtotal,delivery_fee,created_at').eq('store_id',st.id).order('created_at',{ascending:false}).limit(200);(q.data||[]).forEach(x=>all.push({ts:new Date(x.created_at).getTime(),ref:x.order_number||x.id,org:st.store_name||'Ma boutique',kind:'Commande reçue',amount:Number(x.subtotal||0)+Number(x.delivery_fee||0),status:x.status||'En attente'}))}}catch(e){}
+ // Opérations du portefeuille.
+ try{const q=await sb.from('rg_wallet_ledger').select('reference,description,entry_type,amount_minor,direction,status,created_at').eq('user_id',session.user.id).order('created_at',{ascending:false}).limit(300);
+  (q.data||[]).forEach(x=>all.push({ts:new Date(x.created_at).getTime(),ref:x.reference||x.entry_type,org:'Portefeuille ZUMUYA',kind:x.direction==='debit'?'Débit portefeuille':'Crédit portefeuille',amount:Number(x.amount_minor||0),status:x.status||x.description||'Enregistré'}))}catch(e){}
+ // Achats professionnels auprès des fournisseurs agricoles.
+ try{const q=await sb.from('rg_supply_orders').select('id,ref,status,total,created_at').or('buyer_user_id.eq.'+session.user.id+',placed_by.eq.'+session.user.id).order('created_at',{ascending:false}).limit(200);
+  (q.data||[]).forEach(x=>all.push({ts:new Date(x.created_at).getTime(),ref:x.ref||x.id,org:'Approvisionnement',kind:'Approvisionnement',amount:Number(x.total||0),status:x.status||'En attente'}))}catch(e){}
+ // Journal d'équipe de l'organisation (visible uniquement aux responsables autorisés par la base).
+ try{if(localUser&&localUser.restId){const r=rests.find(x=>x.id===localUser.restId);if(r&&r.portalOrgId){const q=await sb.from('rg_audit_log').select('id,action,target,created_at').eq('org_id',r.portalOrgId).order('created_at',{ascending:false}).limit(100);(q.data||[]).forEach(x=>all.push({ts:new Date(x.created_at).getTime(),ref:x.target||x.id,org:r.name,kind:'Action équipe',amount:0,status:x.action}))}}}catch(e){}
+ all.sort((a,b)=>b.ts-a.ts);render();
+}
+$('#apply').addEventListener('click',render);
+$('#pdf').addEventListener('click',()=>window.print());
+$('#csv').addEventListener('click',()=>{const head=['Date','Référence','Établissement','Type','Montant','Statut'];const rows=visible.map(x=>[new Date(x.ts).toISOString(),x.ref,x.org,x.kind,x.amount,x.status]);const csv=[head,...rows].map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(';')).join('\n');const a=document.createElement('a'),url=URL.createObjectURL(new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'}));a.href=url;a.download='zumuya-historique.csv';a.click();URL.revokeObjectURL(url)});
+init();
+})();
+</script><script src="account-shortcuts.js"></script></body></html>

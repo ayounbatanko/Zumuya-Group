@@ -33,7 +33,13 @@ if(type==='universal'){
     }catch(e){}
   }
 }
+/* Tout compte universel peut également commander dans le catalogue public, même sans activité restaurant/hôtel activée. */
+if(type==='universal')type='customer';
 var ROLE={restaurant:'restaurant',hotel:'restaurant',staff:'restaurant',customer:'client',delivery:'driver'}[type];
+/* Le propriétaire de la plateforme peut aussi acheter comme n'importe quel compte. */
+if(!ROLE){try{var OC=window.ZUMAYA_CONFIG,ox=new XMLHttpRequest();ox.open('POST',OC.SUPABASE_URL+'/rest/v1/rpc/rg_is_platform_owner',false);
+  ox.setRequestHeader('apikey',OC.SUPABASE_ANON_KEY);ox.setRequestHeader('Authorization','Bearer '+s.access_token);ox.setRequestHeader('Content-Type','application/json');ox.send('{}');
+  if(ox.status===200&&JSON.parse(ox.responseText)===true){type='customer';ROLE='client'}}catch(e){}}
 if(!ROLE)return;
 var isStaff=type==='staff';
 if((type==='restaurant'||type==='hotel'||isStaff||type==='delivery')&&!md.organization_id)return;   /* livreur / employé : uniquement s'ils ont été rattachés par un restaurant */

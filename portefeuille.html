@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="fr"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#14213d"><title>Mon portefeuille — ZUMUYA GROUP</title>
+<link rel="icon" href="logo.svg" type="image/svg+xml"><link rel="stylesheet" href="compte.css">
+<style>
+body{margin:0;background:#f3f6fa;color:#17243a;font-family:system-ui,Arial,sans-serif}
+.wrap{max-width:980px;margin:24px auto;padding:16px}
+header{background:#14213d;color:#fff;padding:16px 20px;font-weight:800}
+header a{color:#fff;text-decoration:none}
+.panel{background:#fff;border:1px solid #dfe6ee;border-radius:16px;padding:20px;margin:16px 0;box-shadow:0 8px 24px #14213d0a}
+.wallet-head{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.wallet-head strong{font-size:clamp(26px,5vw,38px);color:#14213d}
+.wallet-kicker{font-size:12px;font-weight:800;letter-spacing:.12em;color:#9a7513}
+.wallet-actions{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0}
+.btn{border:0;border-radius:10px;padding:12px 16px;background:#14213d;color:white;font-weight:750;cursor:pointer}
+.btn.secondary{background:#edf1f6;color:#14213d}
+.muted{color:#68778b;font-size:13px}
+.entry{display:flex;justify-content:space-between;gap:12px;padding:12px;border:1px solid #e3e9f0;border-radius:10px;margin:8px 0;flex-wrap:wrap}
+.entry small{display:block;color:#68778b}
+.entry b.credit{color:#07834b}.entry b.debit{color:#b3261e}
+input,select{padding:11px;border:1px solid #ccd5df;border-radius:9px;font:inherit;width:100%;box-sizing:border-box}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+@media(max-width:600px){.wrap{padding:10px}.panel{padding:14px}}
+</style></head><body>
+<header><a href="compte.html">ZUMUYA GROUP</a> · Mon portefeuille</header>
+<main class="wrap">
+<h1>👛 Mon portefeuille</h1>
+<section class="panel wallet-panel" id="walletPanel">
+<div class="wallet-head"><div><span class="wallet-kicker">PORTEFEUILLE ZUMUYA</span><h2>Solde disponible</h2><p class="muted">Vos encaissements, commissions et retraits au même endroit.</p></div><strong id="walletBalance">Chargement…</strong></div>
+<div class="wallet-actions"><button type="button" class="btn" id="walletDeposit">＋ Déposer de l’argent</button><button type="button" class="btn secondary" id="walletWithdrawToggle">↗ Demander un retrait</button></div>
+<p class="muted" id="walletNotice"></p>
+<form id="walletWithdrawForm" class="grid" hidden>
+<label>Montant à retirer (FCFA)<input name="amount" type="number" min="1" step="1" required></label>
+<label>Moyen de paiement<select name="method" required><option value="">Choisir</option><option value="mobile_money">Mobile Money</option><option value="bank">Virement bancaire</option></select></label>
+<label>Numéro / référence du bénéficiaire<input name="destination" required placeholder="Numéro Mobile Money ou RIB"></label>
+<div><button class="btn" type="submit">Envoyer la demande</button></div>
+</form>
+<h3>Historique des opérations</h3><div id="walletLedger"><p class="muted">Chargement…</p></div>
+</section></main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js"></script>
+<script src="wallet.js?v=4"></script><script src="account-shortcuts.js"></script>
+</body></html>

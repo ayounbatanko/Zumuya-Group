@@ -5,12 +5,12 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&family=Manrope:wght@700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="zservice.css?v=1"><link rel="stylesheet" href="zcart.css?v=1"></head><body>
 <header class="zbar"><a class="zbrand" href="index.html"><img src="logo.svg" alt=""><span>ZUMUYA <b>GROUP</b></span></a>
-<nav><a href="index.html#services">Services</a><a href="hotel.html">Hôtel</a><a href="livraison.html">Livraison</a><a id="who" href="compte.html">Se connecter</a></nav></header>
+<nav><a href="index.html#services">Services</a><a href="hotels-public.html">Hôtels</a><a href="hotel.html">Espace hôtel</a><a href="livraison.html">Livraison</a><a id="who" href="compte.html">Se connecter</a></nav></header>
 <section class="zhero"><span class="eyebrow">PÔLE 01 · RESTAURATION</span><h1>Les restaurants <em>proches de vous</em></h1>
-<p>Tous les catalogues des restaurants partenaires, ouverts à tous : le prix de chaque repas et les frais de livraison selon votre position. Connexion (compte Client) requise uniquement pour commander : ajoutez les plats d’un même restaurant à votre panier, validez, puis suivez votre livraison.</p>
+<p>Tous les catalogues des restaurants partenaires, ouverts à tous : le prix de chaque repas et les frais de livraison selon votre position. La consultation des catalogues est publique. Tous les comptes ZUMUYA, clients comme professionnels, peuvent commander et suivre chaque étape jusqu’à la livraison.</p>
 <div class="zchips" id="chips"></div></section>
 <main class="zwrap" id="app"></main>
-<script src="config.js"></script><script src="zsession.js?v=3"></script><script src="zcart.js?v=1"></script>
+<script src="config.js"></script><script src="zsession.js?v=3"></script><script src="zcart.js?v=2"></script>
 <script>
 (()=>{'use strict';
 const $=s=>document.querySelector(s),esc=ZS.esc;let pos=null,rests=[],q='',sort='near',open={},err='';
@@ -47,4 +47,4 @@ async function locate(){try{pos=await ZS.locate();err=''}catch(e){err='Position 
 async function load(){try{const a=await ZS.rests();rests=a.filter(r=>ZS.subOk(r)&&!ZS.isHotel(r));ZC.setData(rests,pos)}catch(e){err='Impossible de charger les restaurants. Vérifiez votre connexion.'}draw()}
 ZC.init({onChange:draw});draw();load();locate();setInterval(load,60000)
 })();
-</script></body></html>
+</script><script src="account-shortcuts.js?v=1"></script></body></html>

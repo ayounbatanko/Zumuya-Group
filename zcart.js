@@ -1,5 +1,5 @@
 /* ZUMUYA GROUP — panier du catalogue, partagé par l'accueil (catalogue.js) et la page Restauration.
-   Règles : consultation libre ; ajout réservé aux comptes « Client » connectés ; un panier = un seul restaurant ;
+   Règles : consultation libre ; ajout réservé aux comptes ZUMUYA connectés (clients et professionnels) ; un panier = un seul établissement ;
    « Passer la commande » reprend le panier dans resto-client.html (adresse, paiement, frais de livraison) ; le suivi
    pas à pas se fait dans « Mes commandes ». Dépend de zsession.js (ZS). */
 (()=>{'use strict';
@@ -11,7 +11,7 @@ function write(){try{cart&&cart.items.length?localStorage.setItem(CK,JSON.string
 const count=()=>cart?cart.items.reduce((a,i)=>a+i.q,0):0;
 const sub=()=>cart?cart.items.reduce((a,i)=>a+i.p*i.q,0):0;
 const restOf=id=>rests.find(r=>r.id===id);
-const isClient=()=>{const w=ZS.portal();return !!w&&w.type==='customer'};
+const isClient=()=>!!ZS.portal();
 const $=id=>document.getElementById(id);
 
 /* ---------- messages ---------- */
@@ -46,7 +46,7 @@ function add(rid,i,d){
  if(it)it.q=Math.min(99,it.q+d);else if(d>0)cart.items.push({n:p.n,p:+p.p||0,q:1});
  cart.items=cart.items.filter(x=>x.q>0);write();refresh()}
 function checkout(){
- if(!isClient())return say('Connectez-vous avec un compte <b>Client</b> pour passer commande. <a href="compte.html">Se connecter</a>');
+ if(!isClient())return say('Connectez-vous à votre compte ZUMUYA GROUP pour passer commande. <a href="compte.html">Se connecter</a>');
  if(!cart)return;const r=restOf(cart.rid);if(!isOpen(r))return say('Impossible d’envoyer la commande : ce restaurant est fermé. Ouverture à '+(r?.openAt||'08:00')+'.');try{localStorage.setItem('rg_target',cart.slug)}catch(e){}location.href='resto-client.html'}
 function track(){try{localStorage.setItem('rg_tab','myorders')}catch(e){}location.href='resto-client.html'}
 

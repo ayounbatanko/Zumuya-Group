@@ -117,7 +117,7 @@ nav:empty{display:none;padding:0;border:0;height:0;overflow:hidden}
 @media(max-width:600px){nav{padding:9px 10px;gap:6px}.znav-action{padding:8px 10px;font-size:12px}}
 </style></head><body>
 <div id="hdr"></div><nav id="nav"></nav><main id="m"></main><div id="receipt"></div>
-<script src="config.js"></script><script src="resto-db.js?v=3"></script><script src="resto-portal-bridge.js?v=3"></script><script src="zteam.js"></script><script src="zdelivery.js"></script><script src="zsupply.js"></script><script src="resto-notif.js"></script>
+<script src="config.js"></script><script src="resto-db.js?v=3"></script><script src="resto-portal-bridge.js?v=4"></script><script src="zteam.js"></script><script src="zdelivery.js"></script><script src="zsupply.js"></script><script src="resto-notif.js"></script>
 <script src="resto-chat.js"></script>
 <script src="resto-charts.js"></script>
 <script src="resto-qr.js"></script>
@@ -212,7 +212,7 @@ function homeGrid(){const pend=D.get().orders.filter(o=>o.restId==U.restId&&o.st
  const btns=order.map(k=>{const m=tabMeta[k];const badge=(k=='orders'&&pend)?` <span class="badge">${pend}</span>`:'';
   const cls=(k==='settings'||k==='sub')?'hg-btn full':'hg-btn';
   return `<button class="${cls}" onclick="tab='${k}';render()"><span class="ico">${m.ico}</span><span>${m.label}${badge}</span></button>`}).join('');
- return `<div class="home-grid-wrap"><div class="card"><h2 style="margin:0 0 14px;text-align:center">Service de Restauration</h2><div class="home-grid">${btns}<a class="hg-btn full" href="index.html#catalogue-public" style="text-decoration:none"><span class="ico">🌾</span><span>Voir les fournisseurs agricoles</span></a><a class="hg-btn" href="messagerie.html" style="text-decoration:none"><span class="ico">💬</span><span>Messagerie</span></a></div></div></div>`}
+ return `<div class="home-grid-wrap"><div class="card"><h2 style="margin:0 0 14px;text-align:center">Service de Restauration</h2><div class="home-grid">${btns}<a class="hg-btn" href="portefeuille.html" style="text-decoration:none"><span class="ico">👛</span><span>Mon portefeuille</span></a><a class="hg-btn" href="historique.html" style="text-decoration:none"><span class="ico">📊</span><span>Historique et rapports</span></a><a class="hg-btn full" href="catalogues.html" style="text-decoration:none"><span class="ico">📚</span><span>Catalogues publics</span></a><a class="hg-btn" href="messagerie.html" style="text-decoration:none"><span class="ico">💬</span><span>Messagerie</span></a></div></div></div>`}
 function proUI(r,s){
  const e=s.end?new Date(s.end).toLocaleDateString():'';
  // Formulaire de paiement reçu du propriétaire
@@ -494,4 +494,5 @@ render();
 
 
 
-</style><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="zchat.js"></script></body></html>
+</style><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="zchat.js"></script><script src="account-shortcuts.js?v=1"></script>
+</body></html>

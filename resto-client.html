@@ -127,7 +127,7 @@ nav:empty{display:none;padding:0;border:0;height:0;overflow:hidden}
 @media(max-width:600px){nav{padding:9px;gap:6px}.client-nav-action{padding:8px 10px;font-size:12px}}
 </style></head><body>
 <div id="hdr"></div><nav id="nav"></nav><main id="m"></main><div id="receipt"></div>
-<script src="config.js"></script><script src="resto-db.js?v=3"></script><script src="resto-portal-bridge.js?v=3"></script><script src="resto-notif.js"></script>
+<script src="config.js"></script><script src="resto-db.js?v=3"></script><script src="resto-portal-bridge.js?v=4"></script><script src="resto-notif.js"></script>
 <script src="resto-chat.js"></script>
 <script>let SH=window;try{if(window.parent!==window&&window.parent.nav)SH=window.parent}catch(e){}
 SH.__m=SH.__m||{l:{},s:{}};
@@ -155,7 +155,7 @@ const cardUrl=s=>inShell?'#card/'+s:'resto-card.html?r='+s;
 const cardSlug=()=>inShell?SH.location.hash.split('/')[1]:new URLSearchParams(location.search).get('r');
 const OWNER_ACCOUNT_NAME='Ayouba Tanko';
 const isOwnerAccount=u=>false;/* le propriétaire est désigné côté Supabase (rg_platform_owners), jamais par un nom */
-function guard(role){const u=me();const allowed=role==='owner'?(u&&(u.role==='owner'||(u.role==='restaurant'&&isOwnerAccount(u)))):(u&&u.role===role);if(!allowed){navTo('index');return null}return u}
+function guard(role){const u=me();const allowed=role==='owner'?(u&&(u.role==='owner'||(u.role==='restaurant'&&isOwnerAccount(u)))):(role==='client'?(u&&!u.disabled):(u&&u.role===role));if(!allowed){navTo('index');return null}return u}
 function logout(){store.clr();try{Object.keys(localStorage).filter(function(k){return /^sb-.*-auth-token$/.test(k)}).forEach(function(k){localStorage.removeItem(k)})}catch(e){}navTo('compte.html')}
 function passwordCard(){return `<div class="card col"><h3 style="margin:0">🔐 Mon compte ZUMUYA GROUP</h3><p class="mut">La connexion se fait avec votre adresse e-mail. Gérez votre profil, votre mot de passe, vos préférences ou supprimez votre compte.</p><a href="parametres.html" style="font-weight:700">⚙️ Ouvrir les paramètres de mon compte →</a></div>`}
 
@@ -187,7 +187,7 @@ function subInfo(r){const n=Date.now(),dl=e=>Math.max(0,Math.ceil((e-n)/864e5));
 function notify(t,b){toast(t+(b?' — '+b:''));try{if(window.Notification&&Notification.permission=='granted')new Notification(t,{body:b||''})}catch(e){}}
 document.addEventListener('click',()=>{try{window.Notification&&Notification.permission=='default'&&Notification.requestPermission()}catch(e){}},{once:true});
 </script><script>
-const U=guard('client');let tab='restos',cur=null,cart={},pos=null,seen=null,seenSig='',menuQ='',hotelDeliveryMode='room';
+const U=guard('client');let tab=(location.hash==='#myorders'?'myorders':'restos'),cur=null,cart={},pos=null,seen=null,seenSig='',menuQ='',hotelDeliveryMode='room';
 // Demander la localisation dès l'arrivée
 if(navigator.geolocation){
   navigator.geolocation.getCurrentPosition(
@@ -333,7 +333,7 @@ function order(){
  render();
 }
 function trk(st,o){const room=o&&o.deliveryMode==='room',L=room?['Commande envoyée','Acceptée par l’hôtel','Préparée','Remise en chambre']:['Commande envoyée','Acceptée par le restaurant','Préparée','Prise en charge par le livreur','Commande en route','Commande arrivée chez vous','Livrée'],I=room?['📨','✅','👨‍🍳','🛎️']:['📨','✅','👨‍🍳','📦','🛵','📍','🎉'],i=st=='terminée'?L.length:(room?['en attente','acceptée','préparée'].indexOf(st):ST.indexOf(st));return `<div class="trk">${L.map((l,k)=>`<div class="st ${k<i?'done':k==i?'cur':''}"><span>${k<i?'✓':I[k]}</span><b>${l}</b></div>`).join('')}</div>`}
-function orders(){const d=D.get();return d.orders.filter(o=>o.clientId==U.id).reverse().map(o=>{const r=d.rests.find(r=>r.id==o.restId),i=ST.indexOf(o.status),end=['refusée','annulée'].includes(o.status);
+function orders(){const d=D.get();return d.orders.filter(o=>o.clientId==U.id||(U.portalId&&o.clientAuthId===U.portalId)).reverse().map(o=>{const r=d.rests.find(r=>r.id==o.restId),i=ST.indexOf(o.status),end=['refusée','annulée'].includes(o.status);
  const dest=o.cLat!=null?o.cLat+','+o.cLng:encodeURIComponent(o.addr),src=o.driverPos?o.driverPos.join(','):'';
  return `<div class="card"><div class="row"><b>${esc(r?.name)}</b> <span class="badge" data-s="${o.status}">${o.status}</span><span class="mut">#${o.id} — ${fdate(o.created)}</span></div>
  <div>${o.items.map(x=>`${esc(x.n)} ×${x.q}`).join(', ')} — <b>${money(o.total,r?.currency)}</b></div>${o.deliveryFee?`<div class="mut">dont livraison ${money(o.deliveryFee,r?.currency)} (${o.distKm} km)</div>`:''}
@@ -378,4 +378,5 @@ U&&RGChat.watch(U.id);try{const tg=store.g('l','rg_target');if(tg){const rr=D.ge
 })();
 </script>
 <script src="resto-ext-loader.js"></script>
+<script src="account-shortcuts.js?v=1"></script>
 </body></html>
