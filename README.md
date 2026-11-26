@@ -28,13 +28,13 @@
 
 | Catégorie | Code | Espace | Fichiers principaux |
 |-----------|------|--------|---------------------|
-| Client | `customer` | Espace client + commandes | `client-espace.html`, `resto-client.html` |
-| Restaurant | `restaurant` | Tableau de bord restaurant | `resto-restaurant.html` |
-| Hôtel | `hotel` | Restaurant + service chambre | `resto-restaurant.html`, `hotel.html` |
-| Livreur | `delivery` | Courses et GPS | `resto-driver.html` |
+| Client | `customer` | Espace client + commandes | `client-espace.html`, `zrestaurant-client.html` |
+| Restaurant | `restaurant` | Tableau de bord restaurant | `zrestaurant-restaurant.html` |
+| Hôtel | `hotel` | Restaurant + service chambre | `zrestaurant-restaurant.html`, `hotel.html` |
+| Livreur | `delivery` | Courses et GPS | `zrestaurant-driver.html` |
 | Producteur agricole | `agro_producer` | Catalogue & demandes | `agro.html` |
 | Commerçant agricole | `agro_trader` | Achat / revente | `agro.html` |
-| Propriétaire plateforme | (rôle serveur) | Supervision globale | `proprietaire.html`, `resto-owner.html` |
+| Propriétaire plateforme | (rôle serveur) | Supervision globale | `proprietaire.html`, `proprietaire.html` |
 
 La redirection est gérée par `zguard.js` : une catégorie qui ouvre la page d’une autre est renvoyée vers la sienne.
 
@@ -48,9 +48,9 @@ Voir **FEATURES.md** pour le détail complet des fonctionnalités par rôle.
 index.html                  → Accueil public + catalogues
 compte.html                 → Authentification + choix de catégorie
 client-espace.html          → Hub client (profil, adresses, favoris)
-resto-client.html           → Commande & suivi client
-resto-restaurant.html       → Dashboard restaurant / hôtel
-resto-driver.html           → Espace livreur
+zrestaurant-client.html           → Commande & suivi client
+zrestaurant-restaurant.html       → Dashboard restaurant / hôtel
+zrestaurant-driver.html           → Espace livreur
 agro.html                   → Espace producteur / commerçant agro
 proprietaire.html           → Back-office propriétaire
 parametres.html             → Paramètres communs
@@ -69,7 +69,7 @@ parametres.html             → Paramètres communs
 - `zguard.js` — contrôle d’accès par catégorie
 - `zcart.js` + `zcart.css` — panier (un seul restaurant à la fois)
 - `catalogue.js` — catalogue public
-- `resto-portal-bridge.js` — lien entre Auth Supabase et tables métier
+- `zrestaurant-portal-bridge.js` — lien entre Auth Supabase et tables métier
 - `config.js` — configuration Supabase unique
 
 ---
@@ -95,7 +95,7 @@ Une seule table de commandes (`rg_orders`), trois modes de remise :
 1. Les catalogues sont visibles par tous.
 2. L’ajout au panier est réservé aux comptes **Client** connectés.
 3. Un panier = un seul restaurant. Ajouter un plat d’un autre restaurant propose de vider le panier.
-4. « Passer la commande » ouvre `resto-client.html` avec le panier repris.
+4. « Passer la commande » ouvre `zrestaurant-client.html` avec le panier repris.
 5. Suivi des commandes en temps réel + carte pendant la livraison.
 
 ---
@@ -104,7 +104,7 @@ Une seule table de commandes (`rg_orders`), trois modes de remise :
 
 - Les politiques RLS des tables `rg_*` restent encore trop ouvertes (clé anon) dans certaines versions.
 - `rg_users` peut contenir des mots de passe en clair dans d’anciennes versions → **migrer entièrement vers Supabase Auth**.
-- Les comptes du portail (Supabase Auth) et les données métier (`rg_users`, `rg_rests`, `rg_orders`) sont reliés par `resto-portal-bridge.js`.
+- Les comptes du portail (Supabase Auth) et les données métier (`rg_users`, `rg_rests`, `rg_orders`) sont reliés par `zrestaurant-portal-bridge.js`.
 - `agro.js` utilise les tables `rg_agro_*` : s’assurer que le schéma SQL correspond.
 
 **Priorité absolue :** restreindre les RLS et n’utiliser que Supabase Auth pour l’authentification.
