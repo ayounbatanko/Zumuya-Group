@@ -16,7 +16,7 @@ FONCTIONNALITÉS INTÉGRÉES DANS CETTE VERSION
 - Portefeuille utilisateur, historique et demandes de recharge soumises à validation.
 - Notifications regroupées par pôle.
 - Synchronisation des catalogues publics et correctifs de configuration des pôles.
-- Espace propriétaire et modules historiques RestoGest, hôtel, Agro, livraison et Marketplace conservés.
+- Espace propriétaire et modules historiques ZUMUYA Restauration, hôtel, Agro, livraison et Marketplace conservés.
 
 SUPABASE
 - Projet configuré dans config.js : azfunhfjmybekzakhtbu.
