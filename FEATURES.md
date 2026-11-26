@@ -7,7 +7,7 @@ Chaque compte ouvre **uniquement** son propre espace (contrôlé par `zguard.js`
 
 ## 1. Client (`customer`)
 
-**Espace principal :** `client-espace.html` + `resto-client.html`
+**Espace principal :** `client-espace.html` + `zrestaurant-client.html`
 
 | Fonctionnalité | Description | Statut |
 |----------------|-------------|--------|
@@ -30,7 +30,7 @@ Chaque compte ouvre **uniquement** son propre espace (contrôlé par `zguard.js`
 
 ## 2. Restaurant (`restaurant`)
 
-**Espace principal :** `resto-restaurant.html`
+**Espace principal :** `zrestaurant-restaurant.html`
 
 | Fonctionnalité | Description | Statut |
 |----------------|-------------|--------|
@@ -53,7 +53,7 @@ Chaque compte ouvre **uniquement** son propre espace (contrôlé par `zguard.js`
 
 ## 3. Hôtel (`hotel`)
 
-**Espace principal :** `resto-restaurant.html` + `hotel.html`
+**Espace principal :** `zrestaurant-restaurant.html` + `hotel.html`
 
 | Fonctionnalité | Description | Statut |
 |----------------|-------------|--------|
@@ -66,7 +66,7 @@ Chaque compte ouvre **uniquement** son propre espace (contrôlé par `zguard.js`
 
 ## 4. Livreur (`delivery`)
 
-**Espace principal :** `resto-driver.html`
+**Espace principal :** `zrestaurant-driver.html`
 
 | Fonctionnalité | Description | Statut |
 |----------------|-------------|--------|
@@ -114,7 +114,7 @@ Chaque compte ouvre **uniquement** son propre espace (contrôlé par `zguard.js`
 
 ## 7. Propriétaire de la plateforme (`platform_owner`)
 
-**Espace principal :** `proprietaire.html` + `resto-owner.html`
+**Espace principal :** `proprietaire.html` + `proprietaire.html`
 
 | Fonctionnalité | Description | Statut |
 |----------------|-------------|--------|
@@ -138,7 +138,7 @@ Chaque compte ouvre **uniquement** son propre espace (contrôlé par `zguard.js`
 | Garde d’accès | `zguard.js` | Redirection selon catégorie |
 | Panier | `zcart.js` + `zcart.css` | Panier partagé (1 restaurant) |
 | Catalogue | `catalogue.js` | Affichage public des menus |
-| Bridge | `resto-portal-bridge.js` | Lien Auth ↔ données service |
+| Bridge | `zrestaurant-portal-bridge.js` | Lien Auth ↔ données service |
 | Config | `config.js` | URL + clé anon Supabase |
 | Auth | `compte.html` / `compte.js` | Inscription / connexion |
 
