@@ -87,4 +87,4 @@ $('#pdf').addEventListener('click',()=>window.print());
 $('#csv').addEventListener('click',()=>{const head=['Date','Référence','Établissement','Type','Montant','Statut'];const rows=visible.map(x=>[new Date(x.ts).toISOString(),x.ref,x.org,x.kind,x.amount,x.status]);const csv=[head,...rows].map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(';')).join('\n');const a=document.createElement('a'),url=URL.createObjectURL(new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'}));a.href=url;a.download='zumuya-historique.csv';a.click();URL.revokeObjectURL(url)});
 init();
 })();
-</script><script src="account-shortcuts.js"></script></body></html>
+</script><script src="account-shortcuts.js?v=3"></script></body></html>
