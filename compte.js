@@ -202,7 +202,7 @@ async function submitPartner(e){
     const orgs=[...new Set([...(oldMeta.organization_ids||[]),org.id])];
     const isRH=currentCat.id==='restaurant'||currentCat.id==='hotel';
     const orgMap={...(oldMeta.org_map||{}),[currentCat.id]:org.id};
-    /* L'établissement restaurant / hôtel pilote la liaison avec le Service de Restauration : une autre activité ne l'écrase pas. */
+    /* L'établissement restaurant / hôtel pilote la liaison avec le ZUMUYA Restauration : une autre activité ne l'écrase pas. */
     const meta={account_type:'universal',account_model:'multi_module',enabled_modules:modules,organization_ids:orgs,org_map:orgMap};
     if(isRH||!oldMeta.organization_id){Object.assign(meta,{organization_id:org.id,organization_name:fd.organization_name.trim(),org_city:fd.city.trim(),org_address:fd.address||'',org_phone:fd.contact_phone.trim(),org_lat:fd.latitude?Number(fd.latitude):null,org_lng:fd.longitude?Number(fd.longitude):null});if(isRH)meta.portal_type=currentCat.id}
     const {error:metaError}=await sb.auth.updateUser({data:meta});

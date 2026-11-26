@@ -20,7 +20,7 @@ Statuts : `en attente < acceptée < préparée < en route < terminée` (+ `annul
 1. **Écrasements** : `rg_orders_guard` fusionne les écritures (une copie périmée n'efface plus `driverId`, `driverPos`, `settled`) et empêche le recul des statuts. L'acceptation d'une course est atomique (`rg_driver_accept`) : un seul livreur la prend.
 2. **Attribution côté serveur** au lieu du navigateur du restaurant. Si `supabase-setup.sql` n'est pas installé, l'ancien mécanisme sert de repli. Correction aussi d'un blocage : quand tous les livreurs avaient refusé, la course n'était plus jamais reproposée.
 3. **Hôtel** : l'étape « remise en chambre » existe (aucun livreur n'est sollicité pour une commande en chambre) ; vue SQL `rg_room_folios`.
-4. **Un seul projet Supabase** : `config.js` sert au portail et au Service de Restauration (`zrestaurant-db.js`, extensions, realtime).
+4. **Un seul projet Supabase** : `config.js` sert au portail et au ZUMUYA Restauration (`zrestaurant-db.js`, extensions, realtime).
 5. **Realtime activé** (`realtime:1`), le polling reste en secours.
 
 ## Limites restantes (à traiter ensuite)

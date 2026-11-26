@@ -1,60 +1,33 @@
-# ZUMUYA GROUP — fonctionnalités et accès
+# Fonctionnalités ZUMUYA GROUP (version livrée)
 
-## 1. Espaces professionnels
+## Restaurant & Hôtel
+- Espace métier natif (`zrestaurant-restaurant.html` / `hospitality.html`)
+- Caisse, commandes, menu / chambres, stocks, livreurs, rapports
+- **Gestion de groupe** : création employés & livreurs, permissions par rubrique, suspension / réactivation
+- **Journal d’actions** : filtre par dates + téléchargement CSV
+- Historique et enregistrements métier exportables
 
-- **Restaurant** : tableau de bord, commandes, catalogue, menus, cuisine, caisse, ventes, stocks, promotions, avis, livreurs, approvisionnement agricole, équipe, journal, rapports, QR.
-- **Hôtel** : fonctions restaurant + chambres, réservations, service en chambre et suivi des opérations d’hébergement.
-- **Producteur agricole** : profil professionnel, localisation, catalogue, stocks, demandes, approvisionnement et coopération.
-- **Commerçant agricole** : découverte des producteurs, achat, revente, catalogue, demandes et stock.
-- **Marketplace** : boutique, catalogue produits, médias, commandes, messagerie et collaboration inter-pôles.
-- **Société de livraison** : profil de transport, zones, offres, missions, statuts et coordination des expéditions.
-- **Livreur d’établissement** : compte créé par le restaurant / hôtel qui le rattache, missions affectées et suivi.
-- **Client** : catalogue, commandes, suivi, profil, adresses et historique.
+## Marketplace / Boutique / Agro / Commerçant / Livraison
+- Tableaux de bord et espaces dédiés (`boutique.html`, `agro.html`, `livraison-entreprise.html`, etc.)
+- Statistiques, graphiques d’activité et historiques filtrables
+- Téléchargement des données d’activité sur une période choisie (selon le pôle)
 
-## 2. Rapports et statistiques
+## Compte propriétaire
+- Vue d’ensemble consolidée (organisations, établissements, transactions, abonnements)
+- Graphiques et indicateurs de supervision
+- **Gestion du groupe** : comptes secondaires avec droits limités (dashboard, partenaires, orgs, abonnements, transactions, rapports, team)
+- Export JSON complet de l’infrastructure (`rg_platform_export_all`) sur période
+- Pilotage portefeuille / commissions
 
-Tous les espaces professionnels disposent d’un accès à `analytics.html` :
-- historique des actions enregistrées ;
-- filtre par date de début et de fin ;
-- statistiques de créations, modifications et suppressions ;
-- graphique d’activité ;
-- export CSV et JSON.
+## Transversal
+- Authentification Supabase Auth
+- Journal d’activité transversal (`rg_activity_events`)
+- Messagerie entre acteurs
+- Portefeuilles et commissions
+- Catalogues publics
+- RLS + Edge Functions pour les actions sensibles
 
-Le rapport restaurant / hôtel propose également les ventes, commandes, chiffre d’affaires et téléchargement des enregistrements métier de l’établissement.
+## Ancien projet RestoGest
+- Entièrement retiré. Plus de dépendance localStorage « rm_db » pour le métier.
+- Branding unifié ZUMUYA GROUP / ZUMUYA Restauration.
 
-## 3. Gestion de groupe restaurant / hôtel
-
-Le compte principal peut :
-- créer des comptes employés et livreurs ;
-- attribuer des permissions par rubrique ;
-- consulter les membres rattachés à son établissement ;
-- modifier leurs autorisations ;
-- suspendre et réactiver un accès ;
-- consulter et exporter le journal des actions.
-
-Les restrictions sont appliquées par RLS Supabase, pas uniquement par l’interface.
-
-## 4. Espace propriétaire ZUMUYA GROUP
-
-- Indicateurs consolidés et graphiques de supervision.
-- Gestion des organisations, partenaires, pays, abonnements et transactions.
-- Gestion du portefeuille et des commissions.
-- Comptes secondaires de gestion avec droits individuels.
-- Suspension / réactivation des membres du groupe.
-- Export JSON des tables métier disponibles, avec filtre temporel.
-
-## 5. Sécurité
-
-- Authentification Supabase Auth.
-- Les actions sensibles de création de comptes passent par les Edge Functions.
-- Les clés `service_role` restent uniquement dans l’environnement Supabase.
-- Les comptes secondaires du propriétaire ne sont pas propriétaires de plateforme.
-- Les livreurs ne disposent pas d’un formulaire d’inscription publique.
-
-## 6. Identité et accès aux rapports
-
-- ZUMUYA GROUP est l'identité unique du produit.
-- Les fichiers techniques `zrestaurant-*` restent compatibles avec les écrans
-  restaurant / hôtel intégrés ; ils ne constituent pas une application séparée.
-- Un accès rapide aux rapports est présent dans les espaces professionnels.
-- Les permissions de rapport reconnaissent `report` et `reports`.

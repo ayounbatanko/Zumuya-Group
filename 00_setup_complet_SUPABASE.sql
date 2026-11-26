@@ -1,5 +1,5 @@
 -- ============================================================
--- Service de Restauration (ZUMUYA) — Configuration Supabase
+-- ZUMUYA Restauration (ZUMUYA) — Configuration Supabase
 -- Projet : https://azfunhfjmybekzakhtbu.supabase.co
 -- À exécuter dans : Supabase Dashboard > SQL Editor > New query > Run
 -- ============================================================
