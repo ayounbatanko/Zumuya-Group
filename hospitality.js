@@ -6,14 +6,51 @@ const defs=[['dash','📊','Tableau de bord'],['menu','🍽️','Catalogue & men
 const allowed=()=>!member||member.member_kind==='staff';const can=p=>!member||member.permissions.includes('all')||member.permissions.includes(p);
 function notice(t,ok=false){$('#notice').textContent=t||'';$('#notice').style.color=ok?'#16865b':'#bd3c42'}
 function nav(){const need={menu:'menu',orders:'orders',sales:'sales',stock:'stock',rooms:'rooms',promotions:'promotions',reviews:'orders',report:'reports',drivers:'deliveries'};let list=defs.filter(([id])=>{if(member?.member_kind==='driver')return ['dash','drivers'].includes(id);if(!member)return true;if(['team','audit','settings','qr','pro'].includes(id))return false;if(id==='rooms'&&kind!=='hotel')return false;return !need[id]||can(need[id])});$('#nav').innerHTML=list.map(([id,ico,t])=>`<button data-tab="${id}" class="${active===id?'active':''}">${ico} ${t}</button>`).join('');$('#nav').querySelectorAll('button').forEach(b=>b.onclick=()=>{active=b.dataset.tab;render()})}
-async function init(){let {data:{session},error}=await sb.auth.getSession();if(error||!session){location.replace('compte.html');return}user=session.user;
- let {data:orgs,error:oe}=await sb.from('rg_organizations').select('id,organization_type,public_name,legal_name,city,address,contact_phone,owner_id').eq('owner_id',user.id).in('organization_type',['restaurant','hotel']);
- const md=user.user_metadata||{};let selected=memberMode?null:(orgs||[]).find(o=>o.organization_type===kind);
- if(!selected&&!memberMode&&md.organization_id){let q=await sb.from('rg_organizations').select('id,organization_type,public_name,legal_name,city,address,contact_phone,owner_id').eq('id',md.organization_id).maybeSingle();if(q.data&&q.data.organization_type===kind)selected=q.data}
- if(!selected){let {data:m}=await sb.from('z_hospitality_team').select('*').eq('user_id',user.id).eq('status','active').maybeSingle();if(m){member=m;let q=await sb.from('rg_organizations').select('id,organization_type,public_name,legal_name,city,address,contact_phone,owner_id').eq('id',m.org_id).maybeSingle();selected=q.data;if(selected)kind=selected.organization_type}}
- if(!selected){notice(oe?.message||'Aucun établissement de ce type n’est rattaché à ce compte. Retournez au compte ZUMAYA et activez le bon pôle.');return}
- org=selected;$('#orgName').textContent=org.public_name||org.legal_name;$('#sideName').textContent=org.public_name||org.legal_name;$('#sideType').textContent=kind==='hotel'?'Gestion hôtelière':'Gestion de restaurant';$('#orgType').textContent=kind==='hotel'?'🏨':'🍽️';$('#roleTag').textContent=member?(member.member_kind==='driver'?'Livreur':'Membre de l’équipe'):'Compte principal';$('#logout').onclick=()=>sb.auth.signOut().then(()=>location.replace('compte.html'));
- nav();await load();if(member?.member_kind==='driver')active='drivers';render();}
+async function init(){
+ $('#view').innerHTML='<div class="card"><h3>Chargement de votre espace professionnel…</h3><p class="muted">Vérification du compte et de l’établissement dans ZUMAYA GROUP.</p></div>';
+ nav();
+ let sessionResult;
+ try{sessionResult=await sb.auth.getSession()}catch(e){notice('Connexion Supabase impossible : '+(e.message||e));return}
+ const session=sessionResult?.data?.session,error=sessionResult?.error;
+ if(error||!session){notice('Votre session a expiré. Reconnectez-vous à ZUMAYA GROUP.');$('#view').innerHTML='<div class="card"><h3>Connexion nécessaire</h3><a class="gold" href="compte.html">Se connecter</a></div>';return}
+ user=session.user;
+ const md=user.user_metadata||{};
+ let orgs=[],oe=null;
+ try{
+  const q=await sb.from('rg_organizations').select('id,organization_type,public_name,legal_name,city,address,contact_phone,owner_id').eq('owner_id',user.id).in('organization_type',['restaurant','hotel']);
+  orgs=q.data||[];oe=q.error||null;
+ }catch(e){oe=e}
+ let selected=memberMode?null:(orgs||[]).find(o=>o.organization_type===kind);
+ // Les comptes multi-pôles conservent les identifiants dans org_map / organization_ids.
+ const mappedId=md.org_map?.[kind]||((md.portal_type===kind||!md.portal_type)&&md.organization_id)||null;
+ if(!selected&&!memberMode&&mappedId){
+  try{const q=await sb.from('rg_organizations').select('id,organization_type,public_name,legal_name,city,address,contact_phone,owner_id').eq('id',mappedId).maybeSingle();if(q.data&&q.data.organization_type===kind)selected=q.data;if(q.error&&!oe)oe=q.error}catch(e){if(!oe)oe=e}
+ }
+ if(!selected&&!memberMode&&Array.isArray(md.organization_ids)&&md.organization_ids.length){
+  try{const q=await sb.from('rg_organizations').select('id,organization_type,public_name,legal_name,city,address,contact_phone,owner_id').in('id',md.organization_ids).eq('organization_type',kind).limit(1);if(q.data?.length)selected=q.data[0];if(q.error&&!oe)oe=q.error}catch(e){if(!oe)oe=e}
+ }
+ if(!selected){
+  try{
+   const q=await sb.from('z_hospitality_team').select('*').eq('user_id',user.id).eq('status','active').maybeSingle();
+   if(q.data){member=q.data;const o=await sb.from('rg_organizations').select('id,organization_type,public_name,legal_name,city,address,contact_phone,owner_id').eq('id',member.org_id).maybeSingle();selected=o.data;if(selected)kind=selected.organization_type;if(o.error&&!oe)oe=o.error}
+   if(q.error&&!oe)oe=q.error;
+  }catch(e){if(!oe)oe=e}
+ }
+ if(!selected){
+  const detail=oe?.message||'Aucun établissement de ce type n’est rattaché à ce compte.';
+  notice(detail);
+  $('#view').innerHTML='<div class="card"><h3>Votre établissement n’est pas encore relié à cet espace</h3><p>Les fonctionnalités de gestion sont prêtes, mais ZUMAYA ne trouve pas encore votre établissement Restaurant ou Hôtel pour ce compte.</p><p>Retournez dans votre compte, ouvrez « Mes activités configurées » et vérifiez que le pôle correspondant est bien activé avec ce même compte.</p><div class="actions"><a class="gold" href="compte.html">Retourner à mon compte</a><a href="index.html#services">Voir les pôles</a></div><p class="muted small">Détail technique : '+esc(detail)+'</p></div>';
+  return;
+ }
+ org=selected;
+ $('#orgName').textContent=org.public_name||org.legal_name;
+ $('#sideName').textContent=org.public_name||org.legal_name;
+ $('#sideType').textContent=kind==='hotel'?'Gestion hôtelière':'Gestion de restaurant';
+ $('#orgType').textContent=kind==='hotel'?'🏨':'🍽️';
+ $('#roleTag').textContent=member?(member.member_kind==='driver'?'Livreur':'Membre de l’équipe'):'Compte principal';
+ $('#logout').onclick=()=>sb.auth.signOut().then(()=>location.replace('compte.html'));
+ nav();await load();if(member?.member_kind==='driver')active='drivers';render();
+}
 async function load(){let {data,error}=await sb.from('z_hospitality_records').select('*').eq('org_id',org.id).order('created_at',{ascending:false});if(error){notice('Base ZUMAYA native non initialisée : '+error.message);records=[]}else records=data||[]}
 const rows=t=>records.filter(x=>x.record_type===t);const money=n=>new Intl.NumberFormat('fr-FR').format(Number(n)||0)+' FCFA';
 function addForm(type,title,fields,extra={}){let html=`<div class="card"><h3>${title}</h3><form id="recordForm"><div class="formgrid">${fields.map(f=>`<label>${f.label}${f.type==='textarea'?`<textarea name="${f.name}" ${f.required?'required':''}></textarea>`:`<input name="${f.name}" type="${f.type||'text'}" ${f.required?'required':''} ${f.step?'step="'+f.step+'"':''} ${f.value!==undefined?'value="'+esc(f.value)+'"':''}>`}</label>`).join('')}</div><button class="gold">Enregistrer</button></form></div>`;
