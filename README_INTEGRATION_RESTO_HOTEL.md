@@ -7,7 +7,7 @@ Les pôles Restaurant et Hôtel sont intégrés au portail unique **ZUMUYA GROUP
 ## Accès
 
 - Connexion et création de compte : `compte.html`
-- Gestion restaurant : `zrestaurant-restaurant.html?portal=restaurant`
+- Gestion restaurant (modules complets issus de l’ancien RestoGest) : `zrestaurant-restogest.html`
 - Gestion hôtel : `zrestaurant-restaurant.html?portal=hotel#hotel`
 - Espace client et commandes : `zrestaurant-client.html`
 - Espace livreur : `zrestaurant-driver.html`
@@ -15,8 +15,17 @@ Les pôles Restaurant et Hôtel sont intégrés au portail unique **ZUMUYA GROUP
 
 ## Fonctionnalités conservées
 
-### Restaurant
+### Restaurant — RestoGest intégré
 - Tableau de bord, indicateurs et rapports
+- Caisse / vente, panier, quantités, modes de paiement, montant reçu et monnaie à rendre
+- Impression et partage des tickets 58/80 mm, logo, caissier, taxes et message de fin
+- Menu et produits, prix de vente, coûts, marges et catégories
+- Gestion du stock, entrées/sorties et seuils d’alerte
+- Clients, dettes, remboursements partiels, réservations de tables
+- Historique, recherche des ventes, rapports et export CSV
+- Utilisateurs internes avec rôles Administrateur, Gérant, Caissier et Serveur, droits par page et remise maximale
+- Paramètres du restaurant, logo, devise, taxes, paiements, apparence, préférences et sauvegarde/restauration
+- Synchronisation automatique Supabase dans `z_hospitality_records`, isolée par `org_id`
 - Caisse, impression des reçus et historique des ventes
 - Carte / menu, descriptions et photos
 - Commandes en ligne, statuts et suivi
@@ -44,3 +53,12 @@ Les pôles Restaurant et Hôtel sont intégrés au portail unique **ZUMUYA GROUP
 ## Déploiement
 
 Les pages sont servies depuis le dépôt ZUMUYA GROUP. Les extensions actives restent chargées par `zrestaurant-ext-loader.js`. Conserver les noms des fichiers appelés par les pages HTML.
+
+
+## Intégration RestoGest (2026-11-26)
+- Le code source `RestoGest(2).html` a été porté dans `zrestaurant-restogest.html`.
+- Le module utilise `config.js` et la session Supabase du compte ZUMUYA GROUP ; aucun second compte cloud RestoGest n'est créé.
+- Les données sont séparées par organisation dans `z_hospitality_records` avec `record_type='setting'` et `title='restogest_data'`, protégées par les politiques RLS existantes.
+- L'ancien tableau de bord générique `hospitality.html` redirige désormais vers les modules métiers réels.
+- Le pôle Hôtel conserve son espace natif `zrestaurant-restaurant.html?portal=hotel#hotel` et ses modules de chambres, réservations et service en chambre.
+- Validation réalisée : vérification syntaxique du JavaScript du module et contrôle des liens publiés. Les parcours de données avec comptes réels restent à tester dans le navigateur.
