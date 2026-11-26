@@ -1,61 +1,38 @@
-# ZUMUYA GROUP — version plate (aucun sous-dossier)
+# ZUMUYA GROUP — structure du dépôt
 
-Tous les fichiers sont à la **racine** du dépôt. Aucun dossier à créer : on peut tout envoyer depuis le téléphone.
+Tous les fichiers publiés par GitHub Pages sont à la racine du dépôt.
 
-## Conventions de noms
+## Espaces par type de compte
 
-| Ancien emplacement | Nouveau nom |
+| Type de compte | Espace actif |
 |---|---|
-| `proprietaire/index.html`, `owner.css`, `owner.js` | `proprietaire.html`, `proprietaire.css`, `proprietaire.js` |
-| `restauration/xxx` | `resto-xxx` (ex. `zrestaurant-index.html`, `zrestaurant-client.html`) |
-| `restauration/ext/kds.js` | `zrestaurant-ext-kds.js` |
-| `restauration/sql/…`, `docs/…` | `resto-sql-…`, `resto-docs-…` |
-| `restauration/supabase/functions/push-notify/index.ts` | `resto-fn-push-notify.ts` |
-| `GMR_Restaurant.apk` | inchangé (racine) |
+| Client | `client-espace.html` et `zrestaurant-client.html` |
+| Restaurant | `zrestaurant-restaurant.html?portal=restaurant` |
+| Hôtel | `zrestaurant-restaurant.html?portal=hotel#hotel` |
+| Livreur | `zrestaurant-driver.html` |
+| Producteur / commerçant agricole | `agro.html` |
+| Boutique Marketplace | `marketplace.html` et `boutique.html` |
+| Société de livraison | `livraison-entreprise.html` |
+| Propriétaire plateforme | `proprietaire.html` |
+| Compte universel | `compte.html` |
 
-Tous les liens internes (pages, scripts, icônes, manifestes, modules) ont été réécrits en conséquence.
+## Fichiers communs
 
-## Corrections apportées
+- `config.js` : configuration publique Supabase du projet ZUMUYA GROUP.
+- `compte.html` et `compte.js` : authentification, inscription et orientation des comptes.
+- `zguard.js` : garde-fou d'interface selon le type de compte.
+- `zrestaurant-db.js` et `zrestaurant-portal-bridge.js` : données et liaison des espaces Restaurant / Hôtel au compte commun.
+- `wallet.js` : portefeuille partagé.
+- `catalogue.js` : catalogues publics multi-pôles.
+- `zrestaurant-ext-loader.js` : chargement des extensions Restaurant / Hôtel.
 
-1. **Service worker unique** : avant, le portail et le Service de Restauration avaient chacun un `sw.js`. À plat ils auraient été au même niveau et se seraient écrasés. Un seul `sw.js` gère maintenant les deux (cache hors ligne + notifications push).
-2. **`sql-portail.sql` ajouté** : le portail utilisait des tables et fonctions qui n'étaient décrites nulle part (`rg_partner_applications`, `rg_countries`, `rg_organizations`, `rg_is_platform_owner`, etc.). Ce script les crée avec leurs règles de sécurité.
-3. Chargeur des extensions (`zrestaurant-ext-loader.js`) adapté aux nouveaux noms de fichiers.
-4. Tableau « Organisations » du propriétaire : colonne vide corrigée (colspan).
-5. Documentation mise à jour pour la structure plate.
+## Installation Supabase
 
-## Mise en ligne (GitHub Pages)
+1. Configurer uniquement l'URL et la clé publique anon dans `config.js`.
+2. Appliquer les migrations SQL nécessaires dans l'ordre prévu par le dépôt, uniquement si elles ne sont pas déjà installées.
+3. Ne pas exécuter de script RESET ou SCHEMA COMPLET sur une base de production.
+4. Garder les politiques RLS actives et ne jamais publier la clé `service_role`.
 
-1. Créez un dépôt, puis **Add file > Upload files** et choisissez tous les fichiers (GitHub accepte jusqu'à 100 fichiers par envoi ; il y en a 66).
-2. **Settings > Pages** : branche `main`, dossier `/ (root)`.
-3. Le site s'ouvre sur `index.html` (portail).
+## Compatibilité des anciennes adresses
 
-## Configuration à faire une fois (UN SEUL projet Supabase)
-
-1. Dans Supabase > SQL Editor du projet de `config.js`, exécutez dans l'ordre : `sql-portail.sql`, puis `supabase-setup.sql` (tables du service, realtime, attribution des livreurs côté serveur, protection des commandes). Si un avertissement signale `pg_cron`, activez-le dans Database > Extensions et relancez.
-2. Créez votre compte sur `compte.html`, puis décommentez la dernière requête de `sql-portail.sql` (avec votre e-mail) pour devenir propriétaire.
-3. Pour changer de projet Supabase, modifiez seulement `config.js`.
-4. `resto-sql-v2_securite_rls.sql` : seulement après lecture de `resto-docs-ZUMUYA RESTAURATION-EXTENSIONS-V2.md`.
-
-Voir `COORDINATION-POLES.md` pour le fonctionnement commun des pôles 01, 02 et 03.
-
-## Points à connaître
-
-- Le portail et le Service de Restauration utilisent maintenant **un seul projet Supabase** (`config.js`). Les données de l'ancien projet de restauration ne sont pas reprises automatiquement.
-- Les images de partage (`og:image`) pointent encore vers l'ancien dépôt `ayounbatanko.github.io/Restaurant-gestion-multiples/`. À remplacer par l'adresse du nouveau site quand elle sera connue (l'image est `resto-apercu-facebook.jpg`).
-
-## Retouches de novembre 2026
-
-1. **Bug grave corrigé** (`zrestaurant-index.html`) : l'ancienne page ouvrait automatiquement le compte restaurant dès qu'une session existait. Désormais, une session ouverte affiche seulement « Continuer vers mon espace » / « Changer de compte ». Le portail n'ouvre plus `zrestaurant-index.html` : « En savoir plus » mène aux pages de service ci-dessous.
-2. **`restauration.html`** (pôle 01) : réservé à l'utilisateur connecté ; restaurants classés par distance (GPS), catalogue complet, prix de chaque repas, frais de livraison = distance × tarif/km du restaurant. Les comptes hôtels n'y figurent pas.
-3. **`hotel.html`** (pôle 02) : service à part, ouvert uniquement avec un compte hôtel (commandes, chambres, accès à la gestion de l'hôtel). Création : `zrestaurant-index.html?type=hotel`.
-4. **`livraison.html`** (pôle 03) : service à part, coordonné avec 01 et 02 (statistiques réseau, tableau des livraisons du restaurant/hôtel, accès livreur).
-5. **Bouton « Connecté »** sur l'accueil (`app.js` + `zsession.js`) dès qu'un utilisateur est connecté (portail ou service).
-6. **Visuel technologique** du hero (réseau animé des pôles).
-7. **Tableau de bord propriétaire** refait (`proprietaire.*`) : menu latéral, indicateurs, graphique des commandes, supervision des restaurants/hôtels/livraisons, partenaires, pays, organisations, transactions, activité.
-
-Nouveaux fichiers : `zsession.js`, `zservice.css`, `restauration.html`, `hotel.html`, `livraison.html`.
-
-## Limites à connaître
-- Les comptes du portail (e-mail, Supabase Auth) et ceux du Service (téléphone, base `rg_users`) sont encore deux systèmes séparés : un utilisateur du portail doit aussi avoir un compte Service pour commander.
-- La réservation aux hôtels est appliquée côté navigateur ; une vraie protection demande les règles RLS (`resto-sql-v2_securite_rls.sql`) après migration des comptes.
-- `rg_users` contient des mots de passe en clair lisibles avec la clé publique : à migrer vers Supabase Auth en priorité.
+Les anciens liens de pages Restaurant / Hôtel redirigent vers les espaces ZUMUYA actuels. Les pages actives ne dépendent pas d'une application externe ni d'une deuxième authentification.
