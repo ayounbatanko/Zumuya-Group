@@ -123,8 +123,13 @@
   <aside class="dside" id="dSide" aria-label="Menu principal">
     <a href="#" class="on" data-view="overview"><span class="ic">▦</span>Vue d’ensemble</a>
     <a href="#" data-view="activities"><span class="ic">🧩</span>Mes activités</a>
+    <a href="#" data-view="wallet"><span class="ic">👛</span>Mon portefeuille</a>
+    <a href="mes-commandes.html"><span class="ic">🛍️</span>Mes commandes</a>
+    <a href="historique.html"><span class="ic">📊</span>Historique & rapports</a>
+    <a href="index.html#catalogue-public"><span class="ic">📚</span>Catalogues publics</a>
     <a href="marketplace.html"><span class="ic">🛍️</span>Marketplace</a>
     <a href="resto-client.html"><span class="ic">🍴</span>Restauration</a>
+    <a href="hotels-public.html"><span class="ic">🏨</span>Catalogue hôtels</a>
     <a href="hotel.html"><span class="ic">🛏️</span>Hôtel</a>
     <a href="agro.html"><span class="ic">🌿</span>Agro</a>
     <a href="livraison.html"><span class="ic">🛵</span>Livraison</a>
@@ -151,6 +156,13 @@
     <div id="vOverview">
       <h2 class="dh2">🚀 Explorez et activez vos activités</h2>
       <div class="dgrid" id="dCards"></div>
+      <p id="dashMsg" role="status" aria-live="polite"></p>
+      <div class="dbottom">
+        <div><h2 class="dh2">💼 Mes activités configurées</h2><div class="dlist" id="dList"></div></div>
+        <aside class="dhelp"><div class="face" aria-hidden="true">🎧</div><div><h3>Besoin d’aide ?</h3><p>Configurez uniquement les activités qui correspondent à vos besoins.</p><a class="dbtn" href="mailto:zumuyagroup@gmail.com?subject=Assistance%20ZUMAYA">❓ Assistance</a></div></aside>
+      </div>
+    </div>
+    <div id="vWallet" hidden>
       <h2 class="dh2">👛 Mon portefeuille unique</h2>
       <p class="dwalletnote">Un seul portefeuille pour toutes vos activités : ventes, commissions et retraits arrivent ici.</p>
       <div class="dwallet"><section class="panel wallet-panel" id="walletPanel">
@@ -165,11 +177,6 @@
   </form>
   <h3>Historique des opérations</h3><div id="walletLedger" class="wallet-ledger"><p class="muted">Chargement…</p></div>
 </section></div>
-      <p id="dashMsg" role="status" aria-live="polite"></p>
-      <div class="dbottom">
-        <div><h2 class="dh2">💼 Mes activités configurées</h2><div class="dlist" id="dList"></div></div>
-        <aside class="dhelp"><div class="face" aria-hidden="true">🎧</div><div><h3>Besoin d’aide ?</h3><p>Configurez uniquement les activités qui correspondent à vos besoins.</p><a class="dbtn" href="mailto:zumuyagroup@gmail.com?subject=Assistance%20ZUMAYA">❓ Assistance</a></div></aside>
-      </div>
     </div>
     <div id="vConfig" hidden>
       <h2 class="dh2">🧩 Configurer une activité</h2>
@@ -181,8 +188,9 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 <script src="module-manager.js?v=1"></script>
-<script src="wallet.js?v=3"></script>
-<script src="dashboard.js?v=5"></script>
+<script src="wallet.js?v=4"></script>
+<script src="dashboard.js?v=6"></script>
 <script src="compte.js?v=15"></script>
-<script src="zchat.js"></script></body>
+<script src="zchat.js"></script><script src="account-shortcuts.js?v=1"></script>
+</body>
 </html>
