@@ -1,36 +1,46 @@
-# Intégration Pôles Restaurant & Hôtel dans Zumuya Group
+# Pôles Restaurant et Hôtel — ZUMUYA GROUP
 
-**Projet de base :** Zumuya Group (correctif boutique automatique)  
-**Source des fonctionnalités :** mise à jour pôle (Restogest) — uniquement Restaurant + Hôtel
+## Architecture actuelle
 
-## Ce qui a été ajouté / mis à jour
+Les pôles Restaurant et Hôtel sont intégrés au portail unique **ZUMUYA GROUP**. Ils utilisent le même compte Supabase, la même authentification du portail, les mêmes organisations et les mêmes commandes que les autres activités.
 
-### Pôle Restaurant
-- Pages d’entrée : `restauration.html`, `resto-index.html`, `resto-card.html`
-- Moteur : `resto-db.js`, extensions (`resto-ext-*.js`), chat, charts, notifs, QR, rapports
-- Dashboard restaurant : `resto-restaurant.html` **conservé depuis Zumuya** (portefeuille + UI récents)
-- Client / livreur / owner : versions Zumuya conservées
+## Accès
 
-### Pôle Hôtel
-- `hotel.html` — espace réservé aux comptes hôtel
-- Service en chambre + **notes de chambre** (`resto-ext-room-billing.js`)
-- Onglet Hôtel dans `resto-restaurant.html` (déjà présent dans Zumuya)
-- `resto-portal-bridge.js` mis à jour pour bien lier un compte au pôle restaurant/hôtel
+- Connexion et création de compte : `compte.html`
+- Gestion restaurant : `zrestaurant-restaurant.html?portal=restaurant`
+- Gestion hôtel : `zrestaurant-restaurant.html?portal=hotel#hotel`
+- Espace client et commandes : `zrestaurant-client.html`
+- Espace livreur : `zrestaurant-driver.html`
+- Supervision de la plateforme : `proprietaire.html`
 
-### SQL à exécuter sur Supabase (dans l’ordre)
-1. `14_activation_immediate.sql`
-2. `15_activation_auto_poles_et_durcissement.sql`
-3. `16_ecosysteme_poles_interconnectes.sql` — active les pôles restaurant & hôtel dans le catalogue
-4. `17_livraison_zones_offres_messagerie.sql` — zones / offres liées aux commandes
+## Fonctionnalités conservées
 
-## Ce qui n’a PAS été écrasé
-- Correctifs boutique automatique Zumuya
-- `compte.html` / `compte.js` / `compte.css` Zumuya
-- `resto-restaurant.html`, `resto-driver.html`, `resto-client.html`, `resto-owner.html` (versions Zumuya plus récentes)
-- Marketplace, agro, etc.
+### Restaurant
+- Tableau de bord, indicateurs et rapports
+- Caisse, impression des reçus et historique des ventes
+- Carte / menu, descriptions et photos
+- Commandes en ligne, statuts et suivi
+- Attribution automatique des courses et gestion des livreurs
+- Gestion d'équipe, permissions et journal des actions
+- Approvisionnement agricole
+- Abonnement Pro, assistance et paramètres
+- Écran cuisine et actualisation en temps réel
 
-## Test rapide
-1. Déployer les fichiers
-2. Lancer les 4 scripts SQL
-3. Compte type **restaurant** → `resto-restaurant.html`
-4. Compte type **hotel** → `hotel.html` puis espace hôtel (service chambre + notes de chambre)
+### Hôtel
+- Gestion des paramètres de l'établissement et des chambres
+- Commandes de service en chambre
+- Préparation et remise en chambre
+- Notes de chambre, règlement et export CSV
+- Livraison extérieure coordonnée avec le pôle Livraison
+- Historique, rapports, équipe et réglages
+
+## Données et sécurité
+
+- `config.js` est la configuration publique Supabase partagée du portail.
+- `zrestaurant-db.js` et `zrestaurant-portal-bridge.js` gèrent les données et le rattachement des comptes aux organisations.
+- Les droits des employés et livreurs restent contrôlés côté serveur par les règles RLS et les fonctions SQL.
+- Les tables `rg_*` font partie du schéma actuellement utilisé : ne pas les supprimer ni les renommer.
+
+## Déploiement
+
+Les pages sont servies depuis le dépôt ZUMUYA GROUP. Les extensions actives restent chargées par `zrestaurant-ext-loader.js`. Conserver les noms des fichiers appelés par les pages HTML.
