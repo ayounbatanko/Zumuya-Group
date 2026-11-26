@@ -148,7 +148,7 @@
             <span class="badge">${esc(o.status || '')}</span>
             <p class="muted" style="margin:4px 0 0">${new Date(o.created_at).toLocaleString('fr-FR')}</p>
           </div>
-          <a class="btn secondary" href="zrestaurant-client.html">Voir</a>
+          <a class="btn secondary" href="resto-client.html">Voir</a>
         </article>
       `).join('');
     } catch (err) {

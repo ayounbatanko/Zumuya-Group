@@ -22,7 +22,7 @@ h2,h3{margin:.2em 0 .4em;letter-spacing:-.2px}
 #hdr>b{font-size:17px;display:flex;align-items:center;gap:8px}#hdr>b:before{content:"";width:10px;height:10px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 3px rgba(255,183,3,.3)}
 #net{font-size:12px;padding:3px 10px;border-radius:99px;background:rgba(18,163,107,.25);color:#7dffc9}#net.off{background:rgba(229,56,59,.3);color:#ffb3b5}
 #hdr .lang{display:inline-flex;background:rgba(255,255,255,.12);border-radius:99px;padding:3px;gap:2px}
-nav{display:flex;gap:8px;flex-wrap:wrap;padding:12px 18px;background:var(--card);border-bottom:1px solid var(--bd);position:sticky;top:56px;z-index:4;overflow-x:visible}
+nav{display:flex;gap:8px;flex-wrap:wrap;padding:12px 18px;background:var(--card);border-bottom:1px solid var(--bd);position:sticky;top:56px;z-index:4;overflow-x:auto}
 main{max-width:1000px;margin:0 auto;padding:18px}
 .card{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:var(--sh)}
 .col{display:flex;flex-direction:column;gap:10px}.col>.card{margin-bottom:0}
@@ -40,7 +40,7 @@ button.sec{background:transparent;color:var(--ink);border:1.5px solid var(--bd);
 button.sec:hover{border-color:var(--navy2);color:var(--navy2);box-shadow:none}
 @media(prefers-color-scheme:dark){button.sec:hover{border-color:var(--gold);color:var(--gold)}}
 button.bad{background:linear-gradient(135deg,#e5383b,#b1252a);color:#fff;box-shadow:0 4px 12px rgba(229,56,59,.35)}
-nav button{background:transparent;color:var(--ink);border:1.5px solid var(--bd);box-shadow:none;padding:8px 16px;white-space:normal}
+nav button{background:transparent;color:var(--ink);border:1.5px solid var(--bd);box-shadow:none;padding:8px 16px;white-space:nowrap}
 nav button:hover{border-color:var(--navy2);box-shadow:none}
 nav button.on{background:linear-gradient(135deg,#14213d,#26417a);color:var(--gold);border-color:transparent;box-shadow:0 4px 12px rgba(20,33,61,.35)}
 #hdr .lang button{background:transparent;box-shadow:none;padding:4px 11px;font-size:12px;color:#fff;border-radius:99px}
@@ -67,7 +67,7 @@ body.auth #hdr{background:transparent;box-shadow:none;position:static}
 body.auth main{padding-top:0}body.auth .card{box-shadow:0 24px 70px rgba(0,0,0,.45);border:0;border-radius:22px;padding:26px}
 .brand{font-size:26px;font-weight:800;margin:0}.brand span{color:var(--gold2)}
 body.auth #hdr>b{display:none}body.auth #hdr{justify-content:flex-end}
-nav{position:static;flex-wrap:wrap;overflow-x:visible}#hdr{position:static}
+nav{position:static;flex-wrap:nowrap;scrollbar-width:thin}#hdr{position:static}
 .gal{display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x mandatory;margin-bottom:10px}.gal.ph{height:90px;align-items:center;justify-content:center;font-size:34px;background:rgba(255,183,3,.15);border-radius:12px}
 .gi{position:relative;flex:0 0 auto;scroll-snap-align:start}.gi img{height:150px;max-width:260px;object-fit:cover;border-radius:12px;display:block}
 .gi .x{position:absolute;top:6px;inset-inline-end:6px;padding:2px 8px;border-radius:99px;background:rgba(20,33,61,.8);color:#fff;box-shadow:none;font-size:12px}
@@ -113,7 +113,7 @@ nav:empty{display:none;padding:0;border:0;height:0;overflow:hidden}
 .back-btn:hover{filter:brightness(1.1);transform:translateY(-1px)}
 </style><style>.driver-nav-action{display:inline-flex;align-items:center;text-decoration:none;padding:9px 13px;border-radius:12px;border:1px solid var(--bd);background:var(--card);color:var(--ink);font-weight:800;font-size:13px}</style></head><body>
 <div id="hdr"></div><main id="m"></main>
-<script src="config.js"></script><script src="resto-db.js?v=3"></script><script src="resto-portal-bridge.js?v=3"></script><script src="resto-notif.js"></script>
+<script src="config.js"></script><script src="resto-db.js?v=3"></script><script src="resto-portal-bridge.js?v=2"></script><script src="resto-notif.js"></script>
 <script src="resto-chat.js"></script>
 <script>let SH=window;try{if(window.parent!==window&&window.parent.nav)SH=window.parent}catch(e){}
 SH.__m=SH.__m||{l:{},s:{}};
@@ -181,9 +181,9 @@ const stages=['préparée','colis récupéré','en route','arrivé','terminée']
 const nextStage={'préparée':'colis récupéré','colis récupéré':'en route','en route':'arrivé','arrivé':'terminée'};
 const stageLabel={'préparée':'À récupérer au restaurant','colis récupéré':'Colis récupéré','en route':'Commande en route 🛵','arrivé':'Commande arrivée 📍','terminée':'Livraison terminée'};
 function mapUrl(o){const dest=o.cLat!=null&&o.cLng!=null?o.cLat+','+o.cLng: o.addr;const origin=myPos?myPos.join(','):'';return 'https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(dest)+(origin?'&origin='+encodeURIComponent(origin):'')+'&travelmode=driving'}
-function driverBar(){return `<div class="row driver-tabs" style="gap:8px;flex-wrap:wrap;margin-bottom:10px">`+[['jobs','🚚 Livraisons'],['chat','💬 Support'],['acc','🔑 Paramètres du compte']].map(([k,l])=>`<button type="button" class="${dTab==k?'':'sec'}" onclick="dTab='${k}';render()">${l}</button>`).join('')+`<a class="driver-nav-action" href="messagerie.html">💬 Messagerie</a></div>`}
+function driverBar(){return `<div class="row driver-tabs" style="gap:8px;flex-wrap:wrap;margin-bottom:10px">`+[['jobs','🚚 Livraisons'],['chat','💬 Support'],['acc','🔑 Paramètres du compte'],['wallet','👛 Portefeuille']].map(([k,l])=>`<button type="button" class="${dTab==k?'':'sec'}" onclick="dTab='${k}';render()">${l}</button>`).join('')+`<a class="driver-nav-action" href="messagerie.html">💬 Messagerie</a></div>`}
 function render(){const wallet=document.getElementById('walletPanel');if(wallet){wallet.hidden=true;if(wallet.parentNode!==document.body)document.body.appendChild(wallet)}const d=D.get(),rs=rest();hdr('Espace livreur — '+U.name+(rs?' · '+rs.name:''));const jobs=mine(),done=d.orders.filter(o=>o.driverId==U.id&&o.status=='terminée').reverse().slice(0,10);
- if(dTab=='acc'){m.innerHTML=driverBar()+passwordCard();return}
+ if(dTab=='wallet'){m.innerHTML=driverBar();if(wallet){wallet.hidden=false;m.appendChild(wallet);if(window.RGWalletLoad)window.RGWalletLoad()}return}if(dTab=='acc'){m.innerHTML=driverBar()+passwordCard();return}
  if(dTab=='chat'){m.innerHTML=driverBar()+RGChat.userView(U);return}
  m.innerHTML=driverBar()+`<h3>Mes livraisons</h3>`+(jobs.map(o=>{const nxt=nextStage[o.status],hasGPS=o.cLat!=null&&o.cLng!=null;
  return `<div class="card"><div class="row"><b>Commande #${esc(o.id)}</b><span class="badge" data-s="${o.status}">${esc(o.status)}</span></div>
@@ -230,13 +230,24 @@ render();
 </script>
 <script src="resto-ext-loader.js"></script>
 <style>
-
-
-
-
-
-
-
-
-
-</style><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="zchat.js"></script></body></html>
+.wallet-panel{border:1px solid #dce4eb;border-radius:18px;padding:20px;background:#fff;margin:18px 0}
+.wallet-head{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.wallet-kicker{font-size:.72rem;letter-spacing:.14em;font-weight:800;color:#a67c32}
+.wallet-head h2{margin:5px 0}.wallet-head strong{background:#102b45;color:white;border-radius:14px;padding:16px 20px;font-size:1.35rem}
+.wallet-actions{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0}
+.wallet-actions .btn,.wallet-panel .btn{border:0;border-radius:10px;padding:12px 16px;font-weight:800;cursor:pointer}
+.wallet-panel .btn{background:#102b45;color:white}.wallet-panel .btn.secondary{background:#e8edf3;color:#102b45}
+.wallet-ledger .entry{border-radius:10px;padding:12px;margin:8px 0;border:1px solid #e5eaf0}
+.wallet-panel form{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin:12px 0}.wallet-panel form label{display:flex;flex-direction:column;gap:6px}.wallet-panel input,.wallet-panel select{padding:10px;border:1px solid #ccd4df;border-radius:9px;font:inherit}.wallet-ledger .credit{color:#167447;font-weight:800}.wallet-ledger .debit{color:#a33b35;font-weight:800}
+</style><section class="panel wallet-panel" id="walletPanel" hidden>
+  <div class="wallet-head"><div><span class="wallet-kicker">PORTEFEUILLE ZUMUYA</span><h2>Mon portefeuille</h2><p class="muted">Solde, encaissements de ventes et retraits sécurisés.</p></div><strong id="walletBalance">Chargement…</strong></div>
+  <div class="wallet-actions"><button type="button" class="btn" id="walletDeposit">＋ Déposer de l’argent</button><button type="button" class="btn secondary" id="walletWithdrawToggle">↗ Demander un retrait</button></div>
+  <p class="muted" id="walletNotice">Les dépôts seront activés après raccordement du prestataire de paiement et de son webhook sécurisé.</p>
+  <form id="walletWithdrawForm" class="grid" hidden>
+    <label>Montant à retirer (FCFA)<input name="amount" type="number" min="1" step="1" required></label>
+    <label>Moyen de paiement<select name="method" required><option value="">Choisir</option><option value="mobile_money">Mobile Money</option><option value="bank">Virement bancaire</option></select></label>
+    <label>Numéro / référence du bénéficiaire<input name="destination" required placeholder="Numéro Mobile Money ou RIB"></label>
+    <div><button class="btn" type="submit">Envoyer la demande</button></div>
+  </form>
+  <h3>Historique des opérations</h3><div id="walletLedger" class="wallet-ledger"><p class="muted">Chargement…</p></div>
+</section><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="wallet.js?v=2"></script></body></html>

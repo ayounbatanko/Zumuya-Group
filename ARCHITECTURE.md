@@ -2,9 +2,9 @@
 
 ## Principes
 
-1. **Un compte unique = plusieurs pôles configurables**
+1. **Un compte = une catégorie = un espace**
 2. Authentification centralisée via Supabase Auth
-3. Métadonnées utilisateur : `account_type=universal`, `enabled_modules[]`, `organization_ids[]`, `organization_id` (compatibilité), `name`…
+3. Métadonnées utilisateur : `account_type`, `organization_id`, `name`…
 4. Protection d’interface via `zguard.js` (la vraie sécurité = RLS Supabase)
 5. Un seul projet Supabase pour portail + services métier
 
@@ -13,11 +13,10 @@
 ```
 compte.html
    │
-   ├─ Client ──────────────────► client-espace.html / zrestaurant-client.html
-   ├─ Restaurant / Hôtel ──────► (compléter fiche partenaire) → zrestaurant-restaurant.html
-   ├─ Livreur ─────────────────► compte d'équipe créé par une organisation autorisée → zrestaurant-driver.html
-   ├─ Société de livraison ───► pôle professionnel autonome → livraison-entreprise.html
-   ├─ Employé ─────────────────► compte créé par un restaurant, droits personnalisés → zrestaurant-restaurant.html
+   ├─ Client ──────────────────► client-espace.html / resto-client.html
+   ├─ Restaurant / Hôtel ──────► (compléter fiche partenaire) → resto-restaurant.html
+   ├─ Livreur ─────────────────► compte créé UNIQUEMENT par un restaurant (Mon équipe) → resto-driver.html
+   ├─ Employé ─────────────────► compte créé par un restaurant, droits personnalisés → resto-restaurant.html
    ├─ Producteur / Commerçant ─► agro.html
    └─ Propriétaire (rôle serveur) ► proprietaire.html
 ```
@@ -32,7 +31,7 @@ Les comptes professionnels doivent compléter leur fiche d’organisation (GPS o
 
 ### Restauration (rg_*)
 - `rg_users`, `rg_rests`, `rg_orders`, `rg_menu_*`, etc.
-- Bridge : `zrestaurant-portal-bridge.js`
+- Bridge : `resto-portal-bridge.js`
 
 ### Agro (rg_agro_* ou z_agro_*)
 - `rg_agro_profiles`
@@ -69,7 +68,7 @@ Chaque page privée déclare les rôles autorisés :
 | `zguard.js` | Redirection par rôle |
 | `zcart.js` | Panier client |
 | `catalogue.js` | Affichage public |
-| `zrestaurant-*.js` | Modules restauration |
+| `resto-*.js` | Modules restauration |
 | `agro.js` | Espace agro |
 | `proprietaire.js` | Back-office |
 
@@ -81,14 +80,3 @@ Chaque page privée déclare les rôles autorisés :
 - `rg_audit_log` : journal des actions sensibles (lecture : compte principal).
 - `rg_supply_orders` / `rg_supply_order_items` : achats entre professionnels, séparés de `rg_orders`; fonctions `rg_supply_*`.
 - Modules d'interface : `zteam.js`, `zsupply.js`.
-
-## Écosystème multi-pôles interconnectés (migration 16)
-
-- `rg_module_catalog` : catalogue officiel des pôles activables.
-- `rg_user_modules` : activation et configuration par compte unique.
-- `rg_org_modules` : pôles activés par organisation, sans fusionner les espaces métier.
-- `rg_business_links` : relations entre organisations avec consentement bilatéral.
-- `rg_workflow_events` : événements inter-pôles (commandes, achats, demandes de transport, expéditions et notifications métier).
-- RPC `rg_ecosystem_*` : activation, demande/acceptation de partenariat, émission et traitement des événements avec contrôle de propriété.
-
-Codes canoniques : `restaurant`, `hotel`, `agro`, `marketplace`, `delivery`. Les types historiques d'organisation sont conservés et mappés lors de la migration.

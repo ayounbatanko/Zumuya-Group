@@ -34,7 +34,7 @@ function applyAuth(){
  const w=window.ZS&&ZS.who(),login=$('#navLogin'),signup=document.querySelector('.nav-signup'),hero=$('#heroActions'),foot=$('#footLogin');
  if(w){
   login.textContent='Connecté';login.className='nav-connected';login.title=(w.name||w.email||'')+' — ouvrir mon compte';
-  login.href=w.kind==='resto'?'zrestaurant-index.html':'compte.html';
+  login.href=w.kind==='resto'?'resto-index.html':'compte.html';
   if(signup)signup.hidden=true;
   if(hero)hero.innerHTML='<a class="btn btn-gold" href="#services">Découvrir les services <span>→</span></a><a class="btn btn-glass" href="'+login.href+'">Mon compte</a>';
   document.querySelectorAll('.steps-cta,.cta .btn').forEach(e=>e.hidden=true);

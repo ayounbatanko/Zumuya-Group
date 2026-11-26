@@ -5,8 +5,8 @@ MODIFICATIONS
 2. Redirection après connexion :
    - customer -> client-espace.html
    - agro_producer / agro_trader -> agro.html (même si la fiche professionnelle doit encore être créée)
-   - restaurant / hotel -> zrestaurant-restaurant.html lorsque la fiche partenaire est validée
-   - delivery -> zrestaurant-driver.html lorsque la fiche partenaire est validée
+   - restaurant / hotel -> resto-restaurant.html lorsque la fiche partenaire est validée
+   - delivery -> resto-driver.html lorsque la fiche partenaire est validée
 3. Ajout d'un module portefeuille dans les espaces Client, Agro, Restaurant/Hôtel et Livreur.
 4. Enregistrement du moyen de retrait, affichage du solde et de l'historique, demande de retrait.
 5. Espace propriétaire : taux de commission modifiable (valeur initiale 5 %, limite 0 à 30 %) et liste des demandes de retrait.

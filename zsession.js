@@ -17,8 +17,7 @@ const CF=()=>window.ZUMAYA_CONFIG||{};
 async function rows(table,extra){const c=CF();if(!c.SUPABASE_URL)throw Error('Configuration Supabase absente');
   const r=await fetch(c.SUPABASE_URL+'/rest/v1/'+table+'?select=id,data'+(extra||''),{headers:{apikey:c.SUPABASE_ANON_KEY,Authorization:'Bearer '+c.SUPABASE_ANON_KEY}});
   if(!r.ok)throw Error('Lecture impossible ('+r.status+')');return(await r.json()).map(x=>x.data).filter(Boolean)}
-/* Lecture publique limitée aux champs catalogue : la table rg_rests contient aussi des données internes et reste protégée par RLS. */
-ZS.rests=()=>rows('rg_public_restaurants','&order=seq.asc');
+ZS.rests=()=>rows('rg_rests','&order=seq.asc');
 ZS.orders=()=>rows('rg_orders','&order=seq.desc&limit=300').then(a=>a.filter(o=>o&&o.restId));
 ZS.subOk=r=>{const n=Date.now();if(r.sub==='suspended')return false;if(r.sub==='active')return r.subEnd>n;return r.trialEnd>n};
 ZS.isHotel=r=>!!(r&&(r.businessType==='hotel'||(r.hotel&&r.hotel.enabled)));

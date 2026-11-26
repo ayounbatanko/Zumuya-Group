@@ -50,8 +50,7 @@ function mount(el,opt){css();opt=opt||{};el.classList.add('zs');
     ${role!=='buyer'?`<button data-v="received" class="${view==='received'?'on':''}">📥 Commandes reçues${pend?` (${pend})`:''}</button>`:''}</div></div>
    ${msg?`<div class="${msg.startsWith('⚠')?'err':'ok'}">${esc(msg)}</div>`:''}
    ${view==='catalog'?catalog():view==='cart'?cartView():view==='mine'?list(pass,true):list(rec,false)}`;
-  bind();
-  if(window.ZDelivery)el.querySelectorAll('[data-dlv]').forEach(d=>ZDelivery.status(d,'supply_order',d.dataset.dlv,{onChange:()=>{clearTimeout(window.__zsT);window.__zsT=setTimeout(()=>refresh(),800)}}))}
+  bind()}
 
  function catalog(){
   const cats=[...new Set(products.map(p=>p.category).filter(Boolean))].sort();
@@ -78,13 +77,12 @@ function mount(el,opt){css();opt=opt||{};el.classList.add('zs');
   return rows.map(o=>{const st=ST[o.status]||[o.status,'#555'],who=asBuyer?(o.supplier&&o.supplier.business_name)||'Fournisseur':(o.buyer_name||'Client professionnel');
    const acts=[];
    if(asBuyer){if(o.status==='pending')acts.push(['cancel','Annuler','d']);if(o.status==='delivering')acts.push(['receive','✅ Confirmer la réception','g'])}
-   else{if(o.status==='pending'){acts.push(['accept','Accepter','g']);acts.push(['refuse','Refuser','d'])}if(o.status==='confirmed'){acts.push(['deliver','🚚 Faire livrer par une société','g']);acts.push(['ship','🚚 Marquer en livraison',''] );acts.push(['cancel','Annuler','d'])}}
+   else{if(o.status==='pending'){acts.push(['accept','Accepter','g']);acts.push(['refuse','Refuser','d'])}if(o.status==='confirmed'){acts.push(['ship','🚚 Marquer en livraison',''] );acts.push(['cancel','Annuler','d'])}}
    return `<div class="c" data-o="${esc(o.id)}"><div class="row" style="justify-content:space-between"><div><b>${esc(o.ref)}</b> <span class="tag" style="background:${st[1]}">${st[0]}</span><div class="m">${asBuyer?'Fournisseur':'Acheteur'} : ${esc(who)}${!asBuyer&&o.buyer_phone?' · '+esc(o.buyer_phone):''}${asBuyer&&o.supplier&&o.supplier.phone?' · '+esc(o.supplier.phone):''} · ${new Date(o.created_at).toLocaleString('fr-FR')}</div></div><b>${money(o.total,o.currency_code)}</b></div>
     <div style="overflow:auto"><table><tbody>${(o.rg_supply_order_items||[]).map(i=>`<tr><td>${esc(i.product_name)}</td><td>${+i.quantity} ${esc(i.unit)}</td><td>${money(i.line_total,o.currency_code)}</td></tr>`).join('')}</tbody></table></div>
     ${o.delivery_address?`<div class="m">📍 ${esc(o.delivery_address)}</div>`:''}${o.delivery_note?`<div class="m">📝 ${esc(o.delivery_note)}</div>`:''}${o.refusal_reason?`<div class="m">Motif : ${esc(o.refusal_reason)}</div>`:''}
     ${o.status==='received'?`<div class="m">Paiement : ${o.payment_status==='paid'?'réglé':'à régler directement au fournisseur'}</div>`:''}
-    ${!asBuyer&&['confirmed','delivering','received'].includes(o.status)?`<div data-dlv="${esc(o.id)}"></div>`:''}
-    <div class="row" style="margin-top:6px">${acts.map(a=>`<button class="${a[2]}" data-a="${a[0]}">${a[1]}</button>`).join('')}${(asBuyer?o.supplier_id:o.buyer_user_id)?`<a href="messagerie.html?kind=user&ref=${encodeURIComponent(asBuyer?o.supplier_id:o.buyer_user_id)}&subject=${encodeURIComponent('Commande '+o.ref)}&ctx_type=supply_order&ctx_id=${encodeURIComponent(o.id)}" style="padding:8px 12px;border-radius:9px;background:#eaf0f5;color:#102b45;font-weight:700;text-decoration:none">💬 ${asBuyer?'Écrire au fournisseur':'Écrire à l’acheteur'}</a>`:''}</div></div>`}).join('')}
+    ${acts.length?`<div class="row" style="margin-top:6px">${acts.map(a=>`<button class="${a[2]}" data-a="${a[0]}">${a[1]}</button>`).join('')}</div>`:''}</div>`}).join('')}
 
  function bind(){
   el.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>{view=b.dataset.v;msg='';draw()});
@@ -102,9 +100,6 @@ function mount(el,opt){css();opt=opt||{};el.classList.add('zs');
       await rpc('rg_supply_place_order',{p_items:items,p_org:opt.orgId||null,p_address:box.querySelector('.zsAddr').value||null,p_note:box.querySelector('.zsNote').value||null});
       delete cart[s];busy=false;view='mine';msg='Commande envoyée. Le fournisseur va la confirmer ou la refuser.';await refresh();return}
     const id=b.closest('[data-o]')&&b.closest('[data-o]').dataset.o;if(!id)return;
-    if(a==='deliver'){const o=orders.find(x=>x.id===id);if(!o)return;if(!window.ZDelivery){msg='⚠ Module de livraison indisponible.';return draw()}
-      let pr={};try{pr=((await rest('rg_agro_profiles?select=city,address,lat,lng&user_id=eq.'+me()))||[])[0]||{}}catch(_){}
-      ZDelivery.open({sourceType:'supply_order',sourceId:o.id,title:'Faire livrer la commande '+o.ref,pickup:{city:pr.city||'',address:pr.address||'',lat:pr.lat,lng:pr.lng},dest:{address:o.delivery_address||'',city:''},onDone:()=>refresh()});return}
     if(a==='accept')await rpc('rg_supply_respond',{p_order:id,p_accept:true});
     else if(a==='refuse'){const r=prompt('Motif du refus (facultatif) :');if(r===null)return;await rpc('rg_supply_respond',{p_order:id,p_accept:false,p_reason:r})}
     else if(a==='ship')await rpc('rg_supply_advance',{p_order:id});

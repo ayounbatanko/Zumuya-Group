@@ -1,6 +1,5 @@
-/* ZUMAYA GROUP — projet Supabase actif connecté à ChatGPT.
-   Clé publishable uniquement côté navigateur. Ne jamais exposer service_role. */
+/* PROJET SUPABASE UNIQUE : portail ET Service de Restauration lisent cette configuration. */
 window.ZUMAYA_CONFIG = {
-  SUPABASE_URL: 'https://azfunhfjmybekzakhtbu.supabase.co',
-  SUPABASE_ANON_KEY: 'sb_publishable_UNgT3Gw6_8OPt5VxDltsQw_VRLvUbi-'
+  SUPABASE_URL: 'https://dusznqvwhrklcqhmbylu.supabase.co',
+  SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR1c3pucXZ3aHJrbGNxaG1ieWx1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM5MTMxODUsImV4cCI6MjEwOTQ4OTE4NX0.K_xKjAzdQi0UyZlc4OoogCBVHCd9Ooc2dVupr7KyjYI'
 };

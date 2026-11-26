@@ -1,73 +1,142 @@
-# ZUMUYA GROUP
+> **Version GitHub corrigée (20/11/2026)** : le type de compte est désormais demandé uniquement à l’inscription, la revalidation du mot de passe accepte l’identifiant e-mail ou téléphone déjà associé au compte, et le Service Worker précharge les ressources du dépôt avec un cache versionné. Voir `README_FIX_2026-11-20.txt` avant publication.
 
-Plateforme multi-pôles (restaurant, hôtel, marketplace, agro-producteur, commerçant, livraison, propriétaire) avec authentification Supabase, tableaux de bord professionnels, journal d’actions, gestion de groupe et exports téléchargeables.
+# ZUMUYA GROUP — Plateforme web organisée
+
+Écosystème numérique multiservices né au Niger, pensé pour l’Afrique de l’Ouest.  
+**Un compte = une catégorie = un tableau de bord dédié.**
+
+---
 
 ## Démarrage rapide
 
-1. **Supabase**  
-   - Projet déjà référencé dans `config.js` : `https://azfunhfjmybekzakhtbu.supabase.co`  
-   - Dans le SQL Editor, exécuter dans l’ordre (ou le script consolidé si fourni) :
-     - `00_setup_complet_SUPABASE.sql` / `supabase-setup.sql`
-     - les migrations `04_` → `20_`
-     - `z_hospitality_native.sql`
-     - `19_pilotage_rapports_exports_equipe_proprietaire.sql`
-     - `20_harmonisation_droits_rapports_journal.sql`
-   - Déployer les Edge Functions :
-     ```bash
-     supabase link --project-ref azfunhfjmybekzakhtbu
-     supabase functions deploy z-hospitality-team
-     supabase functions deploy platform-team-admin
-     ```
+1. Tous les fichiers sont à la racine (compatible GitHub Pages : branche `main`, dossier `/`).
+2. Ouvrir `index.html`.
+3. Configurer Supabase dans `config.js` (URL + clé **anon** uniquement).
+4. Dans le SQL Editor Supabase, exécuter **dans l’ordre** :
+   - `sql-portail.sql`
+   - `supabase-setup.sql` (activer `pg_cron` si demandé)
+   - `ZUMUYA_EXTENSION_ESSAI.sql`
+   - `07_portefeuilles_commissions.sql`
+   - `08_messagerie_acteurs.sql`
+5. Créer un compte sur `compte.html`, puis (optionnel) devenir propriétaire en décommentant la dernière requête de `sql-portail.sql` avec votre e-mail.
 
-2. **Front**  
-   - Héberger le contenu de ce dépôt (GitHub Pages, Netlify, Vercel, ou serveur statique).  
-   - `config.js` contient uniquement l’URL et la clé **anon / publishable**. Ne jamais y mettre `service_role`.
+> Ne jamais committer de clé `service_role`.
 
-3. **Comptes**  
-   - Client / restaurant / hôtel / marketplace / agro / commerçant / société de livraison : inscription via `compte.html`.  
-   - Employés & livreurs d’un établissement : créés depuis l’espace restaurant/hôtel (Gestion de groupe).  
-   - Comptes secondaires du propriétaire ZUMUYA : créés depuis `proprietaire.html` → Gestion du groupe.
+---
 
-## Fonctionnalités principales
+## Catégories de compte et espaces
 
-### Tous les pôles professionnels
-- Tableau de bord structuré avec KPI et graphiques d’historique.
-- Historique d’activité filtrable par période et **téléchargeable** (CSV / JSON selon le pôle).
-- Messagerie, portefeuille / commissions, catalogues publics selon le rôle.
+| Catégorie | Code | Espace | Fichiers principaux |
+|-----------|------|--------|---------------------|
+| Client | `customer` | Espace client + commandes | `client-espace.html`, `resto-client.html` |
+| Restaurant | `restaurant` | Tableau de bord restaurant | `resto-restaurant.html` |
+| Hôtel | `hotel` | Restaurant + service chambre | `resto-restaurant.html`, `hotel.html` |
+| Livreur | `delivery` | Courses et GPS | `resto-driver.html` |
+| Producteur agricole | `agro_producer` | Catalogue & demandes | `agro.html` |
+| Commerçant agricole | `agro_trader` | Achat / revente | `agro.html` |
+| Propriétaire plateforme | (rôle serveur) | Supervision globale | `proprietaire.html`, `resto-owner.html` |
 
-### Restaurant & Hôtel
-- Caisse, commandes, menu / chambres, stocks, livreurs, KDS.
-- **Gestion de groupe** : création de membres (employés, livreurs), permissions par rubrique, suspension / réactivation.
-- **Journal d’actions** : consultation filtrée + export CSV.
-- Rapports de ventes et enregistrements métier exportables.
+La redirection est gérée par `zguard.js` : une catégorie qui ouvre la page d’une autre est renvoyée vers la sienne.
 
-### Compte propriétaire ZUMUYA GROUP
-- Vue consolidée (organisations, établissements, transactions, abonnements).
-- Graphiques d’activité et indicateurs de supervision.
-- Gestion des comptes secondaires avec droits limités.
-- Export JSON complet de l’infrastructure sur une période choisie.
-- Pilotage des partenaires, pays, portefeuille et commissions.
+Voir **FEATURES.md** pour le détail complet des fonctionnalités par rôle.
 
-### Sécurité
-- Supabase Auth + RLS.
-- Actions sensibles (création de comptes équipe) via Edge Functions.
-- Interface protégée par `zguard.js` (la vraie sécurité reste côté base).
+---
 
-## Structure utile
+## Architecture fonctionnelle
 
-| Fichier / dossier | Rôle |
-|-------------------|------|
-| `index.html` | Portail d’entrée |
-| `compte.html` | Inscription / connexion multi-rôles |
-| `zrestaurant-restaurant.html` | Espace restaurant / hôtel (staff) |
-| `hospitality.js` + `z_hospitality_native.sql` | Équipes, journal, records |
-| `proprietaire.html` + `proprietaire.js` | Espace propriétaire |
-| `19_pilotage_…sql` | Journal transversal + équipe propriétaire + export |
-| `supabase/functions/` | Edge Functions équipe |
+```
+index.html                  → Accueil public + catalogues
+compte.html                 → Authentification + choix de catégorie
+client-espace.html          → Hub client (profil, adresses, favoris)
+resto-client.html           → Commande & suivi client
+resto-restaurant.html       → Dashboard restaurant / hôtel
+resto-driver.html           → Espace livreur
+agro.html                   → Espace producteur / commerçant agro
+proprietaire.html           → Back-office propriétaire
+parametres.html             → Paramètres communs
+```
 
-## Notes
+### Portefeuilles et messagerie
 
-- Ancien projet « RestoGest » / localStorage : entièrement remplacé. Toutes les données métier passent par Supabase.
-- Les clés `service_role` restent exclusivement dans le tableau de bord Supabase / secrets des fonctions.
-- Pour un nouveau projet Supabase, mettre à jour `config.js` puis rejouer le SQL et redéployer les fonctions.
+- `wallet.js` affiche le portefeuille dans les espaces client, agro, restaurant/hôtel et livreur.
+- `07_portefeuilles_commissions.sql` crée les soldes, le grand livre, les moyens de retrait et le taux de commission propriétaire (5 % par défaut, réglable de 0 à 30 %).
+- Le partage des fonds après vente doit être appelé exclusivement depuis un webhook/Edge Function après vérification du paiement (`rg_wallet_settle_sale`). Le dépôt Mobile Money/carte et le paiement effectif des retraits nécessitent les identifiants et webhooks d'un prestataire ; l'interface ne crédite donc pas artificiellement un compte.
+- `messagerie.html` / `messagerie.js` offrent des conversations privées entre acteurs. `08_messagerie_acteurs.sql` installe les tables et les politiques RLS.
 
+## Modules partagés
+
+- `zsession.js` — session et données publiques
+- `zguard.js` — contrôle d’accès par catégorie
+- `zcart.js` + `zcart.css` — panier (un seul restaurant à la fois)
+- `catalogue.js` — catalogue public
+- `resto-portal-bridge.js` — lien entre Auth Supabase et tables métier
+- `config.js` — configuration Supabase unique
+
+---
+
+## Coordination Restauration · Hôtel · Livraison
+
+Une seule table de commandes (`rg_orders`), trois modes de remise :
+
+| Mode | Pôle | Description |
+|------|------|-------------|
+| Sur place / à emporter | 01 | Remise au comptoir |
+| Chambre | 02 | Service en chambre (hôtels) |
+| Livraison | 03 | Attribution automatique au livreur libre le plus proche (serveur) |
+
+**Statuts** (sans retour en arrière) :  
+`en attente` → `acceptée` → `préparée` → `en route` → `terminée`  
+(+ `annulée`, `refusée`)
+
+---
+
+## Panier & catalogue (accueil)
+
+1. Les catalogues sont visibles par tous.
+2. L’ajout au panier est réservé aux comptes **Client** connectés.
+3. Un panier = un seul restaurant. Ajouter un plat d’un autre restaurant propose de vider le panier.
+4. « Passer la commande » ouvre `resto-client.html` avec le panier repris.
+5. Suivi des commandes en temps réel + carte pendant la livraison.
+
+---
+
+## Sécurité (points d’attention)
+
+- Les politiques RLS des tables `rg_*` restent encore trop ouvertes (clé anon) dans certaines versions.
+- `rg_users` peut contenir des mots de passe en clair dans d’anciennes versions → **migrer entièrement vers Supabase Auth**.
+- Les comptes du portail (Supabase Auth) et les données métier (`rg_users`, `rg_rests`, `rg_orders`) sont reliés par `resto-portal-bridge.js`.
+- `agro.js` utilise les tables `rg_agro_*` : s’assurer que le schéma SQL correspond.
+
+**Priorité absolue :** restreindre les RLS et n’utiliser que Supabase Auth pour l’authentification.
+
+---
+
+## Fichiers SQL fournis
+
+| Fichier | Rôle |
+|---------|------|
+| `sql-portail.sql` | Schéma portail + fonction propriétaire |
+| `supabase-setup.sql` | Setup service restauration |
+| `ZUMUYA_EXTENSION_ESSAI.sql` | Profils / adresses / favoris clients + agro |
+| `04_auth_phone_email_profile.sql` | Référence auth |
+| `05_suppression_compte.sql` | Référence suppression de compte |
+
+---
+
+## Roadmap d’organisation (recommandée)
+
+1. **Sécurité** — RLS strictes + Auth pure
+2. **Stabilisation** — Client / Restaurant / Hôtel / Livreur
+3. **Agro** — Alignement tables + parcours producteur/commerçant complets
+4. **Catalogue unifié** — Restaurants + produits agricoles + futurs commerces
+5. **Paiements mobiles** — Orange Money, Moov, Wave…
+6. **Analytics propriétaire** — Tableaux de bord consolidés
+
+---
+
+## Licence & usage
+
+Code fourni pour déploiement et évolution de la plateforme ZUMUYA GROUP.  
+Adapter `config.js` à votre projet Supabase avant mise en production.
+
+© ZUMUYA GROUP — L’Afrique de l’Ouest en réseau.

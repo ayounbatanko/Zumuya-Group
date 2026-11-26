@@ -15,7 +15,7 @@ ZUMUYA GROUP — VERSION 3
    rg_organizations et reliée à rg_delivery_organizations avant d'inviter un livreur.
 
 IMPORTANT — erreur 401 rg_orders :
-Le code historique zrestaurant-db.js utilise encore la clé anon pour ses requêtes REST
+Le code historique resto-db.js utilise encore la clé anon pour ses requêtes REST
 et charge les tables globalement. Accorder les écritures anon à rg_orders serait
 une fuite de commandes et de données personnelles. La migration n'ouvre donc pas
 rg_orders au rôle anon. Le connecteur de synchronisation historique doit être

@@ -1,7 +1,7 @@
 ZUMUYA GROUP — CORRECTIFS DU 20/11/2026 (V2)
 
 1. SYNCHRONISATION (erreur 401 / 42501 « Synchronisation impossible »)
-   - zrestaurant-db.js envoyait toutes les requêtes avec la clé publique anonyme : la base refusait l'écriture.
+   - resto-db.js envoyait toutes les requêtes avec la clé publique anonyme : la base refusait l'écriture.
      Il utilise maintenant le jeton de connexion de l'utilisateur (session Supabase du portail).
    - Les nouvelles lignes sont insérées, les lignes existantes sont mises à jour (PATCH), conformément aux règles RLS.
    - Les identifiants attendus par les règles RLS (authId, ownerAuthId, clientAuthId...) sont ajoutés à l'envoi.
@@ -19,7 +19,7 @@ ZUMUYA GROUP — CORRECTIFS DU 20/11/2026 (V2)
    - En-tête allégé : marque, nom du compte, déconnexion.
    - Fonctionnalités regroupées en onglets sur une seule rangée défilante (non fixe, ne masque plus l'écran) :
      Mon catalogue · Demandes · Coopération · Messagerie · Portefeuille · Mon compte.
-   - « Mon compte » regroupe Paramètres, Gestion ZUMUYA et Déconnexion.
+   - « Mon compte » regroupe Paramètres, Gestion RestoGest et Déconnexion.
    - Les statistiques ne s'affichent que dans l'onglet catalogue.
 
 4. CATALOGUES PUBLICS (accueil)

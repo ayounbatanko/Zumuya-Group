@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="fr"><head><script src="config.js"></script><script src="zguard.js?v=3" data-roles="restaurant,hotel,staff"></script><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="manifest" href="resto-manifest.webmanifest"><meta name="theme-color" content="#14213d"><link rel="icon" type="image/png" href="resto-icon-192.png?v=3"><link rel="apple-touch-icon" href="resto-icon-192.png?v=3"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Restauration"><meta property="og:type" content="website">
+<!DOCTYPE html><html lang="fr"><head><script src="config.js"></script><script src="zguard.js" data-roles="restaurant,hotel,staff"></script><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="manifest" href="resto-manifest.webmanifest"><meta name="theme-color" content="#14213d"><link rel="icon" type="image/png" href="resto-icon-192.png?v=3"><link rel="apple-touch-icon" href="resto-icon-192.png?v=3"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Restauration"><meta property="og:type" content="website">
 <meta property="og:locale" content="fr_FR">
 <meta property="og:site_name" content="Service de Restauration">
 <meta property="og:title" content="Service de Restauration - Gestion intelligente du restaurant">
@@ -22,7 +22,7 @@ h2,h3{margin:.2em 0 .4em;letter-spacing:-.2px}
 #hdr>b{font-size:17px;display:flex;align-items:center;gap:8px}#hdr>b:before{content:"";width:10px;height:10px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 3px rgba(255,183,3,.3)}
 #net{font-size:12px;padding:3px 10px;border-radius:99px;background:rgba(18,163,107,.25);color:#7dffc9}#net.off{background:rgba(229,56,59,.3);color:#ffb3b5}
 #hdr .lang{display:inline-flex;background:rgba(255,255,255,.12);border-radius:99px;padding:3px;gap:2px}
-nav{display:flex;gap:8px;flex-wrap:wrap;padding:12px 18px;background:var(--card);border-bottom:1px solid var(--bd);position:sticky;top:56px;z-index:4;overflow-x:visible}
+nav{display:flex;gap:8px;flex-wrap:wrap;padding:12px 18px;background:var(--card);border-bottom:1px solid var(--bd);position:sticky;top:56px;z-index:4;overflow-x:auto}
 main{max-width:1000px;margin:0 auto;padding:18px}
 .card{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:var(--sh)}
 .col{display:flex;flex-direction:column;gap:10px}.col>.card{margin-bottom:0}
@@ -40,7 +40,7 @@ button.sec{background:transparent;color:var(--ink);border:1.5px solid var(--bd);
 button.sec:hover{border-color:var(--navy2);color:var(--navy2);box-shadow:none}
 @media(prefers-color-scheme:dark){button.sec:hover{border-color:var(--gold);color:var(--gold)}}
 button.bad{background:linear-gradient(135deg,#e5383b,#b1252a);color:#fff;box-shadow:0 4px 12px rgba(229,56,59,.35)}
-nav button{background:transparent;color:var(--ink);border:1.5px solid var(--bd);box-shadow:none;padding:8px 16px;white-space:normal}
+nav button{background:transparent;color:var(--ink);border:1.5px solid var(--bd);box-shadow:none;padding:8px 16px;white-space:nowrap}
 nav button:hover{border-color:var(--navy2);box-shadow:none}
 nav button.on{background:linear-gradient(135deg,#14213d,#26417a);color:var(--gold);border-color:transparent;box-shadow:0 4px 12px rgba(20,33,61,.35)}
 #hdr .lang button{background:transparent;box-shadow:none;padding:4px 11px;font-size:12px;color:#fff;border-radius:99px}
@@ -67,7 +67,7 @@ body.auth #hdr{background:transparent;box-shadow:none;position:static}
 body.auth main{padding-top:0}body.auth .card{box-shadow:0 24px 70px rgba(0,0,0,.45);border:0;border-radius:22px;padding:26px}
 .brand{font-size:26px;font-weight:800;margin:0}.brand span{color:var(--gold2)}
 body.auth #hdr>b{display:none}body.auth #hdr{justify-content:flex-end}
-nav{position:static;flex-wrap:wrap;overflow-x:visible}#hdr{position:static}
+nav{position:static;flex-wrap:nowrap;scrollbar-width:thin}#hdr{position:static}
 .gal{display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x mandatory;margin-bottom:10px}.gal.ph{height:90px;align-items:center;justify-content:center;font-size:34px;background:rgba(255,183,3,.15);border-radius:12px}
 .gi{position:relative;flex:0 0 auto;scroll-snap-align:start}.gi img{height:150px;max-width:260px;object-fit:cover;border-radius:12px;display:block}
 .gi .x{position:absolute;top:6px;inset-inline-end:6px;padding:2px 8px;border-radius:99px;background:rgba(20,33,61,.8);color:#fff;box-shadow:none;font-size:12px}
@@ -117,7 +117,7 @@ nav:empty{display:none;padding:0;border:0;height:0;overflow:hidden}
 @media(max-width:600px){nav{padding:9px 10px;gap:6px}.znav-action{padding:8px 10px;font-size:12px}}
 </style></head><body>
 <div id="hdr"></div><nav id="nav"></nav><main id="m"></main><div id="receipt"></div>
-<script src="config.js"></script><script src="resto-db.js?v=3"></script><script src="resto-portal-bridge.js?v=4"></script><script src="zteam.js"></script><script src="zdelivery.js"></script><script src="zsupply.js"></script><script src="resto-notif.js"></script>
+<script src="config.js"></script><script src="resto-db.js?v=3"></script><script src="resto-portal-bridge.js?v=3"></script><script src="zteam.js"></script><script src="zsupply.js"></script><script src="resto-notif.js"></script>
 <script src="resto-chat.js"></script>
 <script src="resto-charts.js"></script>
 <script src="resto-qr.js"></script>
@@ -184,10 +184,10 @@ const U=guard('restaurant');U&&RGChat.watch(U.id);var setSub='rest';let tab=null
 const R=()=>D.get().rests.find(r=>r.id==U.restId);
 const upd=f=>{const d=D.get();f(d.rests.find(r=>r.id==U.restId),d);D.save(d)};
 const day=ts=>new Date(ts).toISOString().slice(0,10);
-const tabs=['sub','dash','hotel','pos','orders','menu','hist','report','drivers','team','supply','audit','support','settings'];
+const tabs=['sub','dash','hotel','pos','orders','menu','hist','report','drivers','team','supply','audit','support','settings','wallet'];
 /* Droits : le compte principal a tout ; un employé n'ouvre que les rubriques accordées par le restaurant (contrôle serveur : voir 11_*.sql). */
 const IS_STAFF=!!(U&&U.staff),PERM=(window.ZPERM&&window.ZPERM.permissions)||[];
-const TABPERM={dash:'dash',pos:'pos',orders:'orders',hotel:'orders',menu:'menu',hist:'hist',report:'report',drivers:'drivers',supply:'supply',settings:'settings',team:'team'};
+const TABPERM={dash:'dash',pos:'pos',orders:'orders',hotel:'orders',menu:'menu',hist:'hist',report:'report',drivers:'drivers',supply:'supply',wallet:'finance',settings:'settings',team:'team'};
 const OWNER_ONLY=['sub','audit'];   /* abonnement et journal : compte principal uniquement */
 function can(k){if(!IS_STAFF)return true;if(k==='support'||k==='account')return true;if(OWNER_ONLY.includes(k))return false;return PERM.includes(TABPERM[k])}
 const ORGID=()=>{const r=R();return (r&&r.portalOrgId)||(window.ZPERM&&window.ZPERM.org_id)||null};
@@ -204,11 +204,11 @@ const tabMeta={
  report:{label:'Rapport du chiffre d\'affaires',ico:'📈'},
  support:{label:'Support (écrire à l\'administrateur)',ico:'💬'},
  hotel:{label:'Module hôtel',ico:'🏨'},
- settings:{label:'Paramètres et réglages',ico:'⚙️'}
+ settings:{label:'Paramètres et réglages',ico:'⚙️'}, wallet:{label:'Portefeuille',ico:'👛'}
 };
 function isHotelAccount(){const r=R();return !!(r&&(r.businessType==='hotel'||(r.hotel&&r.hotel.enabled)))}
 function homeGrid(){const pend=D.get().orders.filter(o=>o.restId==U.restId&&o.status=='en attente').length;
- const order=[ 'sub','dash',...(isHotelAccount()?['hotel']:[]),'pos','orders','menu','hist','report','drivers','team','supply','audit','support','settings'].filter(can);
+ const order=[ 'sub','dash',...(isHotelAccount()?['hotel']:[]),'pos','orders','menu','hist','report','drivers','team','supply','audit','support','settings','wallet'].filter(can);
  const btns=order.map(k=>{const m=tabMeta[k];const badge=(k=='orders'&&pend)?` <span class="badge">${pend}</span>`:'';
   const cls=(k==='settings'||k==='sub')?'hg-btn full':'hg-btn';
   return `<button class="${cls}" onclick="tab='${k}';render()"><span class="ico">${m.ico}</span><span>${m.label}${badge}</span></button>`}).join('');
@@ -279,7 +279,7 @@ function render(){const r=R(),s=subInfo(r);if(tab==='hotel'&&!isHotelAccount())t
  if(!s.ok){m.innerHTML=tab==='account'?passwordCard():tab==='support'?RGChat.userView(U):proUI(r,s)+`<div class="row" style="gap:8px"><button type="button" class="sec" onclick="tab='support';render()">💬 Support</button><button type="button" class="sec" onclick="tab='account';render()">🔑 Paramètres du compte</button></div>`;return}
  if(!tab){m.innerHTML=banner(r,s)+homeGrid();return}
  const back=`<div class="back-row"><button type="button" class="back-btn" onclick="tab=null;render()">← Retour à l'accueil</button></div>`;
- m.innerHTML=back+(V[tab])(r);mountPro(r)}
+ if(tab==='wallet'){m.innerHTML=back;if(wallet){wallet.hidden=false;m.appendChild(wallet);if(window.RGWalletLoad)window.RGWalletLoad()}return}m.innerHTML=back+(V[tab])(r);mountPro(r)}
 function getOwnerPlans(){
  const d=D.get();const op=d.ownerPay||{};
  const cur=op.defaultCurrency||'XOF';
@@ -399,7 +399,7 @@ settingsMain(r){return `<div class="card col"><label>Nom<input id="sn" value="${
  </div>
  <label>Devise<select id="sc">${curOptions(r.currency)}</select></label>
  <button onclick="saveS()">Enregistrer</button></div>
- <div class="card"><b>Carte de visite</b><p><a href="${cardUrl(r.slug)}" target="_blank">Ouvrir la carte de visite de ${esc(r.name)}</a></p><div style="text-align:center">${RGQR.svg(new URL('resto-card.html?r='+encodeURIComponent(r.slug),location.href).href,150)}<p class="mut">📱 QR code : vos clients arrivent directement sur votre restaurant.</p></div></div>`}};
+ <div class="card"><b>Carte de visite</b><p><a href="${cardUrl(r.slug)}" target="_blank">Ouvrir la carte de visite de ${esc(r.name)}</a></p><div style="text-align:center">${RGQR.svg(new URL('resto-index.html?resto='+r.slug,location.href).href,150)}<p class="mut">📱 QR code : vos clients arrivent directement sur votre restaurant.</p></div></div>`}};
 function saveHotel(){const services=[...document.querySelectorAll('.hotel-service:checked')].map(x=>x.value);try{upd(r=>{r.hotel={...(r.hotel||{}),enabled:true,name:hn.value.trim(),category:hc.value,manager:hm.value.trim(),rooms:Math.max(0,+hr.value||0),services,hours:ht.value.trim(),instructions:hi.value.trim()};r.businessType='hotel'});render();showOperationSuccess('Modification des paramètres de l’hôtel',()=>{tab='hotel';render()})}catch(e){alert('Échec de l’enregistrement des paramètres hôtel. Vérifiez votre espace de stockage et réessayez.')}}
 function addC(i){const p=R().menu[i],x=cart.find(c=>c.n==p.n);x?x.q++:cart.push({n:p.n,p:p.p,q:1});render()}
 function sell(){const r=R(),s={id:uid(),date:Date.now(),items:cart,total:cart.reduce((a,i)=>a+i.p*i.q,0),pay:pm.value,src:'caisse'};
@@ -483,15 +483,26 @@ render();
  if('serviceWorker' in navigator && location.protocol.startsWith('http')){navigator.serviceWorker.register('./sw.js?v=9').catch(()=>{})}
 })();
 </script>
-<script src="resto-ext-loader.js?v=4"></script>
+<script src="resto-ext-loader.js"></script>
 <style>
-
-
-
-
-
-
-
-
-
-</style><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="zchat.js"></script></body></html>
+.wallet-panel{border:1px solid #dce4eb;border-radius:18px;padding:20px;background:#fff;margin:18px 0}
+.wallet-head{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.wallet-kicker{font-size:.72rem;letter-spacing:.14em;font-weight:800;color:#a67c32}
+.wallet-head h2{margin:5px 0}.wallet-head strong{background:#102b45;color:white;border-radius:14px;padding:16px 20px;font-size:1.35rem}
+.wallet-actions{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0}
+.wallet-actions .btn,.wallet-panel .btn{border:0;border-radius:10px;padding:12px 16px;font-weight:800;cursor:pointer}
+.wallet-panel .btn{background:#102b45;color:white}.wallet-panel .btn.secondary{background:#e8edf3;color:#102b45}
+.wallet-ledger .entry{border-radius:10px;padding:12px;margin:8px 0;border:1px solid #e5eaf0}
+.wallet-panel form{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin:12px 0}.wallet-panel form label{display:flex;flex-direction:column;gap:6px}.wallet-panel input,.wallet-panel select{padding:10px;border:1px solid #ccd4df;border-radius:9px;font:inherit}.wallet-ledger .credit{color:#167447;font-weight:800}.wallet-ledger .debit{color:#a33b35;font-weight:800}
+</style><section class="panel wallet-panel" id="walletPanel" hidden>
+  <div class="wallet-head"><div><span class="wallet-kicker">PORTEFEUILLE ZUMUYA</span><h2>Mon portefeuille</h2><p class="muted">Solde, encaissements de ventes et retraits sécurisés.</p></div><strong id="walletBalance">Chargement…</strong></div>
+  <div class="wallet-actions"><button type="button" class="btn" id="walletDeposit">＋ Déposer de l’argent</button><button type="button" class="btn secondary" id="walletWithdrawToggle">↗ Demander un retrait</button></div>
+  <p class="muted" id="walletNotice">Les dépôts seront activés après raccordement du prestataire de paiement et de son webhook sécurisé.</p>
+  <form id="walletWithdrawForm" class="grid" hidden>
+    <label>Montant à retirer (FCFA)<input name="amount" type="number" min="1" step="1" required></label>
+    <label>Moyen de paiement<select name="method" required><option value="">Choisir</option><option value="mobile_money">Mobile Money</option><option value="bank">Virement bancaire</option></select></label>
+    <label>Numéro / référence du bénéficiaire<input name="destination" required placeholder="Numéro Mobile Money ou RIB"></label>
+    <div><button class="btn" type="submit">Envoyer la demande</button></div>
+  </form>
+  <h3>Historique des opérations</h3><div id="walletLedger" class="wallet-ledger"><p class="muted">Chargement…</p></div>
+</section><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="wallet.js?v=2"></script></body></html>
