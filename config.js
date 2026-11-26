@@ -1,5 +1,6 @@
-/* Configuration Supabase unique de ZUMUYA GROUP.
-   Le portail, la restauration, l'hôtel, les commandes et les catalogues partagent ce projet.
+/* Configuration Supabase centralisée utilisée par les espaces du dépôt ZUMUYA GROUP.
+   L'URL et la clé publique doivent toujours provenir du même projet.
+   Ne les remplacer qu'après vérification de la migration des données et des fonctions.
    Ne jamais mettre de clé service_role dans ce fichier. */
 window.ZUMAYA_CONFIG = {
   SUPABASE_URL: 'https://dusznqvwhrklcqhmbylu.supabase.co',
