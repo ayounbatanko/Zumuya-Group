@@ -201,7 +201,7 @@ const tabMeta={
  menu:{label:'Carte / Menu',ico:'🍴'},
  hist:{label:'Historique des ventes',ico:'🕐'},
  report:{label:'Rapports et statistiques',ico:'📈'},
- hotel:{label:'Gestion de l’hôtel et service en chambre',ico:'🏨'},
+ hotel:{label:'Restauration et services de l’hôtel',ico:'🏨'},
  drivers:{label:'Gestion des livreurs',ico:'🚚'},
  team:{label:'Mon équipe',ico:'👥'},
  supply:{label:'Approvisionnement agricole',ico:'🌾'},
@@ -215,7 +215,7 @@ function homeGrid(){
  const pend=D.get().orders.filter(o=>o.restId==U.restId&&o.status=='en attente').length;
  const groups=[
   {title:'Pilotage et ventes',items:['dash','orders','pos','menu','hist','report']},
-  ...(isHotelAccount()?[{title:'Services hôteliers',items:['hotel']}]:[]),
+  ...(isHotelAccount()?[{title:'Hôtel — restauration et services',items:['hotel']}]:[]),
   {title:'Équipe et opérations',items:['drivers','team','supply','audit']},
   {title:'Compte et assistance',items:['sub','support','settings']}
  ];
@@ -339,11 +339,72 @@ function submitProPay(){
  toast('Paiement transmis au propriétaire');render();
 }
 const V={
-hotel(r){const h=r.hotel||{};const os=D.get().orders.filter(o=>o.restId===r.id);const active=os.filter(o=>!['terminée','refusée','annulée'].includes(o.status));const today=os.filter(o=>day(o.created)===day(Date.now()));const services=h.services||['Restaurant','Service en chambre','À emporter'];
- return `<div class="col"><div class="card"><h3>🏨 Espace hôtel partenaire</h3><p class="mut">Configurez les services de votre hôtel dans ZUMUYA GROUP : restauration, service en chambre et événements.</p><div class="grid"><div class="card"><b>${active.length}</b><div class="mut">Commandes en cours</div></div><div class="card"><b>${today.length}</b><div class="mut">Commandes aujourd’hui</div></div><div class="card"><b>${os.filter(o=>o.deliveryMode==='room'&&o.status==='préparée').length}</b><div class="mut">À remettre en chambre</div></div><div class="card"><b>${services.length}</b><div class="mut">Services activés</div></div></div><div class="row" style="margin-top:10px"><button onclick="tab='orders';render()">🛎️ Commandes et remises en chambre</button><button class="sec" onclick="window.ZUMUYA_EXT&&ZUMUYA_EXT.openFolio?ZUMUYA_EXT.openFolio():alert('Notes de chambre indisponibles.')">🧾 Notes de chambre</button></div></div>
- <div class="card col"><h3>Informations de l’hôtel</h3><label>Nom de l’hôtel<input id="hn" value="${esc(h.name||r.name)}"></label><label>Catégorie<select id="hc"><option ${h.category==='Hôtel'?'selected':''}>Hôtel</option><option ${h.category==='Résidence hôtelière'?'selected':''}>Résidence hôtelière</option><option ${h.category==='Auberge'?'selected':''}>Auberge</option><option ${h.category==='Complexe touristique'?'selected':''}>Complexe touristique</option></select></label><label>Responsable restauration<input id="hm" value="${esc(h.manager||'')}" placeholder="Nom du responsable"></label><label>Nombre de chambres<input id="hr" type="number" min="0" value="${h.rooms||''}" placeholder="Ex. 40"></label></div>
- <div class="card col"><h3>Services de restauration</h3>${['Restaurant','Service en chambre','Petit-déjeuner','Bar / Café','Banquets et séminaires','À emporter'].map((x,i)=>`<label style="display:flex;gap:10px;align-items:center"><input type="checkbox" class="hotel-service" value="${x}" ${(services.includes(x)?'checked':'')}> ${x}</label>`).join('')}<label>Plage horaire du service<input id="ht" value="${esc(h.hours||'07:00 - 23:00')}" placeholder="07:00 - 23:00"></label><label>Instructions affichées à l’équipe<textarea id="hi" rows="3" placeholder="Ex. appeler la réception avant livraison en chambre">${esc(h.instructions||'')}</textarea></label><button onclick="saveHotel()">💾 Enregistrer les paramètres hôtel</button></div>
- <div class="card"><h3>Commandes de l’hôtel</h3><p class="mut">Une seule liste de commandes : service en chambre (remise par le personnel, montant cumulé sur la note de la chambre) et livraison extérieure (course proposée au livreur le plus proche, coordonnée avec ZUMUYA Livraison).</p><button onclick="tab='orders';render()">Voir les commandes</button></div></div>`},
+hotel(r){
+ const h=r.hotel||{},os=D.get().orders.filter(o=>o.restId===r.id);
+ const active=os.filter(o=>!['terminée','refusée','annulée'].includes(o.status));
+ const today=os.filter(o=>day(o.created)===day(Date.now()));
+ const room=os.filter(o=>o.deliveryMode==='room'&&!['terminée','refusée','annulée'].includes(o.status));
+ const services=h.services||['Restaurant','Service en chambre','Petit-déjeuner','Bar / Café','À emporter'];
+ const countService=name=>os.filter(o=>(o.serviceType||'Restaurant').toLowerCase().includes(name.toLowerCase())).length;
+ const tile=(ico,title,desc,target)=>`<button type="button" class="hg-btn" style="min-height:104px;text-align:left" onclick="tab='${target}';render()"><span class="ico">${ico}</span><span><b>${title}</b><small style="display:block;white-space:normal;font-weight:400;opacity:.8;margin-top:5px">${desc}</small></span></button>`;
+ return `<div class="col">
+ <div class="card">
+  <h3>🏨 Restauration de l'hôtel</h3>
+  <p class="mut">Un seul espace pour piloter le restaurant de l'hôtel, le bar, le petit-déjeuner, les banquets et le service en chambre. Les ventes, les menus et les commandes restent rattachés à cet établissement hôtelier.</p>
+  <div class="grid">
+   <div class="card"><b>${active.length}</b><div class="mut">Commandes en cours</div></div>
+   <div class="card"><b>${today.length}</b><div class="mut">Commandes aujourd'hui</div></div>
+   <div class="card"><b>${room.length}</b><div class="mut">Services en chambre à traiter</div></div>
+   <div class="card"><b>${services.length}</b><div class="mut">Services activés</div></div>
+  </div>
+ </div>
+ <div class="card col">
+  <h3>🍽️ Centre de restauration hôtelière</h3>
+  <p class="mut">Accédez directement aux outils de gestion issus de RestoGest, adaptés aux différents points de restauration de votre hôtel.</p>
+  <div class="home-grid">
+   ${tile('🍴','Restaurant de l’hôtel','Carte, plats, prix et disponibilité','menu')}
+   ${tile('🧮','Caisse et ventes','Encaisser les clients du restaurant et du bar','pos')}
+   ${tile('🛎️','Commandes & service en chambre','Commandes clients, numéro de chambre et remise','orders')}
+   ${tile('☕','Petit-déjeuner, bar & café','Suivre les commandes des différents services','orders')}
+   ${tile('🎉','Banquets & événements','Traiter les commandes de groupes et événements','orders')}
+   ${tile('📚','Historique des ventes','Retrouver les ventes et réimprimer les tickets','hist')}
+   ${tile('📊','Rapports de restauration','Consulter les résultats et statistiques','report')}
+   ${tile('🌾','Approvisionnement','Gérer les achats et fournisseurs alimentaires','supply')}
+  </div>
+  <div class="row" style="margin-top:12px">
+   <button type="button" onclick="window.ZUMUYA_EXT&&ZUMUYA_EXT.openFolio?ZUMUYA_EXT.openFolio():alert('Notes de chambre indisponibles.')">🧾 Ouvrir les notes de chambre</button>
+   <button type="button" class="sec" onclick="tab='orders';render()">Voir toutes les commandes</button>
+  </div>
+ </div>
+ <div class="card col">
+  <h3>🏨 Informations de l’hôtel</h3>
+  <div class="formgrid">
+   <label>Nom de l’hôtel<input id="hn" value="${esc(h.name||r.name)}"></label>
+   <label>Catégorie<select id="hc"><option ${h.category==='Hôtel'?'selected':''}>Hôtel</option><option ${h.category==='Résidence hôtelière'?'selected':''}>Résidence hôtelière</option><option ${h.category==='Auberge'?'selected':''}>Auberge</option><option ${h.category==='Complexe touristique'?'selected':''}>Complexe touristique</option></select></label>
+   <label>Responsable restauration<input id="hm" value="${esc(h.manager||'')}" placeholder="Nom du responsable"></label>
+   <label>Nombre de chambres<input id="hr" type="number" min="0" value="${h.rooms||''}" placeholder="Ex. 40"></label>
+  </div>
+ </div>
+ <div class="card col">
+  <h3>⚙️ Organisation des services de restauration</h3>
+  <p class="mut">Activez uniquement les services proposés par votre établissement. Les commandes peuvent préciser le service concerné et, pour le service en chambre, le numéro de chambre.</p>
+  ${['Restaurant','Service en chambre','Petit-déjeuner','Bar / Café','Banquets et séminaires','À emporter'].map(x=>`<label style="display:flex;gap:10px;align-items:center;padding:7px 0"><input type="checkbox" class="hotel-service" value="${x}" ${services.includes(x)?'checked':''}> <span><b>${x}</b> <small class="mut">— ${countService(x)} commande(s)</small></span></label>`).join('')}
+  <label>Horaires de restauration<input id="ht" value="${esc(h.hours||'07:00 - 23:00')}" placeholder="07:00 - 23:00"></label>
+  <label>Consignes pour l’équipe<textarea id="hi" rows="3" placeholder="Ex. appeler la réception avant livraison en chambre">${esc(h.instructions||'')}</textarea></label>
+  <button type="button" onclick="saveHotel()">💾 Enregistrer l’organisation de l’hôtel</button>
+ </div>
+ <div class="card">
+  <h3>📌 Règles de service</h3>
+  <ul class="mut">
+   <li>Restaurant et bar : encaissement via la caisse de l'hôtel.</li>
+   <li>Petit-déjeuner : commandes suivies dans l'espace Commandes.</li>
+   <li>Service en chambre : préciser le numéro de chambre et suivre la remise par le personnel.</li>
+   <li>Banquets : centraliser les commandes et les montants dans l'historique de l'hôtel.</li>
+   <li>Les ventes et rapports sont rattachés au compte de cet hôtel, séparément des autres établissements.</li>
+  </ul>
+ </div>
+ </div>`},
+
  dash(r){const S=r.sales,c=r.currency,td=day(Date.now()),sum=a=>a.reduce((x,s)=>x+s.total,0);
  const days=[...Array(7)].map((_,i)=>{const t=Date.now()-(6-i)*864e5;return{l:day(t).slice(5),v:sum(S.filter(s=>day(s.date)==day(t)))}});
  const it={};S.forEach(s=>s.items.forEach(i=>it[i.n]=(it[i.n]||0)+i.p*i.q));
