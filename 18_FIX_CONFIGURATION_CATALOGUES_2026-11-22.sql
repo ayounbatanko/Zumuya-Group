@@ -19,7 +19,11 @@ declare
 begin
   if v_uid is null then raise exception 'Connexion requise.'; end if;
   if p_status not in ('active','paused') then raise exception 'Statut non autorisé.'; end if;
-  v_module := case p_module when 'restaurant' then 'restauration' when 'delivery' then 'livraison' else p_module end;
+  v_module := case
+    when exists(select 1 from public.rg_module_catalog where module_code=p_module) then p_module
+    when p_module='restaurant' and exists(select 1 from public.rg_module_catalog where module_code='restauration') then 'restauration'
+    when p_module='delivery' and exists(select 1 from public.rg_module_catalog where module_code='livraison') then 'livraison'
+    else p_module end;
   if not exists(select 1 from public.rg_module_catalog where module_code=v_module and rollout_status='available') then
     raise exception 'Pôle indisponible ou non configuré (%).',v_module;
   end if;
