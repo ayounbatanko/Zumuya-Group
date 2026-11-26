@@ -1,7 +1,5 @@
 /* ZUMUYA GROUP — raccourcis communs dans tous les espaces connectés */
 (()=>{'use strict';
-const path=(location.pathname.split('/').pop()||'').toLowerCase();
-if(['index.html','resto-index.html','resto-card.html','compte.html'].includes(path)){} 
 let session=null;
 try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(/^sb-.*-auth-token$/.test(k)){const v=JSON.parse(localStorage.getItem(k)||'null');session=v&&(v.currentSession||v);if(session&&session.user)break;}}}catch(e){}
 if(!session||!session.user)return;
