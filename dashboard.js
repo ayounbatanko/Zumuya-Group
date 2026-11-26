@@ -14,7 +14,7 @@ const MODS=[
 let sb=null,user=null,orgs=[],mods=[],busy=false;
 const say=(t,good)=>{const m=$('#dashMsg');if(m){m.textContent=t||'';m.className=good?'good':''}};
 function view(v){
-  $('#vOverview').hidden=v!=='overview';$('#vConfig').hidden=v!=='config';const vw=$('#vWallet');if(vw)vw.hidden=v!=='wallet';
+  $('#vOverview').hidden=v!=='overview';$('#vConfig').hidden=v!=='config';const vw=$('#vWallet');if(vw)vw.hidden=v!=='wallet';const vc=$('#vCatalogs');if(vc)vc.hidden=v!=='catalogs';
   $$('#dash .dside [data-view]').forEach(a=>a.classList.toggle('on',a.dataset.view===v||(v==='config'&&a.dataset.view==='activities')));
   closeSide();window.scrollTo({top:0});
 }
@@ -57,11 +57,9 @@ async function configure(code){
   const m=MODS.find(x=>x.code===code);if(!m||busy)return;
   busy=true;say('');
   try{
-    /* activation du pôle sur le compte (sans effet bloquant si la table n'est pas accessible) */
-    const org=orgs.find(o=>m.orgs.includes(o.organization_type));
-    const {error:activationError}=await sb.rpc('rg_ecosystem_set_module',{p_module:code,p_org:org?.id||null,p_configuration:{},p_status:'active'});
-    if(activationError)throw activationError;
-    if(!window.ZPARTNER)throw new Error('Le formulaire n’est pas disponible.');
+    /* Ouvrir d'abord la configuration : la création de l'organisation enregistre ensuite le pôle.
+       La synchronisation SQL de l'écosystème est non bloquante dans compte.js. */
+    if(!window.ZPARTNER)throw new Error('Le formulaire de configuration n’est pas chargé. Actualisez la page.');
     view('config');
     await window.ZPARTNER.open(m.cats);
   }catch(e){say(e.message||'Configuration impossible pour le moment.')}
