@@ -12,4 +12,4 @@ function render(){const q=$('#q').value.trim().toLowerCase();const list=hotels.f
 async function load(){try{const a=await ZS.rests();hotels=a.filter(r=>ZS.subOk(r)&&ZS.isHotel(r));render()}catch(e){$('#hotels').textContent='Impossible de charger les catalogues hôteliers. Réessayez.'}}
 $('#q').addEventListener('input',render);$('#refresh').addEventListener('click',load);ZC.init({onChange:render});load();setInterval(load,60000);
 })();
-</script><script src="account-shortcuts.js"></script></body></html>
+</script><script src="account-shortcuts.js?v=3"></script></body></html>
