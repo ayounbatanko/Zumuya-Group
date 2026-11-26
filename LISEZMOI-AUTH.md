@@ -6,7 +6,7 @@ Seule exception : un ancien compte client créé avec un numéro de téléphone 
 
 ## Restaurants partenaires : plus de seconde connexion
 
-Après connexion e-mail, un restaurant ayant sa fiche partenaire arrive directement sur son espace (`resto-restaurant.html`, tableau de bord RestoGest). Le fichier `resto-portal-bridge.js` (chargé par `resto-restaurant.html` et `resto-index.html`) reconnaît la session du portail, retrouve ou crée le compte local et la fiche restaurant, puis ouvre la session. L'écran « Gestion Multiples de Restaurant » ne redemande plus d'identifiants dans ce parcours. « Changer de compte » et « Déconnexion » dans le Service restent possibles.
+Après connexion e-mail, un restaurant ayant sa fiche partenaire arrive directement sur son espace (`zrestaurant-restaurant.html`, tableau de bord ZUMUYA Restauration). Le fichier `zrestaurant-portal-bridge.js` (chargé par `zrestaurant-restaurant.html` et `zrestaurant-index.html`) reconnaît la session du portail, retrouve ou crée le compte local et la fiche restaurant, puis ouvre la session. L'écran « Gestion Multiples de Restaurant » ne redemande plus d'identifiants dans ce parcours. « Changer de compte » et « Déconnexion » dans le Service restent possibles.
 
 ## Configuration Supabase Auth
 
