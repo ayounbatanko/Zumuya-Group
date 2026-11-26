@@ -41,4 +41,4 @@ async function load(){try{const auth=await sb.auth.getSession();const session=au
  }catch(e){$('#orders').innerHTML='<div class="empty">Impossible de charger les commandes. Vérifiez votre connexion et réessayez.</div>'}}
 document.querySelectorAll('[data-filter]').forEach(b=>b.addEventListener('click',()=>{filter=b.dataset.filter;draw()}));$('#refresh').addEventListener('click',load);load();
 })();
-</script><script src="account-shortcuts.js?v=1"></script></body></html>
+</script><script src="account-shortcuts.js?v=3"></script></body></html>
