@@ -4,6 +4,7 @@ const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 /* cats = catégories du formulaire partenaire ; orgs = types d'organisation qui rendent l'activité « configurée » ; page = espace de gestion ; browse = page publique du pôle */
 const MODS=[
+ {code:'social',ico:'🌐',title:'Réseau social',desc:'Publications, photos, vidéos et communauté ZUMUYA',cats:[],orgs:[],page:'reseau-social.html',browse:'reseau-social.html',def:'Mon profil social',social:true},
  {code:'marketplace',ico:'🛍️',title:'Marketplace',desc:'Boutique, produits et commandes',cats:['marketplace'],orgs:['marketplace','commerce'],page:'boutique.html',browse:'marketplace.html',def:'Ma boutique'},
  {code:'restaurant',ico:'🍽️',title:'Restauration',desc:'Restaurant, menus et commandes',cats:['restaurant'],orgs:['restaurant'],page:'zrestaurant-restaurant.html?portal=restaurant#home',browse:'zrestaurant-client.html',def:'Mon restaurant'},
  {code:'agro',ico:'🌱',title:'Agro',desc:'Producteurs, fournisseurs et acheteurs',cats:['agro','agro_trader'],orgs:['agro','agro_trader'],page:'agro.html',browse:'agro.html',def:'Mon activité agricole'},
@@ -28,7 +29,7 @@ function status(m){
     const sus=o.verification_status==='suspended';
     return{on:true,name:o.public_name||o.legal_name||m.def,cls:sus?'bad':'ok',label:sus?'Suspendu':'Activé',ico:sus?'!':'✔',manage:true};
   }
-  if(row)return{on:true,name:m.def,cls:'warn',label:'Informations à compléter',ico:'!',manage:false};
+  if(row)return{on:true,name:m.def,cls:'warn',label:'Activé',ico:'✔',manage:!!m.social};
   return{on:false};
 }
 function renderCards(){
@@ -57,6 +58,7 @@ async function configure(code){
   const m=MODS.find(x=>x.code===code);if(!m||busy)return;
   busy=true;say('');
   try{
+    if(m.social){const r=await sb.rpc('rg_ecosystem_set_module',{p_module:'social',p_org:null,p_configuration:{},p_status:'active'});if(r.error)throw r.error;await load();say('Pôle Réseau social activé pour votre compte.',true);return;}
     /* Ouvrir d'abord la configuration : la création de l'organisation enregistre ensuite le pôle.
        La synchronisation SQL de l'écosystème est non bloquante dans compte.js. */
     if(!window.ZPARTNER)throw new Error('Le formulaire de configuration n’est pas chargé. Actualisez la page.');
