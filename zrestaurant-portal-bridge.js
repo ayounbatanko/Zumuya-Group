@@ -40,7 +40,11 @@ if(type==='universal'||((type==='restaurant'||type==='hotel')&&!md.organization_
   }
   /* Secours pour les comptes universels dont la fiche d'organisation est déjà portée par les métadonnées,
      mais dont la lecture REST est momentanément indisponible. Le pôle explicite de l'URL reste prioritaire. */
-  if(type==='universal'&&requestedPortal&&!orgLookupOK&&md.organization_id){type=requestedPortal;}
+  if(type==='universal'&&requestedPortal&&!orgLookupOK){
+    var mappedOrg=om[requestedPortal];if(mappedOrg&&typeof mappedOrg==='object')mappedOrg=mappedOrg.id||mappedOrg.organization_id;
+    if(mappedOrg&&!md.organization_id)md.organization_id=mappedOrg;
+    if(md.organization_id)type=requestedPortal;
+  }
 }
 /* Si aucun établissement ne correspond au pôle demandé, ne pas ouvrir un espace vide ou celui d'un autre pôle. */
 if(((type==='restaurant'||type==='hotel')&&!md.organization_id)||(pu.user_metadata&&pu.user_metadata.account_type==='universal'&&requestedPortal&&!md.organization_id)){
