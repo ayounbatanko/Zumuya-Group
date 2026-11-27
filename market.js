@@ -1,42 +1,42 @@
 (()=>{'use strict';
 const $=s=>document.querySelector(s),cfg=window.ZUMAYA_CONFIG||{};
-const notice=$('#notice');let sb=null,user=null,items=[],marketCart=readMarketCart();
+const notice=$('#notice');let sb=null,user=null,auth=null,items=[],marketCart=readMarketCart();
 const params=new URLSearchParams(location.search),storeFilter=params.get('store');let autoAdded=false;
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const money=n=>new Intl.NumberFormat('fr-FR',{maximumFractionDigits:0}).format(Number(n)||0)+' FCFA';
 const https=u=>typeof u==='string'&&/^https:\/\//i.test(u)?u:'';
 function msg(el,t){el.textContent=t}
+function readAuthSession(){try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(/^sb-.*-auth-token$/.test(k)){const v=JSON.parse(localStorage.getItem(k)||'null'),a=v&&(v.currentSession||v);if(a&&a.access_token){auth=a;return a}}}}catch(_){}return null}
+function apiHeaders(token){return {apikey:cfg.SUPABASE_ANON_KEY,Authorization:'Bearer '+(token||cfg.SUPABASE_ANON_KEY),'Content-Type':'application/json'}}
+async function apiRows(path,token){const r=await fetch(cfg.SUPABASE_URL+'/rest/v1/'+path,{headers:apiHeaders(token)}),t=await r.text();if(!r.ok)throw Error(t||('Supabase '+r.status));return t?JSON.parse(t):[]}
 async function init(){try{
-  if(!cfg.SUPABASE_URL||!cfg.SUPABASE_ANON_KEY)throw Error('Configuration Supabase absente.');
-  if(!window.supabase?.createClient)throw Error('Bibliothèque Supabase indisponible.');
-  sb=window.supabase.createClient(cfg.SUPABASE_URL,cfg.SUPABASE_ANON_KEY);
-  const {data,error}=await sb.auth.getSession();if(error)throw error;user=data.session?.user||null;
-  await Promise.all([loadCategories(),loadProducts(),loadBanner()]);ensureCartPanel();renderMarketCart();
-  msg(notice,user?'Marketplace prêt.':'Catalogue public. Connectez-vous via ZUMAYA pour acheter ou vendre.');
+ if(!cfg.SUPABASE_URL||!cfg.SUPABASE_ANON_KEY)throw Error('Configuration Supabase absente.');
+ auth=readAuthSession();user=auth?.user||null;
+ if(window.supabase?.createClient){sb=window.supabase.createClient(cfg.SUPABASE_URL,cfg.SUPABASE_ANON_KEY);try{const {data}=await sb.auth.getSession();if(data.session){auth=data.session;user=data.session.user||user}}catch(_){}}
+ ensureCartPanel();renderMarketCart();
+ const results=await Promise.allSettled([loadCategories(),loadProducts(),loadBanner()]);
+ const pe=results[1].status==='rejected'?results[1].reason:null,ce=results[0].status==='rejected'?results[0].reason:null;
+ if(pe)msg(notice,'Produits non chargés : '+(pe.message||'erreur Supabase'));
+ else if(ce)msg(notice,'Produits affichés ; catégories indisponibles : '+(ce.message||'erreur Supabase'));
+ else msg(notice,user?'Marketplace prêt.':'Catalogue public. Connectez-vous via ZUMAYA pour acheter ou vendre.');
 }catch(e){msg(notice,e.message||'Impossible de charger ZUMAYA MARKET.')}}
-async function loadCategories(){const {data,error}=await sb.from('commerce_categories').select('id,name').eq('is_active',true).order('name');if(error)throw error;(data||[]).forEach(c=>{const o=document.createElement('option');o.value=c.id;o.textContent=c.name;$('#category').append(o)})}
+async function loadCategories(){const rows=await apiRows('commerce_categories?select=id,name&is_active=eq.true&order=name');$('#category').innerHTML='<option value="">Toutes les catégories</option>';rows.forEach(c=>{const o=document.createElement('option');o.value=c.id;o.textContent=c.name;$('#category').append(o)})}
 async function loadBanner(){
-  if(!storeFilter)return;
-  const {data}=await sb.from('commerce_stores').select('store_name,city,description,logo_url').eq('id',storeFilter).maybeSingle();
-  const b=$('#storeBanner');if(!data){return}
-  b.innerHTML=`${https(data.logo_url)?`<img src="${esc(data.logo_url)}" alt="">`:''}<div><h2>${esc(data.store_name)}</h2><p>${esc([data.city,data.description].filter(Boolean).join(' — '))}</p></div><a href="marketplace.html">Toutes les boutiques</a> <a href="messagerie.html?kind=store&ref=${encodeURIComponent(storeFilter)}&subject=${encodeURIComponent('Question à '+data.store_name)}">💬 Contacter la boutique</a>`;b.hidden=false;
+ if(!storeFilter)return;
+ const rows=await apiRows('commerce_stores?select=store_name,city,description&id=eq.'+encodeURIComponent(storeFilter)+'&limit=1'),data=rows[0],b=$('#storeBanner');if(!data)return;
+ b.innerHTML='<div><h2>'+esc(data.store_name)+'</h2><p>'+esc([data.city,data.description].filter(Boolean).join(' — '))+'</p></div><a href="marketplace.html">Toutes les boutiques</a> <a href="messagerie.html?kind=store&ref='+encodeURIComponent(storeFilter)+'&subject='+encodeURIComponent('Question à '+data.store_name)+'">💬 Contacter la boutique</a>';b.hidden=false;
 }
 async function loadProducts(){
-  const term=$('#search').value.trim();
-  let q=sb.from('commerce_products').select('id,store_id,title,description,price,stock_quantity,image_url,media_urls,video_urls,market_type,commerce_stores!inner(store_name,city,phone,verification_status,is_active)').eq('status','active').eq('commerce_stores.is_active',true).gt('stock_quantity',0).order('created_at',{ascending:false}).limit(80);
-  if(storeFilter)q=q.eq('store_id',storeFilter);
-  if(term)q=q.ilike('title','%'+term.replace(/[%_,()]/g,'')+'%');
-  if($('#category').value)q=q.eq('category_id',$('#category').value);
-  if($('#market').value!=='all')q=q.in('market_type',[$('#market').value,'all']);
-  const {data,error}=await q;if(error)throw error;items=data||[];
-  const root=$('#products');root.innerHTML='';
-  items.forEach(p=>{const card=document.createElement('article');card.className='product';card.dataset.id=p.id;
-    const img=https(p.image_url)||https((p.media_urls||[])[0]);
-    card.innerHTML=`<div class="ph">${img?`<img src="${esc(img)}" alt="${esc(p.title)}" loading="lazy" onerror="this.style.display='none'">`:''}</div><div class="body"><h3>${esc(p.title)}</h3><div class="price">${money(p.price)}</div><div class="meta">${esc(p.commerce_stores.store_name)} · ${esc(p.commerce_stores.city||'')}</div><div class="meta">Stock : ${p.stock_quantity}${(p.video_urls||[]).length?' · 🎥':''}</div><button type="button" data-add="${p.id}" data-store="${p.store_id}">＋ Ajouter au panier</button></div>`;
-    root.append(card)});
-  if(!items.length)root.innerHTML='<p class="muted">Aucun produit disponible pour cette recherche.</p>';
-  renderMarketCart();
-  const requested=params.get('product');if(requested&&!autoAdded){autoAdded=true;addToMarketCart(requested)}
+ const term=$('#search').value.trim(),p=new URLSearchParams();
+ p.set('select','id,store_id,title,description,price,stock_quantity,image_url,media_urls,video_urls,market_type,commerce_stores!inner(store_name,city,phone,verification_status,is_active)');
+ p.set('status','eq.active');p.set('commerce_stores.is_active','eq.true');p.set('stock_quantity','gt.0');p.set('order','created_at.desc');p.set('limit','80');
+ if(storeFilter)p.set('store_id','eq.'+storeFilter);if(term)p.set('title','ilike.*'+term.replace(/[%_,()]/g,'')+'*');
+ if($('#category').value)p.set('category_id','eq.'+$('#category').value);if($('#market').value!=='all')p.set('market_type','in.('+$('#market').value+',all)');
+ items=await apiRows('commerce_products?'+p.toString());const root=$('#products');root.innerHTML='';
+ items.forEach(x=>{const c=document.createElement('article');c.className='product';c.dataset.id=x.id;const img=https(x.image_url)||https((x.media_urls||[])[0]);
+ c.innerHTML='<div class="ph">'+(img?'<img src="'+esc(img)+'" alt="'+esc(x.title)+'" loading="lazy" onerror="this.style.display=\'none\'">':'')+'</div><div class="body"><h3>'+esc(x.title)+'</h3><div class="price">'+money(x.price)+'</div><div class="meta">'+esc(x.commerce_stores.store_name)+' · '+esc(x.commerce_stores.city||'')+'</div><div class="meta">Stock : '+x.stock_quantity+((x.video_urls||[]).length?' · 🎥':'')+'</div><button type="button" data-add="'+x.id+'" data-store="'+x.store_id+'">＋ Ajouter au panier</button></div>';root.append(c)});
+ if(!items.length)root.innerHTML='<p class="muted">Aucun produit disponible pour cette recherche.</p>';renderMarketCart();
+ const requested=params.get('product');if(requested&&!autoAdded){autoAdded=true;addToMarketCart(requested)}
 }
 $('#products').addEventListener('click',e=>{
   const b=e.target.closest('[data-add]');
@@ -52,7 +52,7 @@ function openProduct(id){
   <div class="pinfo"><h2>${esc(p.title)}</h2><div class="price">${money(p.price)}</div><div class="meta">Vendu par <a href="marketplace.html?store=${encodeURIComponent(p.store_id)}">${esc(p.commerce_stores.store_name)}</a> · ${esc(p.commerce_stores.city||'')}</div><div class="meta">Stock : ${p.stock_quantity}</div>${p.description?`<p>${esc(p.description)}</p>`:''}<div class="zm-actions"><button type="button" id="pbuy">＋ Ajouter au panier</button> <a class="zm-chat" href="messagerie.html?kind=store&ref=${encodeURIComponent(p.store_id)}&subject=${encodeURIComponent('Question sur : '+p.title)}&ctx_type=product&ctx_id=${encodeURIComponent(p.id)}">💬 Contacter le vendeur</a></div></div>`;
   $('#pbuy').addEventListener('click',()=>{addToMarketCart(p.id);closeModal()});
   $('#pmodal').hidden=false;document.body.style.overflow='hidden';
-  sb.rpc('commerce_track_view',{p_product:p.id,p_session:sessionKey()}).then(()=>{},()=>{});
+  if(sb)sb.rpc('commerce_track_view',{p_product:p.id,p_session:sessionKey()}).then(()=>{},()=>{});
 }
 function closeModal(){$('#pmodal').hidden=true;document.body.style.overflow='';$('#pcontent').innerHTML=''}
 $('#pclose').addEventListener('click',closeModal);$('#pmodal').addEventListener('click',e=>{if(e.target.id==='pmodal')closeModal()});document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
@@ -95,8 +95,7 @@ async function checkoutMarketCart(){
   const city=(prompt('Ville de livraison :','')||'').trim()||null;
   let pos=null;if(confirm('Partager votre position GPS pour faciliter la livraison ?\\nOK = oui · Annuler = non'))pos=await myPos();
   const payload={p_store_id:marketCart.store_id,p_items:marketCart.items.map(x=>({product_id:x.id,quantity:x.qty})),p_delivery_address:address.trim(),p_buyer_note:null,p_delivery_fee:0,p_delivery_city:city,p_delivery_lat:pos?pos.lat:null,p_delivery_lng:pos?pos.lng:null};
-  const {data,error}=await sb.rpc('commerce_create_order',payload);if(error)throw error;
-  const ref=data;marketCart=null;writeMarketCart();renderMarketCart();alert('Commande créée : '+ref+'. Le vendeur va la confirmer. Vous pouvez échanger avec lui par messagerie.');await loadProducts();
+  let ref;if(sb){const {data,error}=await sb.rpc('commerce_create_order',payload);if(error)throw error;ref=data}else{const r=await fetch(cfg.SUPABASE_URL+'/rest/v1/rpc/commerce_create_order',{method:'POST',headers:apiHeaders(auth?.access_token),body:JSON.stringify(payload)}),t=await r.text();if(!r.ok)throw Error(t||'Commande impossible');ref=t?JSON.parse(t):null}marketCart=null;writeMarketCart();renderMarketCart();alert('Commande créée : '+ref+'. Le vendeur va la confirmer. Vous pouvez échanger avec lui par messagerie.');await loadProducts();
  }catch(e){alert(e.message||'Commande impossible.')}
 }
 $('#refresh').addEventListener('click',()=>loadProducts().catch(e=>msg(notice,e.message)));
