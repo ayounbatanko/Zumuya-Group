@@ -1,6 +1,6 @@
 (()=>{'use strict';
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-let sb,session,countries=[],rests=[],orders=[];
+let sb,session,countries=[],rests=[],orders=[],lastSubPending=null;
 const TITLES={overview:'Vue d’ensemble',services:'Services : restauration, hôtel, livraison',partners:'Partenaires',countries:'Déploiement par pays',orgs:'Organisations',payments:'Transactions',wallet:'Portefeuille & commissions',activity:'Activité métier',subscriptions:'Abonnements Pro'};
 const msg=s=>{$('#loginMsg').textContent=s};
 const fail=s=>{const e=$('#err');e.hidden=!s;e.textContent=s||''};
@@ -60,7 +60,15 @@ async function refresh(){fail('');
  const orgNames=Object.fromEntries((orgs.data||[]).map(x=>[x.id,x.public_name]));
  const pend=(partners.data||[]).filter(x=>x.status==='pending');
  renderOverview(orgs.data||[],prof.count||0,ests.count||0,payments.data||[],pend);await loadWalletAdmin();
- renderServices();renderPartners(partners.data||[]);renderSubscriptions(subReq?.data||[]);renderCountries();renderOrgs(orgs.data||[]);renderPayments(payments.data||[]);renderActivity(records.data||[],orgNames);
+ renderServices();renderPartners(partners.data||[]);renderSubscriptions(subReq?.data||[]);
+  const pendingSubs=(subReq?.data||[]).filter(x=>['pending','awaiting_payment','paid'].includes(x.status));
+  if(lastSubPending!==null&&pendingSubs.length>lastSubPending){
+    const msg='Nouvelle demande d’abonnement Pro reçue ('+(pendingSubs.length-lastSubPending)+').';
+    const notice=$('#subNotice');if(notice){notice.hidden=false;notice.textContent='🔔 '+msg}
+    try{if('Notification'in window&&Notification.permission==='granted')new Notification('ZUMUYA GROUP',{body:msg})}catch(e){}
+  }
+  lastSubPending=pendingSubs.length;
+  renderCountries();renderOrgs(orgs.data||[]);renderPayments(payments.data||[]);renderActivity(records.data||[],orgNames);
  if(!rr)fail('Les données du Service de Restauration ne sont pas lisibles : exécutez supabase-setup.sql dans ce projet Supabase.');
  const b=$('#pBadge');b.hidden=!pend.length;b.textContent=pend.length;$('#live').textContent='● Connecté · '+new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}
 
