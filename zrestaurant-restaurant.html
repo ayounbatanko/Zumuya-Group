@@ -360,7 +360,7 @@ hotel(r){
  return `<div class="col">
  <div class="card">
   <h3>🏨 Restauration de l'hôtel</h3>
-  <p class="mut">Un seul espace pour piloter le restaurant de l'hôtel, le bar, le petit-déjeuner, les banquets et le service en chambre. Les ventes, les menus et les commandes restent rattachés à cet établissement hôtelier.</p>
+  
   <div class="grid">
    <div class="card"><b>${active.length}</b><div class="mut">Commandes en cours</div></div>
    <div class="card"><b>${today.length}</b><div class="mut">Commandes aujourd'hui</div></div>
@@ -370,9 +370,9 @@ hotel(r){
  </div>
  <div class="card col">
   <h3>🍽️ Centre de restauration hôtelière</h3>
-  <p class="mut">Accédez à tous les outils de gestion RestoGest pour cet hôtel : caisse, menu, stock, clients, dettes, réservations, historique, rapports et réglages.</p>
+  
   <a class="btn primary" style="display:inline-flex;justify-content:center;text-decoration:none" href="zrestaurant-restogest.html?type=hotel">🧾 Ouvrir la gestion complète RestoGest</a>
-  <p class="mut">Accédez directement aux outils de gestion issus de RestoGest, adaptés aux différents points de restauration de votre hôtel.</p>
+  
   <div class="home-grid">
    ${tile('🍴','Restaurant de l’hôtel','Carte, plats, prix et disponibilité','menu')}
    ${tile('🧮','Caisse et ventes','Encaisser les clients du restaurant et du bar','pos')}
