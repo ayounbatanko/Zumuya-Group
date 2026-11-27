@@ -1,8 +1,8 @@
 /* Gestion des pôles autonomes du compte unique ZUMUYA GROUP. */
 (()=>{'use strict';
 const $=s=>document.querySelector(s);
-const ICONS={restaurant:'🍽️',hotel:'🏨',agro:'🌾',marketplace:'🛍️',delivery:'🚚'};
-const ROUTES={restaurant:'zrestaurant-restaurant.html?portal=restaurant#home',hotel:'zrestaurant-restaurant.html?portal=hotel#hotel',agro:'agro.html',marketplace:'marketplace.html',delivery:'livraison.html'};
+const ICONS={social:'🌐',restaurant:'🍽️',hotel:'🏨',agro:'🌾',marketplace:'🛍️',delivery:'🚚'};
+const ROUTES={social:'reseau-social.html',restaurant:'zrestaurant-restaurant.html?portal=restaurant#home',hotel:'zrestaurant-restaurant.html?portal=hotel#hotel',agro:'agro.html',marketplace:'marketplace.html',delivery:'livraison.html'};
 let client=null,user=null,catalog=[],enabled=[],orgs=[];
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function message(t,good=false){const el=$('#moduleMsg');if(el){el.textContent=t;el.className='module-msg '+(good?'good':'');}}
