@@ -1,7 +1,7 @@
 /* ZUMUYA GROUP — service worker commun au portail et aux pôles métier.
    Précharge uniquement les pages et dépendances natives ZUMUYA.
    Réseau d'abord, cache en secours hors ligne. */
-const CACHE='zumuya-v44-20261127';
+const CACHE='zumuya-v45-20261127';
 const FILES=[
  './index.html','./compte.html','./compte.css','./compte.js','./config.js','./zguard.js','./zsession.js',
  './dashboard.css','./dashboard.js','./module-manager.js','./modules.js','./parametres.html','./parametres.js',
@@ -13,7 +13,7 @@ const FILES=[
  './messagerie.html','./messagerie.js','./ecosysteme.html',
  './wallet.js','./account-shortcuts.js','./catalogue.js','./zcart.js','./zcart.css','./zchat.js','./zteam.js','./zdelivery.js','./zservice.css','./logo.svg',
  './manifest.webmanifest','./icon-180.png','./icon-192.png','./icon-512.png','./icon-maskable-512.png',
- './zrestaurant-index.html','./zrestaurant-restaurant.html','./zrestaurant-client.html','./zrestaurant-driver.html','./zrestaurant-card.html',
+ './restaurant-gestion.html','./hotel-gestion.html','./zrh.css','./zrh-native.js','./zrestaurant-index.html','./zrestaurant-restaurant.html','./zrestaurant-client.html','./zrestaurant-driver.html','./zrestaurant-card.html',
  './zrestaurant-db.js','./zrestaurant-portal-bridge.js','./zrestaurant-notif.js','./zrestaurant-chat.js','./zrestaurant-charts.js','./zrestaurant-qr.js','./zrestaurant-rest-report.js',
  './zrestaurant-ext-loader.js','./zrestaurant-ext-core.js','./zrestaurant-ext-dispatch.js','./zrestaurant-ext-tracking.js','./zrestaurant-ext-kds.js','./zrestaurant-ext-room-billing.js','./zrestaurant-ext-realtime.js',
  './zrestaurant-splash.js','./zrestaurant-version.json','./zrestaurant-manifest.webmanifest','./zrestaurant-icon-192.png','./zrestaurant-icon-512.png','./zrestaurant-icon-maskable-192.png','./zrestaurant-icon-maskable-512.png','./zrestaurant-apercu-facebook.jpg',
