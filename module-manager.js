@@ -2,7 +2,7 @@
 (()=>{'use strict';
 const $=s=>document.querySelector(s);
 const ICONS={social:'🌐',restaurant:'🍽️',restauration:'🍽️',hotel:'🏨',agro:'🌾',marketplace:'🛍️',delivery:'🚚'};
-const ROUTES={social:'reseau-social.html',restaurant:'zrh-portal.html?type=restaurant',restauration:'zrh-portal.html?type=restaurant',hotel:'zrh-portal.html?type=hotel',agro:'agro.html',marketplace:'marketplace.html',delivery:'livraison.html'};
+const ROUTES={social:'reseau-social.html',restaurant:'restaurant-gestion.html',restauration:'restaurant-gestion.html',hotel:'hotel-gestion.html',agro:'agro.html',marketplace:'marketplace.html',delivery:'livraison.html'};
 let client=null,user=null,catalog=[],enabled=[],orgs=[];
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function message(t,good=false){const el=$('#moduleMsg');if(el){el.textContent=t;el.className='module-msg '+(good?'good':'');}}
