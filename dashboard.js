@@ -81,7 +81,7 @@ async function loadPersonalStats(){
  }catch(e){}
  try{const r=await sb.from('commerce_orders').select('id,status,subtotal,delivery_fee,created_at').eq('buyer_id',user.id).order('created_at',{ascending:false}).limit(200);(r.data||[]).forEach(o=>push('Marketplace',o.status,(+o.subtotal||0)+(+o.delivery_fee||0),o.created_at))}catch(e){}
  try{const r=await sb.from('rg_supply_orders').select('id,status,total,created_at').or('buyer_user_id.eq.'+user.id+',placed_by.eq.'+user.id).order('created_at',{ascending:false}).limit(200);(r.data||[]).forEach(o=>push('Agro',o.status,o.total,o.created_at))}catch(e){}
- const done=s=>/termin|livr|reç|received|delivered|completed|annul|refus/.test(s),pending=all.filter(o=>!done(o.status)).length,completed=all.length-pending,total=all.reduce((n,o)=>n+o.amount,0);
+ const norm=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g,''),successful=s=>/^(terminee|livree|received|delivered|completed|paid|payment_received)$/.test(norm(s)),terminal=s=>successful(s)||/^(annulee|refusee|cancelled|canceled|rejected)$/.test(norm(s)),pending=all.filter(o=>!terminal(o.status)).length,completed=all.filter(o=>successful(o.status)).length,total=all.filter(o=>successful(o.status)).reduce((n,o)=>n+o.amount,0);
  const fmt=n=>new Intl.NumberFormat('fr-FR',{maximumFractionDigits:0}).format(n)+' FCFA';
  $('#psTotal').textContent=all.length;$('#psPending').textContent=pending;$('#psDone').textContent=completed;$('#psAmount').textContent=fmt(total);
  const days=Array.from({length:7},(_,i)=>{const d=new Date(since);d.setDate(since.getDate()+i);return d});
