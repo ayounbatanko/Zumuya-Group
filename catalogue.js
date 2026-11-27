@@ -6,13 +6,13 @@ const esc=ZS.esc,ZC=window.ZC||{ctl:()=>'',headBtn:()=>'',init(){},setData(){}};
 let rests=[],pos=null,q='',sort='near',open={},err='',loading=true,agroProducts=[],mktProducts=[],orgs=[],agroCart=readAgroCart();
 const $=s=>root.querySelector(s);
 const chatHref=(k,ref,sub)=>'messagerie.html?kind='+k+'&ref='+encodeURIComponent(ref)+'&subject='+encodeURIComponent(sub||'');
-let cat=(()=>{try{const v=sessionStorage.getItem('zg_cat');return ['all','resto','hotel','agro','market'].includes(v)?v:'none'}catch(_){return 'none'}})();
+let cat=(()=>{try{const v=sessionStorage.getItem('zg_cat');return ['social','resto','hotel','agro','market','delivery'].includes(v)?v:'none'}catch(_){return 'none'}})();
 function phRests(){const known=new Set(rests.map(r=>r.portalOrgId).filter(Boolean)),names=new Set(rests.map(r=>(r.name||'').trim().toLowerCase()));
  return orgs.filter(o=>(o.organization_type==='restaurant'||o.organization_type==='hotel')&&!known.has(o.id)&&!names.has((o.public_name||'').trim().toLowerCase()));}
 function phCard(o){const h=o.organization_type==='hotel';
  return '<article class="pc-rest"><div class="pc-head"><div class="pc-logo">'+(h?'🏨':'🍽️')+'</div><div class="pc-g"><h3>'+esc(o.public_name)+'</h3><span class="pc-mut">'+esc([o.address,o.city].filter(Boolean).join(', ')||'Adresse non renseignée')+'</span><div class="pc-badges"><span class="pc-b">'+(h?'Hôtel':'Restaurant')+'</span><span class="pc-b grey">0 plat</span><a class="pc-b gold" href="'+chatHref('org',o.id,'Question à '+o.public_name)+'">💬 Écrire</a></div></div></div><p class="pc-mut" style="padding:14px 18px">Catalogue bientôt disponible.</p></article>'}
 function catBar(){const ph=phRests(),nph=ph.length,nph_h=ph.filter(o=>o.organization_type==='hotel').length,nh=rests.filter(r=>ZS.isHotel(r)).length+nph_h,nr=rests.length-rests.filter(r=>ZS.isHotel(r)).length+(nph-nph_h),na=agroProducts.filter(p=>p.availability!=='unavailable').length,nm=mktProducts.length;
- return '<div class="pc-cats" role="tablist" aria-label="Catégorie de catalogue">'+[['all','✨ Tout',rests.length+nph+na+nm],['resto','🍽️ Restaurants',nr],['hotel','🏨 Hôtels',nh],['agro','🌾 Produits agricoles',na],['market','🛍️ Marketplace',nm]].map(x=>'<button type="button" role="tab" data-cat="'+x[0]+'" class="'+(cat===x[0]?'on':'')+'" aria-selected="'+(cat===x[0])+'">'+x[1]+' <i>'+x[2]+'</i></button>').join('')+'</div>'}
+ const nd=orgs.filter(o=>['delivery','delivery_service','logistics'].includes(o.organization_type)).length;return '<div class="pc-cats" role="tablist" aria-label="Catégorie de catalogue">'+[['social','🌐 Réseau social',''],['resto','🍽️ Restaurant',nr],['hotel','🏨 Hôtel',nh],['agro','🌾 Agro',na],['market','🛍️ Marketplace',nm],['delivery','🚚 Livraison',nd]].map(x=>'<button type="button" role="tab" data-cat="'+x[0]+'" class="'+(cat===x[0]?'on':'')+'" aria-selected="'+(cat===x[0])+'">'+x[1]+' <i>'+x[2]+'</i></button>').join('')+'</div>'}
 function dishCard(r,p,k,fee){
  const img=p.imgs&&p.imgs[0]?'<img loading="lazy" src="'+esc(p.imgs[0])+'" alt="">':'<div class="pc-ph">🍽️</div>',act=ZC.ctl(r.id,k,p.n);
  return '<div class="pc-dish">'+img+'<div class="pc-in"><b>'+esc(p.n)+'</b><span class="pc-d">'+esc(p.desc||'')+'</span><span class="pc-pr">'+ZS.money(p.p,r.currency)+'</span>'+
@@ -36,12 +36,12 @@ function draw(){
  const keep=document.activeElement&&document.activeElement.id==='pcSearch'?document.activeElement.selectionStart:null;
  root.innerHTML=catBar()+(cat==='none'?'<section class="market-section pc-category-prompt"><h3>Choisissez une catégorie</h3><p class="pc-mut">Les catalogues et leurs produits s’afficheront uniquement après votre sélection.</p></section>':'<div class="pc-bar"><input id="pcSearch" type="search" placeholder="'+(cat==='all'?'Rechercher un restaurant, un plat ou un produit…':cat==='market'?'Rechercher un produit ou une boutique…':cat==='agro'?'Rechercher un produit agricole…':cat==='hotel'?'Rechercher un hôtel ou un plat…':'Rechercher un restaurant ou un plat…')+'" value="'+esc(q)+'" aria-label="Rechercher un restaurant ou un plat">'+(cat==='agro'||cat==='market'?'':'<select id="pcSort" aria-label="Trier"><option value="near"'+(sort==='near'?' selected':'')+'>Les plus proches</option><option value="fee"'+(sort==='fee'?' selected':'')+'>Livraison la moins chère</option></select>')+(pos?'<span class="pc-b">📍 Position active</span>':'<button type="button" class="btn btn-gold" id="pcLoc">📍 Activer ma localisation</button>')+'</div>'+
   (err?'<div class="pc-err">'+esc(err)+'</div>':'')+
-  (()=>{const showR=['all','resto','hotel'].includes(cat),showA=cat==='all'||cat==='agro',showM=cat==='all'||cat==='market';let out='';
-  const phl=phRests().filter(o=>(cat==='all'||(cat==='hotel')===(o.organization_type==='hotel'))&&(!ql||(o.public_name||'').toLowerCase().includes(ql)));
-  if(showR){if(loading)out+='<p class="empty">Chargement des catalogues…</p>';else if(list.length||phl.length)out+=(cat==='all'?'<h3 class="pc-sec">🍽️ Restaurants &amp; hôtels</h3>':'')+list.map(card).join('')+phl.map(phCard).join('');else if(cat!=='all')out+='<p class="empty">Aucun '+(cat==='hotel'?'hôtel':'restaurant')+' partenaire disponible pour le moment.</p>'}
+  (()=>{const showR=['resto','hotel'].includes(cat),showA=cat==='agro',showM=cat==='market';let out='';
+  const phl=phRests().filter(o=>(cat==='hotel')===(o.organization_type==='hotel')&&(!ql||(o.public_name||'').toLowerCase().includes(ql)));
+  if(showR){if(loading)out+='<p class="empty">Chargement des catalogues…</p>';else if(list.length||phl.length)out+=list.map(card).join('')+phl.map(phCard).join('');else if(cat!=='all')out+='<p class="empty">Aucun '+(cat==='hotel'?'hôtel':'restaurant')+' partenaire disponible pour le moment.</p>'}
   if(showA){const a=agroHTML(cat==='all');out+=a}
   if(showM){out+=marketHTML(cat==='all')}
-  if(cat==='all'&&!out.trim())out='<p class="empty">Aucun contenu disponible pour le moment.</p>';return out})());
+  if(cat==='social')out='<section class="market-section"><div class="market-heading"><div><span class="market-kicker">PÔLE 1</span><h3>🌐 Réseau social ZUMUYA</h3><p>Publications, photos, vidéos, réactions et échanges avec la communauté.</p></div></div><a class="btn btn-gold" href="reseau-social.html">Ouvrir le réseau social →</a></section>';\n  if(cat==='delivery'){const ds=orgs.filter(o=>['delivery','delivery_service','logistics'].includes(o.organization_type));out=ds.length?'<section class="market-section"><div class="market-heading"><h3>🚚 Services de livraison partenaires</h3></div><div class="market-grid">'+ds.map(o=>'<article class="market-product"><div class="market-photo">🚚</div><div class="market-product-body"><h4>'+esc(o.public_name||'Service de livraison')+'</h4><p>'+esc([o.address,o.city].filter(Boolean).join(', '))+'</p><a class="pc-add" href="messagerie.html?kind=org&ref='+encodeURIComponent(o.id)+'">💬 Contacter</a></div></article>').join('')+'</div></section>':'<p class="empty">Aucun service de livraison partenaire disponible.</p>'}\n  if(!out.trim())out='<p class="empty">Aucun contenu disponible pour le moment.</p>';return out})());
  const s=$('#pcSearch');s.oninput=e=>{q=e.target.value;draw()};if(keep!=null){s.focus();s.setSelectionRange(keep,keep)}
  if($('#pcSort'))$('#pcSort').onchange=e=>{sort=e.target.value;draw()};const l=$('#pcLoc');if(l)l.onclick=locate}
 
@@ -69,7 +69,7 @@ async function loadMarket(){
 }
 async function loadOrgs(){
  const c=window.ZUMAYA_CONFIG||{};if(!c.SUPABASE_URL||!c.SUPABASE_ANON_KEY)return;
- try{const r=await fetch(c.SUPABASE_URL+'/rest/v1/rg_organizations?select=id,organization_type,public_name,city,address,latitude,longitude&organization_type=in.(restaurant,hotel,agro,agro_trader)&order=created_at.desc',{headers:{apikey:c.SUPABASE_ANON_KEY,Authorization:'Bearer '+c.SUPABASE_ANON_KEY}});
+ try{const r=await fetch(c.SUPABASE_URL+'/rest/v1/rg_organizations?select=id,organization_type,public_name,city,address,latitude,longitude&organization_type=in.(restaurant,hotel,agro,agro_trader,delivery,delivery_service,logistics)&order=created_at.desc',{headers:{apikey:c.SUPABASE_ANON_KEY,Authorization:'Bearer '+c.SUPABASE_ANON_KEY}});
   if(!r.ok)return;orgs=await r.json();draw()}catch(_){}
 }
 async function loadAgro(){
