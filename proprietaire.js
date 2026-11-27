@@ -1,7 +1,7 @@
 (()=>{'use strict';
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let sb,session,countries=[],rests=[],orders=[];
-const TITLES={overview:'Vue d’ensemble',services:'Services : restauration, hôtel, livraison',partners:'Partenaires',countries:'Déploiement par pays',orgs:'Organisations',payments:'Transactions',wallet:'Portefeuille & commissions',activity:'Activité métier'};
+const TITLES={overview:'Vue d’ensemble',services:'Services : restauration, hôtel, livraison',partners:'Partenaires',countries:'Déploiement par pays',orgs:'Organisations',payments:'Transactions',wallet:'Portefeuille & commissions',activity:'Activité métier',subscriptions:'Abonnements Pro'};
 const msg=s=>{$('#loginMsg').textContent=s};
 const fail=s=>{const e=$('#err');e.hidden=!s;e.textContent=s||''};
 const dt=x=>x?new Date(x).toLocaleDateString('fr-FR'):'—';
@@ -44,7 +44,7 @@ async function loadWalletAdmin(){
  if(!wd.error)$('#ownerWithdrawals').innerHTML=(wd.data||[]).map(x=>`<div class="entry"><b>${Number(x.amount_minor).toLocaleString('fr-FR')} FCFA</b> · ${esc(x.status)} · ${esc(x.payment_method?.type||'')} · ${esc(x.payment_method?.destination||'')}<small> · ${dt(x.created_at)}</small></div>`).join('')||'Aucune demande de retrait.';
 }
 async function refresh(){fail('');
- const [orgs,ests,records,partners,payments,c,prof,rr,oo]=await Promise.all([
+ const [orgs,ests,records,partners,payments,c,prof,rr,oo,subReq]=await Promise.all([
   sb.from('rg_organizations').select('id,legal_name,public_name,country_code,organization_type,verification_status,created_at').order('created_at',{ascending:false}).limit(100),
   sb.from('rg_establishments').select('id',{count:'exact',head:true}),
   sb.from('rg_service_records').select('id,organization_id,module_code,record_type,status,created_at').order('created_at',{ascending:false}).limit(15),
@@ -53,13 +53,14 @@ async function refresh(){fail('');
   sb.from('rg_countries').select('code,name,enabled').order('name'),
   sb.from('rg_profiles').select('user_id',{count:'exact',head:true}),
   optional(sb.from('rg_rests').select('id,data').order('seq',{ascending:true})),
-  optional(sb.from('rg_orders').select('id,data').order('seq',{ascending:false}).limit(500))]);
+  optional(sb.from('rg_orders').select('id,data').order('seq',{ascending:false}).limit(500)),
+  optional(sb.from('zrh_subscription_requests').select('id,org_id,service_type,months,amount_minor,currency_code,status,payment_reference,owner_note,created_at,rg_organizations(public_name,legal_name,contact_phone,owner_id)').order('created_at',{ascending:false}).limit(200))]);
  for(const r of [orgs,ests,records,partners,payments,c,prof])if(r.error)throw r.error;
  countries=c.data||[];rests=(rr&&rr.data||[]).map(x=>x.data).filter(Boolean);orders=(oo&&oo.data||[]).map(x=>x.data).filter(o=>o&&o.restId&&!String(o.id).startsWith('__'));
  const orgNames=Object.fromEntries((orgs.data||[]).map(x=>[x.id,x.public_name]));
  const pend=(partners.data||[]).filter(x=>x.status==='pending');
  renderOverview(orgs.data||[],prof.count||0,ests.count||0,payments.data||[],pend);await loadWalletAdmin();
- renderServices();renderPartners(partners.data||[]);renderCountries();renderOrgs(orgs.data||[]);renderPayments(payments.data||[]);renderActivity(records.data||[],orgNames);
+ renderServices();renderPartners(partners.data||[]);renderSubscriptions(subReq?.data||[]);renderCountries();renderOrgs(orgs.data||[]);renderPayments(payments.data||[]);renderActivity(records.data||[],orgNames);
  if(!rr)fail('Les données du Service de Restauration ne sont pas lisibles : exécutez supabase-setup.sql dans ce projet Supabase.');
  const b=$('#pBadge');b.hidden=!pend.length;b.textContent=pend.length;$('#live').textContent='● Connecté · '+new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}
 
@@ -89,6 +90,15 @@ function renderServices(){
  $('#svcStats').innerHTML=stat('🍽️ Restaurants',rests.length-hot)+stat('🏨 Hôtels',hot)+stat('📦 Courses attribuées',drv)+stat('Plats au catalogue',rests.reduce((a,r)=>a+(r.menu||[]).length,0));
  $('#rests').innerHTML=list.map(r=>{const [l,c]=subLabel(r);return `<tr><td><b>${esc(r.name)}</b><br><small>${esc(r.phone||'')}</small></td><td>${isHotel(r)?'🏨 Hôtel':'🍽️ Restaurant'}</td><td><span class="badge ${c}">${l}</span></td><td>${(r.menu||[]).length} plat(s)</td><td>${+r.kmPrice>0?esc(r.kmPrice)+' '+esc(r.currency||'XOF')+'/km':'<span class="badge warn">non défini</span>'}</td><td>${r.lat!=null?'<span class="badge good">renseignée</span>':'<span class="badge bad">manquante</span>'}</td><td>${cntBy(r.id)}</td></tr>`}).join('')||'<tr><td colspan="7">Aucun établissement.</td></tr>'}
 function renderPartners(a){$('#partners').innerHTML=a.length?a.map(x=>`<div class="partner"><strong>${esc(x.organization_name)}</strong><small>${esc(x.country_code)} · ${esc(x.category)} · ${esc(x.city)} · ${esc(x.contact_email||'Sans e-mail')} · ${esc(x.contact_phone||'')} · <span class="badge ${x.status==='approved'?'good':x.status==='rejected'?'bad':'warn'}">${esc(x.status)}</span></small>${x.status==='pending'?`<div class="actions"><button data-partner="${x.id}" data-status="approved">Approuver</button><button class="reject" data-partner="${x.id}" data-status="rejected">Refuser</button></div>`:''}</div>`).join(''):'<div class="empty">Aucune demande de partenariat.</div>'}
+function renderSubscriptions(a){
+ const pending=a.filter(x=>['pending','awaiting_payment','paid'].includes(x.status));
+ const badge=$('#subBadge');if(badge){badge.hidden=!pending.length;badge.textContent=pending.length}
+ $('#subscriptionRequests').innerHTML=a.length?a.map(x=>{
+  const org=x.rg_organizations||{},status=x.status==='approved'?'Activé':x.status==='rejected'?'Refusé':x.status==='paid'?'Paiement signalé':x.status==='awaiting_payment'?'En attente de paiement':'À traiter';
+  const can=['pending','awaiting_payment','paid'].includes(x.status);
+  return '<article class="partner"><strong>'+esc(org.public_name||org.legal_name||'Établissement')+' · '+(x.service_type==='hotel'?'Hôtel':'Restaurant')+'</strong><small>'+esc(org.contact_phone||'Téléphone non renseigné')+' · '+x.months+' mois · '+Number(x.amount_minor||0).toLocaleString('fr-FR')+' '+esc(x.currency_code||'XOF')+' · '+dt(x.created_at)+'</small><p>Statut : <b>'+status+'</b>'+(x.payment_reference?' · Référence : '+esc(x.payment_reference):'')+'</p>'+(can?'<div class="actions"><button data-sub="'+x.id+'" data-action="approve">Activer Pro</button><button class="reject" data-sub="'+x.id+'" data-action="reject">Refuser</button></div>':'')+(x.owner_note?'<small>Note : '+esc(x.owner_note)+'</small>':'')+'</article>'
+ }).join(''):'<div class="empty">Aucune demande d’abonnement Pro pour le moment.</div>';
+}
 function renderCountries(){$('#countries').innerHTML=countries.map(x=>`<div class="country"><div><b>${esc(x.name)}</b><small>${esc(x.code)} · ${x.enabled?'Marché activé':'Marché en préparation'}</small></div><button class="toggle ${x.enabled?'on':'off'}" data-country="${x.code}" data-enabled="${x.enabled}">${x.enabled?'Désactiver':'Activer'}</button></div>`).join('')}
 function renderOrgs(a){$('#orgCount').textContent=a.length+' affichée(s)';$('#orgs').innerHTML=a.map(x=>`<tr><td>${esc(x.public_name)}</td><td>${esc(x.country_code)}</td><td>${esc(x.organization_type)}</td><td><span class="badge ${x.verification_status==='verified'?'good':'warn'}">${esc(x.verification_status)}</span></td><td><select data-org-status="${x.id}"><option value="">Changer…</option><option value="verified">Vérifier</option><option value="rejected">Refuser</option><option value="suspended">Suspendre</option><option value="pending">En attente</option></select></td><td>${dt(x.created_at)}</td></tr>`).join('')||'<tr><td colspan="6">Aucune organisation.</td></tr>'}
 function renderPayments(a){$('#payments').innerHTML=a.map(x=>`<tr><td>${dt(x.created_at)}</td><td>${esc(x.module_code)}</td><td>${Number(x.amount_minor).toLocaleString('fr-FR')}</td><td>${esc(x.currency_code)}</td><td>${esc(x.provider)}</td><td><span class="badge">${esc(x.status)}</span></td></tr>`).join('')||'<tr><td colspan="6">Aucune transaction.</td></tr>'}
@@ -103,6 +113,7 @@ $('#refresh').onclick=()=>run(refresh);
 $('#q').oninput=renderServices;$('#f').onchange=renderServices;
 $('#countries').onclick=e=>{const b=e.target.closest('[data-country]');if(!b)return;const en=b.dataset.enabled!=='true';if(!confirm(`${en?'Activer':'Désactiver'} ce pays ? Cette action modifie la disponibilité du marché dans le référentiel.`))return;run(async()=>{const {error}=await sb.rpc('rg_platform_set_country_enabled',{p_code:b.dataset.country,p_enabled:en});if(error)throw error;await refresh()})};
 $('#orgs').onchange=e=>{const sel=e.target.closest('[data-org-status]');if(!sel||!sel.value)return;run(async()=>{const {error}=await sb.from('rg_organizations').update({verification_status:sel.value}).eq('id',sel.dataset.orgStatus);if(error)throw error;await refresh()})};
+$('#subscriptionRequests').onclick=e=>{const b=e.target.closest('[data-sub]');if(!b)return;const action=b.dataset.action;const note=prompt(action==='approve'?'Confirmation : paiement vérifié ? Ajoute une note si nécessaire.':'Motif du refus :');if(note===null)return;if(action==='approve'&&!confirm('Confirmer l’activation de l’abonnement Pro pour cet établissement ?'))return;run(async()=>{const {error}=await sb.rpc('zrh_subscription_owner_action',{p_request_id:b.dataset.sub,p_action:action,p_method_id:null,p_owner_note:note.trim()||null});if(error)throw error;await refresh()})};
 $('#partners').onclick=e=>{const b=e.target.closest('[data-partner]');if(!b)return;const patch={status:b.dataset.status};if(patch.status==='rejected'){const n=prompt('Motif du refus (visible par le demandeur) :');if(n===null)return;patch.review_note=n.trim()||null}run(async()=>{const {error}=await sb.from('rg_partner_applications').update(patch).eq('id',b.dataset.partner);if(error)throw error;await refresh()})};
 start().catch(e=>{$('#login').hidden=false;$('#shell').hidden=true;msg(e.message||'Configuration ou connexion impossible')});
 setInterval(()=>{if(session&&!document.hidden)refresh().catch(()=>{})},60000);
