@@ -11,7 +11,7 @@ function write(){try{cart&&cart.items.length?localStorage.setItem(CK,JSON.string
 const count=()=>cart?cart.items.reduce((a,i)=>a+i.q,0):0;
 const sub=()=>cart?cart.items.reduce((a,i)=>a+i.p*i.q,0):0;
 const restOf=id=>rests.find(r=>r.id===id);
-const isClient=()=>!!ZS.portal();
+const isConnected=()=>!!ZS.portal();
 const $=id=>document.getElementById(id);
 
 /* ---------- messages ---------- */
@@ -36,7 +36,7 @@ function add(rid,i,d){
  const w=ZS.portal();
  if(!w){try{const pg=location.pathname.split('/').pop()||'index.html';localStorage.setItem('zg_back',pg+($('catalogue-public')?'#catalogue-public':'')+'|'+Date.now())}catch(e){}
   return say('Connectez-vous avec un compte <b>Client</b> pour ajouter des plats à votre panier. <a href="compte.html">Se connecter</a> · <a href="compte.html?mode=signup">Créer un compte</a>')}
- if(w.type!=='customer')return say('Les commandes en ligne sont réservées aux comptes <b>Client</b>. Votre compte est un compte professionnel : utilisez un compte Client pour commander.');
+ 
  const r=restOf(rid),p=r&&(r.menu||[])[i];if(!p)return;if(!isOpen(r))return say('Ce restaurant est actuellement fermé. Les commandes seront disponibles à partir de '+(r.openAt||'08:00')+'.');
  if(cart&&cart.rid!==rid){
   if(!confirm('Votre panier contient déjà des plats de « '+cart.name+' ».\nUn panier ne peut contenir que les plats d’un seul restaurant.\n\nLe vider et commencer avec « '+r.name+' » ?'))return;
@@ -46,9 +46,9 @@ function add(rid,i,d){
  if(it)it.q=Math.min(99,it.q+d);else if(d>0)cart.items.push({n:p.n,p:+p.p||0,q:1});
  cart.items=cart.items.filter(x=>x.q>0);write();refresh()}
 function checkout(){
- if(!isClient())return say('Connectez-vous à votre compte ZUMUYA GROUP pour passer commande. <a href="compte.html">Se connecter</a>');
+ if(!isConnected())return say('Connectez-vous à votre compte ZUMUYA GROUP pour passer commande. <a href="compte.html">Se connecter</a>');
  if(!cart)return;const r=restOf(cart.rid);if(!isOpen(r))return say('Impossible d’envoyer la commande : ce restaurant est fermé. Ouverture à '+(r?.openAt||'08:00')+'.');try{localStorage.setItem('rg_target',cart.slug)}catch(e){}location.href='resto-client.html'}
-function track(){try{localStorage.setItem('rg_tab','myorders')}catch(e){}location.href='resto-client.html'}
+
 
 /* ---------- affichage ---------- */
 /* Bouton « Ajouter » ou sélecteur de quantité d'un plat (rid = restaurant, i = rang du plat dans son menu). */
@@ -58,10 +58,9 @@ function ctl(rid,i,name){const n=cart&&cart.rid===rid?(cart.items.find(x=>x.n===
 /* Bouton d'en-tête de restaurant, visible seulement si le panier est celui de ce restaurant. */
 const headBtn=rid=>cart&&cart.rid===rid?'<button type="button" class="btn btn-gold pc-order" data-pc="panel">🛒 Voir mon panier ('+count()+')</button>':'';
 function dock(){let d=$('pcDock');
- if(!isClient()&&!cart){if(d)d.hidden=true;return}
+ if(!cart){if(d)d.hidden=true;return}
  if(!d){d=document.createElement('div');d.id='pcDock';d.className='pc-dock';document.body.appendChild(d)}d.hidden=false;
- d.innerHTML=(cart?'<button type="button" class="pc-cart" data-pc="panel">🛒 <b>'+count()+'</b> · '+ZS.money(sub(),cart.cur)+' <span>Voir le panier</span></button>':'')+
-  (isClient()?'<button type="button" class="pc-track" data-pc="track">📦 Suivre mes commandes</button>':'')}
+ d.innerHTML='<button type="button" class="pc-cart" data-pc="panel">🛒 <b>'+count()+'</b> · '+ZS.money(sub(),cart.cur)+' <span>Voir le panier</span></button>'}
 function panel(){let p=$('pcPanel');if(!cart){if(p)p.hidden=true;return}
  if(!p){p=document.createElement('div');p.id='pcPanel';p.className='pc-panel';document.body.appendChild(p)}p.hidden=false;
  const r=restOf(cart.rid),d=r&&pos&&r.lat!=null&&r.lng!=null?ZS.km(pos,[r.lat,r.lng]):null,fee=r?ZS.fee(r,d):null,tot=sub();
@@ -85,7 +84,7 @@ document.addEventListener('click',e=>{
  else if(a==='close')$('pcPanel').hidden=true;
  else if(a==='clear'){if(confirm('Vider le panier ?')){cart=null;write();$('pcPanel').hidden=true;refresh()}}
  else if(a==='checkout')checkout();
- else if(a==='track')track();
+
  else if(a==='toast-x')$('pcToast').hidden=true});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){const p=$('pcPanel');if(p)p.hidden=true}});
 addEventListener('storage',e=>{if(e.key===CK){cart=read();refresh()}});
