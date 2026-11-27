@@ -6,7 +6,7 @@ const roleToPartner={restaurant:'restaurant',hotel:'hotel',delivery:'delivery',a
 /* L'identifiant de connexion du portail reste l'adresse e-mail ; le rôle est détecté depuis le profil après connexion. */
 const EMAIL_RE=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const LABEL={customer:'Client',restaurant:'Restaurant partenaire',hotel:'Hôtel / hébergement',delivery:'Livreur (compte créé par un restaurant)',staff:'Employé (compte créé par un restaurant)',agro_producer:'Producteur agricole',agro_trader:'Commerçant agricole',marketplace:'Vendeur Marketplace',delivery_service:'Service de livraison'};
-function updateIdentityFields(){$('#email').required=true}
+function updateIdentityFields(){$('#email').required=true;$('#email').type='text';$('#email').inputMode='text';$('#email').placeholder='vous@exemple.com ou +227…';const l=$('#emailWrap');if(l&&l.firstChild)l.firstChild.textContent='E-mail ou téléphone international';}
 const MIN=8;
 
 function showMsg(text,type='error'){const m=$('#msg');m.textContent=text;m.className='msg '+type;m.hidden=!text}
@@ -70,8 +70,13 @@ function showAuth(){if(window.ZDASH)window.ZDASH.hide();$('#account').hidden=tru
 async function submit(e){
   e.preventDefault();showMsg('');
   const password=$('#password').value,name=$('#displayName').value.trim(),confirm=$('#passwordConfirm').value;
-  const email=$('#email').value.trim().toLowerCase();
-  if(!EMAIL_RE.test(email))return showMsg('Saisissez une adresse e-mail valide.');
+  const rawIdentity=$('#email').value.trim();
+  const email=rawIdentity.toLowerCase();
+  const phone=rawIdentity.replace(/[\s().-]/g,'');
+  const isEmail=EMAIL_RE.test(email);
+  const isPhone=/^\+[1-9]\d{7,14}$/.test(phone);
+  if(mode==='up'&&!isEmail)return showMsg('Pour créer un compte, saisissez une adresse e-mail valide.');
+  if(mode==='in'&&!isEmail&&!isPhone)return showMsg('Saisissez votre e-mail ou votre téléphone au format international (+227…, +225…).');
   if(mode==='up'){
     if(!name)return showMsg('Saisissez votre nom complet.');
     if(password.length<MIN)return showMsg('Le mot de passe doit contenir au moins '+MIN+' caractères.');
@@ -88,7 +93,8 @@ async function submit(e){
       if(data.session){await showAccount(data.session.user);return}
       showMsg('Compte créé. Ouvrez le lien de confirmation reçu par e-mail (pensez aux courriers indésirables), puis connectez-vous.','success');
     }else{
-      const {data,error}=await sb.auth.signInWithPassword({email,password});
+      const identity=isEmail?{email}:{phone};
+      const {data,error}=await sb.auth.signInWithPassword({...identity,password});
       if(error)throw error;
       await showAccount(data.user);
     }
