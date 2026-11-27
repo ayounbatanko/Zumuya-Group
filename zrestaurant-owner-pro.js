@@ -1,6 +1,6 @@
 /* ZUMUYA Restauration - espace propriétaire : tableau de bord, utilisateurs, rapports */
 (function(){
-var ROLE={client:'Client',restaurant:'Restaurant',driver:'Livreur'},DONE=['annulée','refusée'],S={uq:'',ur:'all',from:'',to:''};
+var ROLE={client:'Client',restaurant:'Restaurant',driver:'Livreur'},DONE=['annulée','refusée'],SOLD=['terminée'],S={uq:'',ur:'all',from:'',to:''};
 var CSS='@keyframes fd{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}.fade{animation:fd .25s ease}.otabs{display:flex;gap:8px;overflow-x:auto;padding:4px 2px 10px}.otabs button{white-space:nowrap;border-radius:999px;padding:9px 14px;font-weight:700}.kg{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}.kp{background:linear-gradient(135deg,#14213d,#26417a);color:#fff;border-radius:16px;padding:14px;box-shadow:0 8px 22px rgba(20,33,61,.25)}.kp span{font-size:12px;opacity:.85;display:block}.kp b{font-size:22px;color:#ffb703;display:block;margin-top:4px}.kp.g2{background:linear-gradient(135deg,#fb8500,#ffb703);color:#14213d}.kp.g2 b{color:#14213d}.bd{display:inline-block;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:700;background:#e8ecf8;color:#26417a}.ur{padding:10px 0;border-bottom:1px solid var(--bd,#e3e6ef)}.ur .r2{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.ur button{padding:6px 10px;font-size:12px}.nbadge{background:#e63946;color:#fff;border-radius:999px;padding:1px 7px;font-size:11px;margin-inline-start:6px}';
 var st=document.createElement('style');st.textContent=CSS+RCSS.replace(/body\{[^}]*\}/,'');document.head.appendChild(st);
 var pad=function(n){return String(n).padStart(2,'0')},ymd=function(t){var x=new Date(t);return x.getFullYear()+'-'+pad(x.getMonth()+1)+'-'+pad(x.getDate())};
@@ -13,14 +13,14 @@ function bar(){var n=RGChat.totalUnread();return '<div class="otabs">'+[['dash',
 function go(t){oTab=t;refresh()}
 
 /* ---------- tableau de bord ---------- */
-function dashCharts(d){var ok=function(o){return DONE.indexOf(o.status)<0},keys=[],A=[],B=[],i,sm=function(l,f){return l.reduce(function(s,x){return s+f(x)},0)};
+function dashCharts(d){var ok=function(o){return SOLD.indexOf(o.status)>=0},keys=[],A=[],B=[],i,sm=function(l,f){return l.reduce(function(s,x){return s+f(x)},0)};
   for(i=6;i>=0;i--){var k=ymd(Date.now()-i*864e5);keys.push(k.slice(8)+'/'+k.slice(5,7));
     A.push(sm(d.orders.filter(function(o){return ok(o)&&ymd(o.created)==k}),function(o){return o.total}));
     B.push(sm(d.rests,function(r){return sm((r.sales||[]).filter(function(x){return x.src!='en ligne'&&ymd(x.date)==k}),function(x){return x.total})}))}
   var top=d.rests.map(function(r){return {l:r.name,v:sm(d.orders.filter(function(o){return o.restId==r.id&&ok(o)}),function(o){return o.total})+sm((r.sales||[]).filter(function(x){return x.src!='en ligne'}),function(x){return x.total})}}).filter(function(x){return x.v}).sort(function(a,b){return b.v-a.v}).slice(0,5);
   var m={};d.orders.forEach(function(o){m[o.status]=(m[o.status]||0)+1});
   return '<div class="rp-s"><h3>📈 Ventes des 7 derniers jours</h3>'+stacked(keys,A,B)+'</div><div class="two"><div class="rp-s"><h3>🏆 Top restaurants</h3>'+(hbars(top,M)||'<p class="mut">Aucune vente.</p>')+'</div><div class="rp-s"><h3>Commandes par statut</h3>'+donut(Object.keys(m).map(function(k){return {l:k,v:m[k]}}))+'</div></div>'}
-function dash(d,pending){var today=ymd(Date.now()),ok=function(o){return DONE.indexOf(o.status)<0},td=d.orders.filter(function(o){return ymd(o.created)==today&&ok(o)}),
+function dash(d,pending){var today=ymd(Date.now()),ok=function(o){return SOLD.indexOf(o.status)>=0},td=d.orders.filter(function(o){return ymd(o.created)==today&&ok(o)}),
   k=function(l,v,c){return '<div class="kp '+(c||'')+'"><span>'+l+'</span><b>'+v+'</b></div>'},
   pro=d.rests.filter(function(r){return r.sub=='active'&&r.subEnd>Date.now()}).length,un=RGChat.totalUnread();
   var last=d.orders.slice().sort(function(a,b){return b.created-a.created}).slice(0,6).map(function(o){var r=d.rests.find(function(x){return x.id==o.restId});
@@ -53,7 +53,7 @@ function tog(id){var d=D.get(),u=d.users.find(function(x){return x.id==id});if(!
 /* ---------- rapports ---------- */
 function range(){if(!S.from){var t=new Date();S.to=ymd(t);t.setDate(t.getDate()-29);S.from=ymd(t)}return [new Date(S.from+'T00:00:00').getTime(),new Date(S.to+'T00:00:00').getTime()+864e5]}
 function reportInner(d){var rg=range(),a=rg[0],z=rg[1],inR=function(t){return t>=a&&t<z},month=(z-a)/864e5>62,key=function(t){return month?ymd(t).slice(0,7):ymd(t)};
-  var on=d.orders.filter(function(o){return inR(o.created||0)}),okO=on.filter(function(o){return DONE.indexOf(o.status)<0}),cash=[],pro=[];
+  var on=d.orders.filter(function(o){return inR(o.created||0)}),okO=on.filter(function(o){return SOLD.indexOf(o.status)>=0}),cash=[],pro=[];
   d.rests.forEach(function(r){(r.sales||[]).forEach(function(s){if(inR(s.date)&&s.src!='en ligne')cash.push({t:s.date,v:s.total,r:r.id})});
     var h=r.proHistory||(r.proPayment&&r.proPayment.status=='confirmed'?[{at:r.proPayment.confirmedAt,amount:(r.proForm&&r.proForm.amount)||0,months:r.proForm&&r.proForm.months}]:[]);
     h.forEach(function(x){if(inR(x.at))pro.push({t:x.at,v:x.amount,m:x.months,r:r.name})})});
