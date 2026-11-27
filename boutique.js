@@ -186,13 +186,16 @@ function drawChart({sel,labels,values,type,color,fmt}){
 
 /* ---------- Produits ---------- */
 async function loadProducts(){
-  const {data,error}=await sb.from('commerce_products').select('*').eq('store_id',store.id).order('created_at',{ascending:false});
+  const ids=(stores||[]).map(s=>s.id).filter(Boolean);
+  if(!ids.length){products=[];renderProducts();return}
+  /* Afficher tous les produits appartenant au vendeur, même s'il possède plusieurs boutiques. */
+  const {data,error}=await sb.from('commerce_products').select('*,commerce_stores(store_name)').in('store_id',ids).order('created_at',{ascending:false});
   if(error)throw error;products=data||[];renderProducts();
 }
 function renderProducts(){
   const sm=Object.fromEntries((stats?.products||[]).map(p=>[p.product_id,p]));
   $('#productList').innerHTML=products.map(p=>{const st=PST[p.status]||['?','off'],x=sm[p.id]||{};
-    return `<article class="pcard"><div class="ph">${p.image_url?`<img src="${esc(p.image_url)}" alt="" loading="lazy">`:''}<span class="chip ${st[1]}">${st[0]}</span></div><div class="pb"><h4>${esc(p.title)}</h4><b>${money(p.price)}</b><span class="stat">Stock : ${p.stock_quantity} · 👁 ${num(x.views)} · 🛒 ${num(x.units)} vendu(s)</span>
+    return `<article class="pcard"><div class="ph">${p.image_url?`<img src="${esc(p.image_url)}" alt="" loading="lazy">`:''}<span class="chip ${st[1]}">${st[0]}</span></div><div class="pb"><h4>${esc(p.title)}</h4><b>${money(p.price)}</b><span class="stat">${esc(p.commerce_stores?.store_name||'Boutique')} · Stock : ${p.stock_quantity} · 👁 ${num(x.views)} · 🛒 ${num(x.units)} vendu(s)</span>
     <div class="acts"><button class="btn sm primary" data-a="edit" data-id="${p.id}">Modifier</button><button class="btn sm ghost" data-a="toggle" data-id="${p.id}">${p.status==='active'?'Masquer':'Publier'}</button><button class="btn sm ghost" data-a="stat" data-id="${p.id}">📈</button><button class="btn sm danger" data-a="del" data-id="${p.id}">Supprimer</button></div></div></article>`}).join('')||'<div class="card"><p class="muted">Aucun produit pour l’instant.</p></div>';
 }
 $('#productList').addEventListener('click',async e=>{
