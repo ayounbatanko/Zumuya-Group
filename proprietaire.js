@@ -124,5 +124,5 @@ $('#orgs').onchange=e=>{const sel=e.target.closest('[data-org-status]');if(!sel|
 $('#subscriptionRequests').onclick=e=>{const b=e.target.closest('[data-sub]');if(!b)return;const action=b.dataset.action;const note=prompt(action==='approve'?'Confirmation : paiement vérifié ? Ajoute une note si nécessaire.':'Motif du refus :');if(note===null)return;if(action==='approve'&&!confirm('Confirmer l’activation de l’abonnement Pro pour cet établissement ?'))return;run(async()=>{const {error}=await sb.rpc('zrh_subscription_owner_action',{p_request_id:b.dataset.sub,p_action:action,p_method_id:null,p_owner_note:note.trim()||null});if(error)throw error;await refresh()})};
 $('#partners').onclick=e=>{const b=e.target.closest('[data-partner]');if(!b)return;const patch={status:b.dataset.status};if(patch.status==='rejected'){const n=prompt('Motif du refus (visible par le demandeur) :');if(n===null)return;patch.review_note=n.trim()||null}run(async()=>{const {error}=await sb.from('rg_partner_applications').update(patch).eq('id',b.dataset.partner);if(error)throw error;await refresh()})};
 start().catch(e=>{$('#login').hidden=false;$('#shell').hidden=true;msg(e.message||'Configuration ou connexion impossible')});
-setInterval(()=>{if(session&&!document.hidden)refresh().catch(()=>{})},60000);
+setInterval(()=>{if(session&&!document.hidden)refresh().catch(()=>{})},15000);
 })();
