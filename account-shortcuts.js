@@ -4,6 +4,13 @@
  try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(/^sb-.*-auth-token$/.test(k)){const v=JSON.parse(localStorage.getItem(k)||'null');session=v&&(v.currentSession||v);if(session&&session.user)break;}}}catch(e){}
  if(!session||!session.user||document.getElementById('zg-common-shortcuts'))return;
  const page=(location.pathname.split('/').pop()||'').toLowerCase();
+ /* Bouton de retour sans déconnexion : conserve la session Supabase. */
+ if(!['compte.html','index.html',''].includes(page)&&!document.getElementById('zg-account-back')){
+  const back=document.createElement('a');back.id='zg-account-back';back.href='compte.html';back.textContent='← Retour à mon compte ZUMUYA';
+  back.style.cssText='position:fixed;top:10px;left:10px;z-index:100001;background:#14213d;color:#fff;border:1px solid #ffffff55;border-radius:12px;padding:10px 14px;text-decoration:none;font:700 12px system-ui;box-shadow:0 4px 14px #0003;max-width:calc(100vw - 20px)';
+  document.body.appendChild(back);
+ }
+ if(['zrestaurant-restaurant.html','zrestaurant-restogest.html','hotel.html','hotel-gestion.html'].includes(page))return;
  const items=[
   {href:'mes-commandes.html',label:'🛍️ Toutes mes commandes',key:'orders',skip:['mes-commandes.html']},
   {href:'portefeuille.html',label:'👛 Portefeuille commun',key:'wallet',skip:['portefeuille.html']},
