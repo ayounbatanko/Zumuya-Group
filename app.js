@@ -45,5 +45,5 @@ function applyAuth(){
 }
 applyAuth();addEventListener('storage',applyAuth);addEventListener('pageshow',applyAuth);
 $('#year').textContent=new Date().getFullYear();renderModules();
-if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js?v=60').catch(()=>{});
+if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js?v=61').catch(()=>{});
 })();
