@@ -70,6 +70,22 @@ function mount(){
   if(slot&&p&&p.parentNode!==slot){slot.appendChild(p)}
   if(p)p.hidden=false;
 }
+async function loadPersonalStats(){
+ const root=$('#personalStats');if(!root||!sb||!user)return;
+ const all=[];const now=new Date();const since=new Date(now);since.setDate(since.getDate()-6);since.setHours(0,0,0,0);
+ const push=(kind,status,amount,date)=>{const d=date?new Date(date):now;if(!Number.isFinite(d.getTime()))return;all.push({kind,status:String(status||'en cours').toLowerCase(),amount:Number(amount)||0,date:d})};
+ try{
+  const D=window.RGDB;if(D&&typeof D.get==='function'){const d=D.get();(d.orders||[]).filter(o=>o.clientAuthId===user.id||o.buyerAuthId===user.id||o.customerAuthId===user.id).forEach(o=>push('Restaurant',o.status,o.total,o.created||o.date))}
+ }catch(e){}
+ try{const r=await sb.from('commerce_orders').select('id,status,subtotal,delivery_fee,created_at').eq('buyer_id',user.id).order('created_at',{ascending:false}).limit(200);(r.data||[]).forEach(o=>push('Marketplace',o.status,(+o.subtotal||0)+(+o.delivery_fee||0),o.created_at))}catch(e){}
+ try{const r=await sb.from('rg_supply_orders').select('id,status,total,created_at').or('buyer_user_id.eq.'+user.id+',placed_by.eq.'+user.id).order('created_at',{ascending:false}).limit(200);(r.data||[]).forEach(o=>push('Agro',o.status,o.total,o.created_at))}catch(e){}
+ const done=s=>/termin|livr|reç|received|delivered|completed|annul|refus/.test(s),pending=all.filter(o=>!done(o.status)).length,completed=all.length-pending,total=all.reduce((n,o)=>n+o.amount,0);
+ const fmt=n=>new Intl.NumberFormat('fr-FR',{maximumFractionDigits:0}).format(n)+' FCFA';
+ $('#psTotal').textContent=all.length;$('#psPending').textContent=pending;$('#psDone').textContent=completed;$('#psAmount').textContent=fmt(total);
+ const days=Array.from({length:7},(_,i)=>{const d=new Date(since);d.setDate(since.getDate()+i);return d});
+ const counts=days.map(d=>all.filter(o=>o.date.toDateString()===d.toDateString()).length),mx=Math.max(1,...counts);
+ $('#psBars').innerHTML='<div class="ps-bars">'+days.map((d,i)=>'<div class="ps-bar"><b>'+counts[i]+'</b><i style="height:'+Math.max(4,counts[i]/mx*76)+'px"></i><small>'+d.toLocaleDateString("fr-FR",{weekday:"short"})+'</small></div>').join('')+'</div>';
+}
 function init(){
   $$('#dash [data-view]').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();view(a.dataset.view)}));
   $('#dBurger').addEventListener('click',()=>$('#dSide').classList.contains('open')?closeSide():openSide());
@@ -94,7 +110,7 @@ window.ZDASH={
     $('#dWho').innerHTML='<b>'+esc(name)+'</b>'+esc(u.email||u.phone||'');
     mount();say('');
     document.body.classList.add('dash-on');$('#dash').hidden=false;$('#account').hidden=true;
-    view('overview');load();
+    view('overview');load();loadPersonalStats();
     if(window.RGWalletLoad)window.RGWalletLoad();
   },
   hide(){document.body.classList.remove('dash-on');const d=$('#dash');if(d)d.hidden=true}
