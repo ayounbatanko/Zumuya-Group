@@ -279,7 +279,7 @@ async function initZumuyaRestoGest(){
   KEY="zumuya_restogest_v1_"+ZORG.id;UKEY="zumuya_restogest_user_v1_"+ZORG.id;
   await pullCloud();db.settings.setup=true;if(!db.users?.length)db.users=[mkUser("Administrateur","admin")];
   const mainUser=db.users.find(u=>u.role==="admin")||db.users[0];mainUser.name=mainUser.name&&mainUser.name!=="Administrateur"?mainUser.name:(md.full_name||md.name||"Administrateur");
-  applyBrand();$("#brandName").textContent="ZUMUYA GROUP";document.title=(requestedType==="hotel"?"ZUMUYA Hôtel — Restauration & F&B":"ZUMUYA Restaurant — Gestion complète");$("#userChip").onclick=openUserMenu;uid=mainUser.id;applyPrefs();refreshChip();enter(mainUser);
+  applyBrand();$("#brandName").textContent="ZUMUYA GROUP";document.title=(requestedType==="hotel"?"ZUMUYA Hôtel — Restauration & F&B":"ZUMUYA Restaurant — Gestion complète");$("#userChip").onclick=openUserMenu;uid=mainUser.id;applyPrefs();refreshChip();enter(mainUser);const requestedPage=new URLSearchParams(location.search).get("page");if(requestedPage==="settings")setPage("settings");
   SB.auth.onAuthStateChange((_event,next)=>{if(!next){location.replace("compte.html");return}CS.user=next.user});
   setInterval(()=>{if(dirty())pushCloud();else pullCloud()},45000);
   addEventListener("online",()=>{if(dirty())pushCloud()});
