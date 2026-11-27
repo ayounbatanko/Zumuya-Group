@@ -317,12 +317,22 @@ function planPickerHtml(r){
   <button type="button" onclick="reqPro()">Envoyer ma demande d'abonnement</button>
  </div>`;
 }
-function reqPro(){
- const sel=document.querySelector('input[name="proPlan"]:checked');
- const months=sel?+sel.value:1;
- if(![1,3,6,12].includes(months))return alert('Choisissez une durée d\'abonnement (1, 3, 6 ou 12 mois).');
- upd(r=>{r.proRequest=Date.now();r.proPlanMonths=months;r.proPayment=null;r.proForm=null});
- toast('Demande Pro envoyée : '+months+' mois');render();
+async function reqPro(){
+  const sel=document.querySelector('input[name="proPlan"]:checked');
+  const months=sel?+sel.value:1,org=ORGID();
+  if(![1,3,6,12].includes(months))return alert("Choisissez une durée d'abonnement (1, 3, 6 ou 12 mois).");
+  if(!org)return alert("Établissement non identifié. Reconnectez-vous à ZUMUYA GROUP.");
+  const cfg=window.ZUMAYA_CONFIG||{};let session=null;
+  try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(/^sb-.*-auth-token$/.test(k)){const v=JSON.parse(localStorage.getItem(k)||"null"),x=v&&(v.currentSession||v);if(x&&x.access_token&&x.user){session=x;break}}}}catch(e){}
+  if(!session)return alert("Votre session ZUMUYA a expiré. Reconnectez-vous.");
+  const button=document.querySelector('button[onclick="reqPro()"]');if(button){button.disabled=true;button.textContent="Envoi…"}
+  try{
+    const response=await fetch(cfg.SUPABASE_URL+"/rest/v1/rpc/zrh_subscription_request_pro",{method:"POST",headers:{apikey:cfg.SUPABASE_ANON_KEY,Authorization:"Bearer "+session.access_token,"Content-Type":"application/json"},body:JSON.stringify({p_org_id:org,p_months:months,p_payment_reference:null})});
+    const body=await response.text();if(!response.ok)throw new Error(body||("Erreur "+response.status));
+    upd(x=>{x.proRequest=Date.now();x.proPlanMonths=months;x.proPayment=null;x.proForm=null});
+    toast("Demande Pro transmise au compte propriétaire.");render();
+  }catch(e){alert("Demande non transmise. Vérifiez que la migration 21_abonnements_pro_restaurant_hotel.sql est exécutée dans Supabase. Détail : "+String(e.message||e).slice(0,180));}
+  finally{if(button){button.disabled=false;button.textContent="Envoyer ma demande d'abonnement"}}
 }
 function copyTxt(b){const t=b.getAttribute('data-copy')||'';const ok=()=>{const x=b.textContent;b.textContent='✅ Copié';setTimeout(()=>b.textContent=x,1500)};
  const fb=()=>{const a=document.createElement('textarea');a.value=t;a.style.cssText='position:fixed;opacity:0';document.body.appendChild(a);a.select();try{document.execCommand('copy');ok()}catch(e){prompt('Copiez ce numéro :',t)}a.remove()};
