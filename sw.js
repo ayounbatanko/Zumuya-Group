@@ -1,7 +1,7 @@
 /* ZUMUYA GROUP — service worker commun au portail et aux pôles métier.
    Précharge uniquement les pages et dépendances natives ZUMUYA.
    Réseau d'abord, cache en secours hors ligne. */
-const CACHE='zumuya-v46-20261127';
+const CACHE='zumuya-v47-20261127';
 const FILES=[
  './index.html','./compte.html','./compte.css','./compte.js','./config.js','./zguard.js','./zsession.js',
  './dashboard.css','./dashboard.js','./module-manager.js','./modules.js','./parametres.html','./parametres.js',
@@ -33,9 +33,10 @@ self.addEventListener('fetch',e=>{
  e.respondWith(fetch(r,{cache:'no-store'}).then(res=>{
   if(res&&res.ok){const copy=res.clone();caches.open(CACHE).then(c=>c.put(r,copy))}
   return res;
- }).catch(()=>caches.match(r).then(hit=>{
+ }).catch(()=>caches.match(r,{ignoreSearch:true}).then(hit=>{
   if(hit)return hit;
-  if(r.mode==='navigate')return caches.match('./index.html');
+  if(r.mode==='navigate' && (u.pathname.endsWith('/index.html')||u.pathname.endsWith('/')))return caches.match('./index.html');
+  if(r.mode==='navigate')return new Response('<!doctype html><html lang="fr"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Page indisponible</title><body style="font:16px system-ui;padding:24px"><h2>Page temporairement indisponible</h2><p>Vérifiez votre connexion Internet puis rechargez cette page.</p><a href="./index.html">Retour à ZUMUYA GROUP</a></body></html>',{status:503,headers:{'Content-Type':'text/html;charset=utf-8'}});
   return Response.error();
  })));
 });
