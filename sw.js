@@ -1,9 +1,9 @@
 /* ZUMUYA GROUP — service worker commun au portail et aux pôles métier.
    Précharge uniquement les pages et dépendances natives ZUMUYA.
    Réseau d'abord, cache en secours hors ligne. */
-const CACHE='zumuya-v56-20261127';;;;;;;
+const CACHE='zumuya-v57-20261127';;;;;;;
 const FILES=[
- './index.html','./compte.html','./compte.css','./compte.js','./config.js','./zguard.js','./zsession.js',
+ './index.html','./reseau-social.html','./reseau-social.css','./reseau-social.js','./compte.html','./compte.css','./compte.js','./config.js','./zguard.js','./zsession.js',
  './dashboard.css','./dashboard.js','./module-manager.js','./modules.js','./parametres.html','./parametres.js',
  './proprietaire.html','./proprietaire.css','./proprietaire.js',
  './client-espace.html','./client-espace.js','./mes-commandes.html','./historique.html','./portefeuille.html','./catalogues.html',
