@@ -94,7 +94,7 @@ if(!r){
      sub:'trial',trialEnd:Date.now()+30*864e5,subEnd:0,pay:[],menu:[],sales:[],portalOrgId:md.organization_id};
   if(isFinite(md.org_lat)&&md.org_lat!==null&&isFinite(md.org_lng)&&md.org_lng!==null){r.lat=Number(md.org_lat);r.lng=Number(md.org_lng);r.locationCapturedAt=Date.now()}
   d.rests.push(r);changed=true;
-}else if(!r.portalOrgId){r.portalOrgId=md.organization_id;changed=true}
+}else{if(!r.portalOrgId){r.portalOrgId=md.organization_id;changed=true}if(type==='hotel'&&r.businessType!=='hotel'){r.businessType='hotel';r.hotel=r.hotel||{enabled:true,name:r.name||orgName,category:'Hôtel',manager:'',rooms:0,services:['Restaurant','Service en chambre','Petit-déjeuner','Bar / Café','Banquets et séminaires','À emporter'],hours:'07:00 - 23:00',instructions:''};r.hotel.enabled=true;changed=true}else if(type==='restaurant'&&r.businessType!=='restaurant'){r.businessType='restaurant';changed=true}}
 if(!u){
   /* « Ayouba Tanko » est réservé au propriétaire de la plateforme : jamais attribué à un compte partenaire */
   var nm=String(md.name||orgName).trim();if(nm.toLocaleLowerCase('fr')==='ayouba tanko')nm=orgName;
