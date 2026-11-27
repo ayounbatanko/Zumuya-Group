@@ -57,11 +57,11 @@ if(memberOff){try{var d1=D.get(),b1=d1.users.find(function(x){return x.portalId=
    /* fiche partenaire pas encore créée : le portail la demande */
 var fromPortal=true;
 var d=D.get(),cur=sget('uid'),curU=cur&&d.users.find(function(x){return x.id==cur&&!x.disabled});
-if(curU&&curU.portalId===pu.id)return;   /* session déjà liée à ce compte portail */
+if(curU&&curU.portalId===pu.id&&curU.role===ROLE)return;   /* session déjà liée à ce compte portail */
 var email=String(pu.email||pu.phone||md.phone_display||'').toLowerCase();
 var uid=function(){return Math.random().toString(36).slice(2,9)};
 function slug(t){return String(t||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'')}
-var u=d.users.find(function(x){return x.portalId===pu.id})||d.users.find(function(x){return x.role==='restaurant'&&email&&String(x.phone||'').toLowerCase()===email});
+var u=d.users.find(function(x){return x.portalId===pu.id&&x.role==='restaurant'})||d.users.find(function(x){return x.role==='restaurant'&&email&&String(x.phone||'').toLowerCase()===email});
 var r=u&&u.restId&&d.rests.find(function(x){return x.id===u.restId})||d.rests.find(function(x){return x.portalOrgId===md.organization_id});
 if(ROLE==='driver'){
   /* Livreur : il n'existe que parce qu'un restaurant l'a créé (Mon équipe). Il est toujours rattaché à CE restaurant. */
