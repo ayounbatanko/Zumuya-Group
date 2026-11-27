@@ -27,16 +27,20 @@ try{var qp=new URLSearchParams(location.search),rp=qp.get('portal');if(rp==='res
 if(type==='universal'||((type==='restaurant'||type==='hotel')&&!md.organization_id)){
   var mods=md.enabled_modules||[],om=md.org_map||{};
   var want=requestedPortal||(type==='restaurant'||type==='hotel'?type:(md.portal_type||(om.restaurant?'restaurant':om.hotel?'hotel':'')));
+  var orgLookupOK=false;
   if(want||mods.indexOf('restaurant')>-1||mods.indexOf('restauration')>-1||mods.indexOf('hotel')>-1||md.organization_id){
     try{var C0=window.ZUMAYA_CONFIG,x0=new XMLHttpRequest();
       x0.open('GET',C0.SUPABASE_URL+'/rest/v1/rg_organizations?owner_id=eq.'+encodeURIComponent(pu.id)+'&organization_type=in.(restaurant,hotel)&select=id,organization_type,public_name,legal_name,city,address,contact_phone,latitude,longitude',false);
       x0.setRequestHeader('apikey',C0.SUPABASE_ANON_KEY);x0.setRequestHeader('Authorization','Bearer '+s.access_token);x0.send();
-      if(x0.status===200){var os=JSON.parse(x0.responseText)||[];
+      if(x0.status===200){orgLookupOK=true;var os=JSON.parse(x0.responseText)||[];
         var og=(want?os.filter(function(o){return o.organization_type===want})[0]:null)||os.filter(function(o){return o.id===md.organization_id})[0]||(!requestedPortal&&os.length===1?os[0]:null);
         if(og){type=og.organization_type;
           md=Object.assign({},md,{organization_id:og.id,organization_name:og.public_name||og.legal_name||md.organization_name,org_city:og.city||md.org_city,org_address:og.address||md.org_address,org_phone:og.contact_phone||md.org_phone,org_lat:og.latitude!=null?og.latitude:md.org_lat,org_lng:og.longitude!=null?og.longitude:md.org_lng})}}
     }catch(e){}
   }
+  /* Secours pour les comptes universels dont la fiche d'organisation est déjà portée par les métadonnées,
+     mais dont la lecture REST est momentanément indisponible. Le pôle explicite de l'URL reste prioritaire. */
+  if(type==='universal'&&requestedPortal&&!orgLookupOK&&md.organization_id){type=requestedPortal;}
 }
 /* Si aucun établissement ne correspond au pôle demandé, ne pas ouvrir un espace vide ou celui d'un autre pôle. */
 if(((type==='restaurant'||type==='hotel')&&!md.organization_id)||(pu.user_metadata&&pu.user_metadata.account_type==='universal'&&requestedPortal&&!md.organization_id)){
