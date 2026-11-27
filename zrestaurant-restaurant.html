@@ -225,7 +225,7 @@ function homeGrid(){
    return `<button type="button" class="${cls}" onclick="tab='${k}';render()"><span class="ico">${m.ico}</span><span>${m.label}${badge}</span></button>`}).join('');
   return `<section class="hg-section"><h3 class="hg-section-title">${g.title}</h3><div class="home-grid">${btns}</div></section>`;
  }).join('');
- return `<div class="home-grid-wrap"><div class="card"><h2 style="margin:0 0 14px;text-align:center">${isHotelAccount()?"ZUMUYA Hôtel":"ZUMUYA Restauration"}</h2>${html}<section class="hg-section"><h3 class="hg-section-title">Gestion complète RestoGest</h3><div class="home-grid"><button type="button" class="hg-btn full" onclick="location.href='zrestaurant-restaurant.html?portal=${isHotelAccount()?"hotel#hotel":"restaurant#home"}'"><span class="ico">🧾</span><span>Ouvrir la gestion complète — caisse, menu, stock, clients, dettes, réservations, rapports et réglages</span></button></div></section></div></div>`;
+ return `<div class="home-grid-wrap"><div class="card"><h2 style="margin:0 0 14px;text-align:center">${isHotelAccount()?"ZUMUYA Hôtel":"ZUMUYA Restauration"}</h2>${html}<section class="hg-section"><h3 class="hg-section-title">Gestion complète RestoGest</h3><div class="home-grid"><button type="button" class="hg-btn full" onclick="location.href='zrestaurant-restogest.html?type=${isHotelAccount()?"hotel":"restaurant"}'"><span class="ico">🧾</span><span>Ouvrir la gestion complète — caisse, menu, stock, clients, dettes, réservations, rapports et réglages</span></button></div></section></div></div>`;
 }
 function proUI(r,s){
  const e=s.end?new Date(s.end).toLocaleDateString():'';
@@ -361,7 +361,7 @@ hotel(r){
  <div class="card col">
   <h3>🍽️ Centre de restauration hôtelière</h3>
   <p class="mut">Accédez à tous les outils de gestion RestoGest pour cet hôtel : caisse, menu, stock, clients, dettes, réservations, historique, rapports et réglages.</p>
-  <a class="btn primary" style="display:inline-flex;justify-content:center;text-decoration:none" href="zrestaurant-restaurant.html?portal=hotel#hotel">🧾 Ouvrir la gestion complète RestoGest</a>
+  <a class="btn primary" style="display:inline-flex;justify-content:center;text-decoration:none" href="zrestaurant-restogest.html?type=hotel">🧾 Ouvrir la gestion complète RestoGest</a>
   <p class="mut">Accédez directement aux outils de gestion issus de RestoGest, adaptés aux différents points de restauration de votre hôtel.</p>
   <div class="home-grid">
    ${tile('🍴','Restaurant de l’hôtel','Carte, plats, prix et disponibilité','menu')}
