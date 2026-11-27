@@ -26,7 +26,7 @@
 
 html{-webkit-tap-highlight-color:transparent}body{overscroll-behavior-y:contain;-webkit-user-select:none;user-select:none}input,textarea,select{-webkit-user-select:text;user-select:text}
 .btn,.mini,.nav-item,.seg button{min-height:40px}.mini{min-height:34px;padding:7px 11px}input,select,textarea{font-size:16px!important}
-.topbar{padding-top:env(safe-area-inset-top)}.bottomnav{display:flex!important;position:fixed;left:0;right:0;bottom:0;z-index:999;background:#fff;border-top:1px solid var(--line);padding:6px 4px calc(6px + env(safe-area-inset-bottom));box-shadow:0 -6px 24px #0000000d}.bottomnav button{flex:1;min-width:0;border:0;background:none;color:var(--muted);font-size:10px;font-weight:700;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:7px 2px;border-radius:10px;white-space:normal}.bottomnav button span{font-size:19px}.bottomnav button.on{color:var(--forest);background:#edf4e8}main{padding-bottom:calc(100px + env(safe-area-inset-bottom))}.toast{bottom:100px}@media(min-width:761px){.bottomnav{max-width:620px;left:50%;right:auto;transform:translateX(-50%);border:1px solid var(--line);border-radius:16px 16px 0 0}}
+.topbar{padding-top:env(safe-area-inset-top)}.bottomnav{display:flex!important;position:fixed;left:0;right:0;bottom:0;z-index:999;background:#fff;border-top:1px solid var(--line);padding:6px 4px calc(6px + env(safe-area-inset-bottom));box-shadow:0 -6px 24px #0000000d}.bottomnav a{flex:1;min-width:0;text-align:center;text-decoration:none;color:var(--forest);font-size:12px;font-weight:800;padding:10px 4px;border-radius:10px;background:#edf4e8}.bottomnav button{flex:1;min-width:0;border:0;background:none;color:var(--muted);font-size:10px;font-weight:700;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:7px 2px;border-radius:10px;white-space:normal}.bottomnav button span{font-size:19px}.bottomnav button.on{color:var(--forest);background:#edf4e8}main{padding-bottom:calc(100px + env(safe-area-inset-bottom))}.toast{bottom:100px}@media(min-width:761px){.bottomnav{max-width:620px;left:50%;right:auto;transform:translateX(-50%);border:1px solid var(--line);border-radius:16px 16px 0 0}}
 [data-theme=dark] .bottomnav{background:#16201b}[data-theme=dark] .bottomnav button.on{color:var(--lime);background:#1f2c26}
 #subBar{padding:9px 34px;font-size:12px;font-weight:600;background:#fff7e0;color:#7a5a10;border-bottom:1px solid #f0dfae;cursor:pointer}#subBar.warn{background:#fff0ef;color:#a33;border-color:#f3c9c6}@media(max-width:760px){#subBar{padding:9px 15px}}#modalWrap{z-index:70}input[type=file]{font-size:13px!important;width:100%;max-width:100%}.modal-actions{flex-wrap:wrap}.code{width:100%;font:11px monospace;word-break:break-all}</style>
 <title>ZUMUYA GROUP — Gestion intelligente du restaurant</title>
@@ -56,7 +56,7 @@ html{-webkit-tap-highlight-color:transparent}body{overscroll-behavior-y:contain;
 </div>
 </div>
 <div class="modal-wrap" id="modalWrap" hidden><section class="modal" id="modal"><button class="close" id="modalClose">×</button><div id="modalContent"></div></section></div>
-<nav class="bottomnav" id="bnav"></nav><div class="toast" id="toast"></div>
+<nav class="bottomnav" id="bnav"><a href="zrestaurant-restogest.html?type=hotel&amp;page=settings" aria-label="Ouvrir les paramètres et réglages">⚙ Paramètres et réglages</a></nav><div class="toast" id="toast"></div>
 <script>
 /* ================= CONFIGURATION SUPABASE ================= */
 const SUPABASE_URL = window.ZUMAYA_CONFIG?.SUPABASE_URL;
