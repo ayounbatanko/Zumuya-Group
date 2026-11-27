@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="fr"><head><script src="config.js"></script><script src="zguard.js?v=4" data-roles="customer"></script><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="manifest" href="zrestaurant-manifest.webmanifest"><meta name="theme-color" content="#14213d"><link rel="icon" type="image/png" href="zrestaurant-icon-192.png?v=3"><link rel="apple-touch-icon" href="zrestaurant-icon-192.png?v=3"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Restauration"><meta property="og:type" content="website">
+<!DOCTYPE html><html lang="fr"><head><script src="config.js"></script><script src="zguard.js?v=4" data-roles="any"></script><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="manifest" href="zrestaurant-manifest.webmanifest"><meta name="theme-color" content="#14213d"><link rel="icon" type="image/png" href="zrestaurant-icon-192.png?v=3"><link rel="apple-touch-icon" href="zrestaurant-icon-192.png?v=3"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Restauration"><meta property="og:type" content="website">
 <meta property="og:locale" content="fr_FR">
 <meta property="og:site_name" content="ZUMUYA Restauration">
 <meta property="og:title" content="ZUMUYA Restauration - Gestion intelligente du restaurant">
@@ -155,7 +155,7 @@ const cardUrl=s=>inShell?'#card/'+s:'zrestaurant-card.html?r='+s;
 const cardSlug=()=>inShell?SH.location.hash.split('/')[1]:new URLSearchParams(location.search).get('r');
 const OWNER_ACCOUNT_NAME='Ayouba Tanko';
 const isOwnerAccount=u=>false;/* le propriétaire est désigné côté Supabase (rg_platform_owners), jamais par un nom */
-function guard(role){const u=me();const allowed=role==='owner'?(u&&(u.role==='owner'||(u.role==='restaurant'&&isOwnerAccount(u)))):(u&&u.role===role);if(!allowed){navTo('index');return null}return u}
+function guard(role){const u=me();const allowed=role==='owner'?(u&&(u.role==='owner'||(u.role==='restaurant'&&isOwnerAccount(u)))):(role==='client'?!!u:(u&&u.role===role));if(!allowed){navTo('index');return null}return u}
 function logout(){store.clr();try{Object.keys(localStorage).filter(function(k){return /^sb-.*-auth-token$/.test(k)}).forEach(function(k){localStorage.removeItem(k)})}catch(e){}navTo('compte.html')}
 function passwordCard(){return `<div class="card col"><h3 style="margin:0">🔐 Mon compte ZUMUYA GROUP</h3><p class="mut">La connexion se fait avec votre adresse e-mail. Gérez votre profil, votre mot de passe, vos préférences ou supprimez votre compte.</p><a href="parametres.html" style="font-weight:700">⚙️ Ouvrir les paramètres de mon compte →</a></div>`}
 
