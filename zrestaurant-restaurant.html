@@ -371,8 +371,6 @@ hotel(r){
  <div class="card col">
   <h3>🍽️ Centre de restauration hôtelière</h3>
   
-  <a class="btn primary" style="display:inline-flex;justify-content:center;text-decoration:none" href="zrestaurant-restogest.html?type=hotel">🧾 Ouvrir la gestion complète RestoGest</a>
-  
   <div class="home-grid">
    ${tile('🍴','Restaurant de l’hôtel','Carte, plats, prix et disponibilité','menu')}
    ${tile('🧮','Caisse et ventes','Encaisser les clients du restaurant et du bar','pos')}
@@ -382,6 +380,7 @@ hotel(r){
    ${tile('📚','Historique des ventes','Retrouver les ventes et réimprimer les tickets','hist')}
    ${tile('📊','Rapports de restauration','Consulter les résultats et statistiques','report')}
    ${tile('🌾','Approvisionnement','Gérer les achats et fournisseurs alimentaires','supply')}
+   ${can('settings')?`<button type="button" class="hg-btn" style="min-height:104px;text-align:left;order:99" onclick="setSub='rest';tab='settings';render()"><span class="ico">⚙️</span><span><b>Paramètres et réglages</b><small style="display:block;white-space:normal;font-weight:400;opacity:.8;margin-top:5px">Restaurant, paiements, horaires, livraison et compte</small></span></button>`:''}
   </div>
   <div class="row" style="margin-top:12px">
    <button type="button" onclick="window.ZUMUYA_EXT&&ZUMUYA_EXT.openFolio?ZUMUYA_EXT.openFolio():alert('Notes de chambre indisponibles.')">🧾 Ouvrir les notes de chambre</button>
