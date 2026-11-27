@@ -73,7 +73,31 @@
   .dmain{padding:0 14px 32px}.dhero{margin:0 -14px;padding:20px 14px 16px}
   .dart{width:100%;opacity:.28;-webkit-mask-image:none;mask-image:none}
 }
-@media(max-width:640px){.dgrid{grid-template-columns:1fr}.dcard{padding:14px}.dcard .ico{font-size:40px;width:56px}.dh2{font-size:19px}.dhelp .face{font-size:52px}.drow{gap:10px}}
+@media(max-width:640px){
+  .dgrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .dcard{padding:12px;gap:9px;align-items:center}
+  .dcard .ico{font-size:30px;width:38px;flex:none}
+  .dcard h3{font-size:14px;margin:0 0 4px}
+  .dcard p{font-size:11px;line-height:1.35;margin:0 0 8px}
+  .dcard .dbtn{min-height:34px;padding:0 10px;font-size:12px}
+  .dcard .dtick{width:22px;height:22px;top:7px;right:7px;font-size:12px}
+  .dh2{font-size:19px}.dhelp .face{font-size:52px}.drow{gap:10px}
+  .dtop{min-height:58px;flex-wrap:wrap;padding:7px 10px}
+  .dbrand{font-size:14px;gap:6px}.dbrand img{width:27px;height:27px}
+  .dmain{padding:0 10px 28px}
+  .dhero{padding:18px 12px 14px}
+  .dhero h1{font-size:23px;max-width:100%}
+  .personal-stats{padding:12px;margin:12px 0 18px}
+  .ps-head{gap:8px;align-items:flex-start;flex-wrap:wrap}
+  .ps-kpis{gap:7px}.ps-kpis article{padding:10px}.ps-kpis b{font-size:19px}
+  .catalog-inline{overflow:hidden}
+}
+@media(max-width:390px){
+  .dgrid{grid-template-columns:1fr}
+  .dcard{padding:13px}
+  .dtop{gap:6px}
+  .dbrand{font-size:13px}
+}
 @media(prefers-reduced-motion:reduce){.dside{transition:none}}
 #dash .wallet-panel{border:1px solid #dce4eb;border-radius:18px;padding:20px;background:#fff;margin:0}.wallet-head{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}.wallet-kicker{font-size:.72rem;letter-spacing:.14em;font-weight:800;color:#a67c32}.wallet-head h2{margin:5px 0}.wallet-head strong{background:#102b45;color:white;border-radius:14px;padding:16px 20px;font-size:1.35rem}.wallet-actions{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0}.wallet-actions .btn,.wallet-panel .btn{border:0;border-radius:10px;padding:12px 16px;font-weight:800;cursor:pointer}.wallet-panel .btn{background:#102b45;color:white}.wallet-panel .btn.secondary{background:#e8edf3;color:#102b45}.wallet-ledger .entry{border-radius:10px;padding:12px;margin:8px 0;border:1px solid #e5eaf0}.wallet-panel form{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin:12px 0}.wallet-panel form label{display:flex;flex-direction:column;gap:6px}.wallet-panel input,.wallet-panel select{padding:10px;border:1px solid #ccd4df;border-radius:9px;font:inherit}.wallet-ledger .credit{color:#167447;font-weight:800}.wallet-ledger .debit{color:#a33b35;font-weight:800}
 .dwalletnote{margin:-6px 0 12px;color:#5b6b7a;font-size:14.5px}.dwallet .wallet-panel{display:block}
