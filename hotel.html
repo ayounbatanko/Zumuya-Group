@@ -8,7 +8,7 @@
 <script>
 (()=>{'use strict';
 const $=s=>document.querySelector(s),esc=ZS.esc,who=ZS.resto(),pw=ZS.portal();
-const w=who||pw;if(w){const a=$('#who');a.textContent='Connecté';a.className='zpill';a.href=who?'zrestaurant-restaurant.html?portal=hotel#hotel':'compte.html'}
+const w=who||pw;if(w){const a=$('#who');a.textContent='Connecté';a.className='zpill';a.href=who?'hotel-gestion.html':'compte.html'}
 const app=$('#app');
 function gate(title,text,btns){app.innerHTML='<div class="card lock"><span class="eyebrow" style="color:#0b7d6f">ACCÈS RÉSERVÉ AUX HÔTELS</span><h2>'+title+'</h2><p>'+text+'</p>'+btns+'</div>'}
 if(!who){gate('Connectez-vous avec le compte de votre hôtel','Ce service n’est ouvert qu’aux établissements inscrits comme hôtels. Les comptes clients, restaurants et livreurs n’y ont pas accès.','<a class="btn btn-gold" href="compte.html">Ouvrir mon compte ZUMUYA</a><a class="btn btn-line" href="compte.html?mode=signup">Créer mon compte ZUMUYA</a>')}
@@ -17,8 +17,8 @@ else hub(who.rest);
 async function hub(r){const h=r.hotel||{},sub=ZS.subOk(r);
  app.innerHTML='<div class="sec-title"><div><span class="eyebrow" style="color:#0b7d6f">'+esc(h.category||'HÔTEL')+'</span><h2>'+esc(h.name||r.name)+'</h2><div class="mut">'+esc(r.address||'')+' '+(h.hours?'· Restauration '+esc(h.hours):'')+'</div></div><span class="badge '+(sub?'':'red')+'">'+(sub?'Compte actif':'Abonnement à renouveler')+'</span></div>'+
  '<div class="kpis" id="k"></div><div class="flow">'+
- '<a class="card step" href="zrestaurant-restaurant.html?portal=hotel#hotel" style="text-decoration:none"><i>01</i><b>🏨 Gérer mon hôtel</b><span>Paramètres, service en chambre, notes de chambre, caisse et catalogue.</span></a>'+
- '<a class="card step" href="zrestaurant-restaurant.html?portal=hotel#orders" style="text-decoration:none"><i>02</i><b>🍽️ Commandes en cours</b><span>Acceptation, préparation et remise en chambre.</span></a>'+
+ '<a class="card step" href="hotel-gestion.html" style="text-decoration:none"><i>01</i><b>🏨 Gérer mon hôtel</b><span>Paramètres, service en chambre, notes de chambre, caisse et catalogue.</span></a>'+
+ '<a class="card step" href="hotel-gestion.html" style="text-decoration:none"><i>02</i><b>🍽️ Commandes en cours</b><span>Acceptation, préparation et remise en chambre.</span></a>'+
  '<a class="card step" href="zrestaurant-restogest.html?type=hotel" style="text-decoration:none"><i>02 bis</i><b>🧾 Gestion complète RestoGest</b><span>Caisse, menu, stock, achats, clients, dettes, réservations, rapports et réglages de la restauration de l’hôtel.</span></a>'+
  '<a class="card step" href="livraison.html" style="text-decoration:none"><i>03</i><b>📦 Livraison coordonnée</b><span>Commandes à l’extérieur : livreur libre le plus proche, suivi en direct.</span></a>'+
  '<a class="card step" href="index.html#catalogue-public" style="text-decoration:none"><i>04</i><b>🌾 Voir les fournisseurs agricoles</b><span>Découvrez les producteurs, comparez les produits et envoyez vos demandes de réapprovisionnement.</span></a>'+
