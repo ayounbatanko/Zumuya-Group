@@ -1,12 +1,12 @@
 /* Gestion des pôles autonomes du compte unique ZUMUYA GROUP. */
 (()=>{'use strict';
 const $=s=>document.querySelector(s);
-const ICONS={social:'🌐',restaurant:'🍽️',hotel:'🏨',agro:'🌾',marketplace:'🛍️',delivery:'🚚'};
-const ROUTES={social:'reseau-social.html',restaurant:'zrestaurant-restaurant.html?portal=restaurant#home',hotel:'zrestaurant-restaurant.html?portal=hotel#hotel',agro:'agro.html',marketplace:'marketplace.html',delivery:'livraison.html'};
+const ICONS={social:'🌐',restaurant:'🍽️',restauration:'🍽️',hotel:'🏨',agro:'🌾',marketplace:'🛍️',delivery:'🚚'};
+const ROUTES={social:'reseau-social.html',restaurant:'zrestaurant-restaurant.html?portal=restaurant#home',restauration:'zrestaurant-restaurant.html?portal=restaurant#home',hotel:'zrestaurant-restaurant.html?portal=hotel#hotel',agro:'agro.html',marketplace:'marketplace.html',delivery:'livraison.html'};
 let client=null,user=null,catalog=[],enabled=[],orgs=[];
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function message(t,good=false){const el=$('#moduleMsg');if(el){el.textContent=t;el.className='module-msg '+(good?'good':'');}}
-function currentOrg(code){const types={restaurant:['restaurant','restauration'],hotel:['hotel'],agro:['agro','agro_producer','agro_trader'],marketplace:['marketplace'],delivery:['delivery_service','delivery','logistics']};return orgs.find(o=>(types[code]||[]).includes(o.organization_type))||null;}
+function currentOrg(code){const key=code==='restauration'?'restaurant':code;const types={restaurant:['restaurant','restauration'],hotel:['hotel'],agro:['agro','agro_producer','agro_trader'],marketplace:['marketplace'],delivery:['delivery_service','delivery','logistics']};return orgs.find(o=>(types[key]||[]).includes(o.organization_type))||null;}
 function render(){const root=$('#moduleGrid');if(!root)return;
  root.innerHTML=catalog.map(m=>{const mine=enabled.find(x=>x.module_code===m.module_code);const on=!!mine&&mine.status==='active';const available=m.rollout_status==='available';const org=currentOrg(m.module_code);const state=on?'Activité activée':mine?.status==='paused'?'En pause':m.rollout_status==='maintenance'?'Maintenance':available?'Disponible':'Bientôt disponible';
  return `<article class="module-config-card"><div class="module-config-icon">${ICONS[m.module_code]||'✦'}</div><div class="module-config-body"><h3>${esc(m.label)}</h3><p>${esc(m.description||'Espace professionnel autonome et connecté aux autres pôles.')}</p><small>${esc(state)}${org?' · '+esc(org.public_name):''}</small></div><div class="module-config-actions">${on?`<button type="button" data-pause="${esc(m.module_code)}" class="module-config-btn secondary">Mettre en pause</button>`:available?`<button type="button" data-enable="${esc(m.module_code)}" class="module-config-btn">Activer ce pôle</button>`:`<button type="button" class="module-config-btn secondary" disabled>À venir</button>`}${on&&ROUTES[m.module_code]?`<a href="${ROUTES[m.module_code]}" class="module-open-link">Ouvrir l’espace →</a>`:''}</div></article>`}).join('')||'<p>Aucun pôle disponible.</p>';
