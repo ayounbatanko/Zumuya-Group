@@ -20,5 +20,5 @@ X.openPromos=function(){var u=X.me();if(!u||u.role!=='restaurant')return;var d=X
   b.querySelector('#pa').onclick=function(){var c=b.querySelector('#pc').value.trim().toUpperCase(),v=+b.querySelector('#pv').value;if(!c||!v)return alert('Code et valeur requis');
     var d=X.db().get(),r=d.rests.find(function(x){return x.id==r0.id});r.promos=r.promos||[];r.promos.push({code:c,type:b.querySelector('#pt').value,value:v,min:+b.querySelector('#pm').value||0,active:true,used:0});X.db().save(d);X.openPromos()};
   var r0=r;b.querySelectorAll('[data-del]').forEach(function(x){x.onclick=function(){var d=X.db().get(),r=d.rests.find(function(y){return y.id==r0.id});r.promos.splice(+x.getAttribute('data-del'),1);X.db().save(d);X.openPromos()}})};
-X.ready(function(){var u=X.me();if(u&&u.role==='restaurant')X.fab('rgx-fab-promo','🎟️ Promos',X.openPromos,1)});
+/* Les codes promo restent accessibles depuis Outils & options, sans bouton flottant. */
 })();
