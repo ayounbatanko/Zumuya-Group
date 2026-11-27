@@ -23,7 +23,7 @@ async function loadBanner(){
 }
 async function loadProducts(){
   const term=$('#search').value.trim();
-  let q=sb.from('commerce_products').select('id,store_id,title,description,price,stock_quantity,image_url,media_urls,video_urls,market_type,commerce_stores!inner(store_name,city,phone,verification_status,is_active)').eq('status','active').eq('commerce_stores.verification_status','verified').eq('commerce_stores.is_active',true).gt('stock_quantity',0).order('created_at',{ascending:false}).limit(80);
+  let q=sb.from('commerce_products').select('id,store_id,title,description,price,stock_quantity,image_url,media_urls,video_urls,market_type,commerce_stores!inner(store_name,city,phone,verification_status,is_active)').eq('status','active').eq('commerce_stores.is_active',true).gt('stock_quantity',0).order('created_at',{ascending:false}).limit(80);
   if(storeFilter)q=q.eq('store_id',storeFilter);
   if(term)q=q.ilike('title','%'+term.replace(/[%_,()]/g,'')+'%');
   if($('#category').value)q=q.eq('category_id',$('#category').value);
