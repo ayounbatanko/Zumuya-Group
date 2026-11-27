@@ -70,21 +70,21 @@ async function loadMarket(){
 }
 async function loadOrgs(){
  const c=window.ZUMAYA_CONFIG||{};if(!c.SUPABASE_URL||!c.SUPABASE_ANON_KEY)return;
- try{const r=await fetch(c.SUPABASE_URL+'/rest/v1/rg_organizations?select=id,organization_type,public_name,city,address,latitude,longitude&organization_type=in.(restaurant,hotel,agro,agro_trader,delivery,delivery_service,logistics)&order=created_at.desc',{headers:{apikey:c.SUPABASE_ANON_KEY,Authorization:'Bearer '+c.SUPABASE_ANON_KEY}});
-  if(!r.ok)return;orgs=await r.json();draw()}catch(_){}
+ try{const r=await fetch(c.SUPABASE_URL+'/rest/v1/rpc/rg_public_partner_directory',{method:'POST',headers:{apikey:c.SUPABASE_ANON_KEY,Authorization:'Bearer '+c.SUPABASE_ANON_KEY,'Content-Type':'application/json'},body:'{}'});
+  if(!r.ok)throw Error('Annuaire partenaires : '+r.status);orgs=await r.json();draw()}catch(e){err='Impossible de charger l’annuaire public des partenaires : '+(e.message||'connexion Supabase');draw()}
 }
 async function loadAgro(){
  const c=window.ZUMAYA_CONFIG||{};if(!c.SUPABASE_URL||!c.SUPABASE_ANON_KEY)return;
  try{
   const h={apikey:c.SUPABASE_ANON_KEY,Authorization:'Bearer '+c.SUPABASE_ANON_KEY};
   const [pr,profiles]=await Promise.all([
-   fetch(c.SUPABASE_URL+'/rest/v1/rg_agro_products?select=id,owner_id,product_name,description,category,quantity,unit,price,photo_url,availability&availability=neq.unavailable&order=created_at.desc',{headers:h}),
-   fetch(c.SUPABASE_URL+'/rest/v1/rg_agro_profiles?select=user_id,business_name,city,role,is_active&is_active=eq.true',{headers:h})
+   fetch(c.SUPABASE_URL+'/rest/v1/rg_agro_products?select=id,owner_id,product_name,description,category,quantity,unit,price,photo_url,availability&availability=in.(available,limited)&order=created_at.desc',{headers:h}),
+   fetch(c.SUPABASE_URL+'/rest/v1/rpc/rg_public_agro_profiles',{method:'POST',headers:{...h,'Content-Type':'application/json'},body:'{}'})
   ]);
-  if(!pr.ok||!profiles.ok)return;
+  if(!pr.ok)throw Error('Produits Agro : '+pr.status);if(!profiles.ok)throw Error('Profils Agro : '+profiles.status);
   const [ps,owners]=await Promise.all([pr.json(),profiles.json()]);const map=new Map(owners.map(x=>[x.user_id,x]));
   agroProducts=ps.filter(x=>map.has(x.owner_id)).map(x=>({...x,owner:map.get(x.owner_id)}));draw();
- }catch(_){}
+ }catch(e){err='Catalogue Agro : '+(e.message||'chargement impossible');draw()}
 }
 function changeAgroQty(id,action){if(!agroCart)return;const x=agroCart.items.find(v=>v.id===id);if(!x)return;if(action==='+')x.qty++;else if(action==='-')x.qty--;else x.qty=0;agroCart.items=agroCart.items.filter(v=>v.qty>0);if(!agroCart.items.length)agroCart=null;writeAgroCart();draw()}
 function addAgro(id){
