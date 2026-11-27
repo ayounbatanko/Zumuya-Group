@@ -6,7 +6,7 @@ const esc=ZS.esc,ZC=window.ZC||{ctl:()=>'',headBtn:()=>'',init(){},setData(){}};
 let rests=[],pos=null,q='',sort='near',open={},err='',loading=true,agroProducts=[],mktProducts=[],orgs=[],agroCart=readAgroCart();
 const $=s=>root.querySelector(s);
 const chatHref=(k,ref,sub)=>'messagerie.html?kind='+k+'&ref='+encodeURIComponent(ref)+'&subject='+encodeURIComponent(sub||'');
-let cat=(()=>{try{const v=sessionStorage.getItem('zg_cat');return ['social','resto','hotel','agro','market','delivery'].includes(v)?v:'none'}catch(_){return 'none'}})();
+let cat='none';
 function phRests(){const known=new Set(rests.map(r=>r.portalOrgId).filter(Boolean)),names=new Set(rests.map(r=>(r.name||'').trim().toLowerCase()));
  return orgs.filter(o=>(o.organization_type==='restaurant'||o.organization_type==='hotel')&&!known.has(o.id)&&!names.has((o.public_name||'').trim().toLowerCase()));}
 function phCard(o){const h=o.organization_type==='hotel';
