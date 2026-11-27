@@ -225,7 +225,7 @@ function homeGrid(){
    return `<button type="button" class="${cls}" onclick="tab='${k}';render()"><span class="ico">${m.ico}</span><span>${m.label}${badge}</span></button>`}).join('');
   return `<section class="hg-section"><h3 class="hg-section-title">${g.title}</h3><div class="home-grid">${btns}</div></section>`;
  }).join('');
- return `<div class="home-grid-wrap"><div class="card"><h2 style="margin:0 0 14px;text-align:center">${isHotelAccount()?"ZUMUYA Hôtel":"ZUMUYA Restauration"}</h2>${html}<section class="hg-section"><h3 class="hg-section-title">Gestion complète RestoGest</h3><div class="home-grid"><button type="button" class="hg-btn full" onclick="location.href='zrestaurant-restogest.html?type=${isHotelAccount()?"hotel":"restaurant"}'"><span class="ico">🧾</span><span>Ouvrir la gestion complète — caisse, menu, stock, clients, dettes, réservations, rapports et réglages</span></button></div></section></div></div>`;
+ return `<div class="home-grid-wrap"><div class="card"><h2 style="margin:0 0 14px;text-align:center">${isHotelAccount()?"ZUMUYA Hôtel":"ZUMUYA Restauration"}</h2>${html}</div></div>`;
 }
 function proUI(r,s){
  const e=s.end?new Date(s.end).toLocaleDateString():'';
@@ -388,34 +388,7 @@ hotel(r){
    <button type="button" class="sec" onclick="tab='orders';render()">Voir toutes les commandes</button>
   </div>
  </div>
- <div class="card col">
-  <h3>🏨 Informations de l’hôtel</h3>
-  <div class="formgrid">
-   <label>Nom de l’hôtel<input id="hn" value="${esc(h.name||r.name)}"></label>
-   <label>Catégorie<select id="hc"><option ${h.category==='Hôtel'?'selected':''}>Hôtel</option><option ${h.category==='Résidence hôtelière'?'selected':''}>Résidence hôtelière</option><option ${h.category==='Auberge'?'selected':''}>Auberge</option><option ${h.category==='Complexe touristique'?'selected':''}>Complexe touristique</option></select></label>
-   <label>Responsable restauration<input id="hm" value="${esc(h.manager||'')}" placeholder="Nom du responsable"></label>
-   <label>Nombre de chambres<input id="hr" type="number" min="0" value="${h.rooms||''}" placeholder="Ex. 40"></label>
-  </div>
- </div>
- <div class="card col">
-  <h3>⚙️ Organisation des services de restauration</h3>
-  <p class="mut">Activez uniquement les services proposés par votre établissement. Les commandes peuvent préciser le service concerné et, pour le service en chambre, le numéro de chambre.</p>
-  ${['Restaurant','Service en chambre','Petit-déjeuner','Bar / Café','Banquets et séminaires','À emporter'].map(x=>`<label style="display:flex;gap:10px;align-items:center;padding:7px 0"><input type="checkbox" class="hotel-service" value="${x}" ${services.includes(x)?'checked':''}> <span><b>${x}</b> <small class="mut">— ${countService(x)} commande(s)</small></span></label>`).join('')}
-  <label>Horaires de restauration<input id="ht" value="${esc(h.hours||'07:00 - 23:00')}" placeholder="07:00 - 23:00"></label>
-  <label>Consignes pour l’équipe<textarea id="hi" rows="3" placeholder="Ex. appeler la réception avant livraison en chambre">${esc(h.instructions||'')}</textarea></label>
-  <button type="button" onclick="saveHotel()">💾 Enregistrer l’organisation de l’hôtel</button>
- </div>
- <div class="card">
-  <h3>📌 Règles de service</h3>
-  <ul class="mut">
-   <li>Restaurant et bar : encaissement via la caisse de l'hôtel.</li>
-   <li>Petit-déjeuner : commandes suivies dans l'espace Commandes.</li>
-   <li>Service en chambre : préciser le numéro de chambre et suivre la remise par le personnel.</li>
-   <li>Banquets : centraliser les commandes et les montants dans l'historique de l'hôtel.</li>
-   <li>Les ventes et rapports sont rattachés au compte de cet hôtel, séparément des autres établissements.</li>
-  </ul>
- </div>
- </div>`},
+  </div>`},
 
  dash(r){const S=r.sales,c=r.currency,td=day(Date.now()),sum=a=>a.reduce((x,s)=>x+s.total,0);
  const days=[...Array(7)].map((_,i)=>{const t=Date.now()-(6-i)*864e5;return{l:day(t).slice(5),v:sum(S.filter(s=>day(s.date)==day(t)))}});
@@ -468,8 +441,9 @@ audit(r){return '<div id="proAudit"></div>'},
 sub(r){return proUI(r,subInfo(r))},
 support(r){return RGChat.userView(U)},
 report(r){return RR.view(r)},
-settings(r){const bar=[['rest','🍽️ Restaurant'],['pay','💳 Paiements'],['acc','🔑 Paramètres du compte']].map(([k,l])=>`<button type="button" class="${setSub==k?'':'sec'}" onclick="setSub='${k}';render()">${l}</button>`).join('');
- return `<div class="row" style="gap:8px;flex-wrap:wrap;margin-bottom:10px">${bar}</div>`+(setSub=='acc'?passwordCard():setSub=='pay'?payCard(r):V.settingsMain(r))},
+settings(r){const bar=[['rest','🍽️ Restaurant'],...(isHotelAccount()?[['hotel','🏨 Hôtel']]:[]),['pay','💳 Paiements'],['acc','🔑 Paramètres du compte']].map(([k,l])=>`<button type="button" class="${setSub==k?'':'sec'}" onclick="setSub='${k}';render()">${l}</button>`).join('');
+ return `<div class="row" style="gap:8px;flex-wrap:wrap;margin-bottom:10px">${bar}</div>`+(setSub=='acc'?passwordCard():setSub=='pay'?payCard(r):setSub=='hotel'?V.hotelSettings(r):V.settingsMain(r))},
+hotelSettings(r){const h=r.hotel||{},services=h.services||['Restaurant','Service en chambre','Petit-déjeuner','Bar / Café','À emporter'];return `<div class="card col"><h3>🏨 Paramètres de l’hôtel et de sa restauration</h3><div class="formgrid"><label>Nom de l’hôtel<input id="hn" value="${esc(h.name||r.name)}"></label><label>Catégorie<select id="hc"><option ${h.category==='Hôtel'?'selected':''}>Hôtel</option><option ${h.category==='Résidence hôtelière'?'selected':''}>Résidence hôtelière</option><option ${h.category==='Auberge'?'selected':''}>Auberge</option><option ${h.category==='Complexe touristique'?'selected':''}>Complexe touristique</option></select></label><label>Responsable restauration<input id="hm" value="${esc(h.manager||'')}"></label><label>Nombre de chambres<input id="hr" type="number" min="0" value="${h.rooms||''}"></label></div><h4>Services proposés</h4>${['Restaurant','Service en chambre','Petit-déjeuner','Bar / Café','Banquets et séminaires','À emporter'].map(x=>`<label style="display:flex;gap:10px;align-items:center;padding:7px 0"><input type="checkbox" class="hotel-service" value="${x}" ${services.includes(x)?'checked':''}> ${x}</label>`).join('')}<label>Horaires de restauration<input id="ht" value="${esc(h.hours||'07:00 - 23:00')}"></label><label>Consignes pour l’équipe<textarea id="hi" rows="3">${esc(h.instructions||'')}</textarea></label><button type="button" onclick="saveHotel()">💾 Enregistrer les paramètres de l’hôtel</button></div>`},
 settingsMain(r){return `<div class="card col"><label>Nom<input id="sn" value="${esc(r.name)}" style="width:100%"></label>
  <div class="row">${r.logo?`<img src="${r.logo}" class="logo">`:''}<label>Logo <input type="file" id="sl" accept="image/*"></label></div>
  <label>Téléphone<input id="sp" value="${esc(r.phone)}" style="width:100%"></label><label>Adresse<input id="sa" value="${esc(r.address)}" style="width:100%"></label>
