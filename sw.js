@@ -1,12 +1,12 @@
 /* ZUMUYA GROUP — service worker commun au portail et aux pôles métier.
    Précharge uniquement les pages et dépendances natives ZUMUYA.
    Réseau d'abord, cache en secours hors ligne. */
-const CACHE='zumuya-v57-20261127';;;;;;;
+const CACHE='zumuya-v58-20261127';;;;;;;
 const FILES=[
  './index.html','./reseau-social.html','./reseau-social.css','./reseau-social.js','./compte.html','./compte.css','./compte.js','./config.js','./zguard.js','./zsession.js',
  './dashboard.css','./dashboard.js','./module-manager.js','./modules.js','./parametres.html','./parametres.js',
  './proprietaire.html','./proprietaire.css','./proprietaire.js',
- './client-espace.html','./client-espace.js','./mes-commandes.html','./historique.html','./portefeuille.html','./catalogues.html',
+ './client-espace.html','./client-espace.js','./mes-commandes.html','./historique.html','./portefeuille.html','./catalogues.html','./catalogue.js',
  './marketplace.html','./market.js','./market.css','./boutique.html','./boutique.js','./boutique.css',
  './agro.html','./agro.js','./agro.css','./agro-collaboration.js','./zsupply.js',
  './restauration.html','./hotels-public.html','./hotel.html','./zrestaurant-restogest.html','./hospitality.html','./hospitality.css','./hospitality.js','./hospitality-catalog.html','./hospitality-catalog.js','./livraison.html','./livraison-entreprise.html','./livraison-pro.js',
