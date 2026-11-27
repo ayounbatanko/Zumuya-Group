@@ -30,34 +30,29 @@ function card(x){
   (show.length?'<div class="pc-dishes">'+[...new Map(show.map(m=>[String(m.p.category||m.p.section||'Menu'),show.filter(x=>String(x.p.category||x.p.section||'Menu')===String(m.p.category||m.p.section||'Menu'))])).entries()].map(([name,items])=>'<section class="pc-menu-category"><h4>'+esc(name)+'</h4><div class="pc-dishes">'+items.map(m=>dishCard(r,m.p,m.k,fee)).join('')+'</div></section>').join('')+'</div>':'<p class="pc-mut" style="padding:14px 18px">'+(ql?'Aucun plat ne correspond.':'Catalogue bientôt disponible.')+'</p>')+
   (!all&&menu.length>4?'<button type="button" class="pc-more" data-open="'+esc(r.id)+'">Voir tout le catalogue ('+menu.length+' plats)</button>':'')+'</article>'}
 function draw(){
- const ql=q.toLowerCase();
- let list=rests.filter(r=>cat==='hotel'?ZS.isHotel(r):cat==='resto'?!ZS.isHotel(r):false).map(r=>({r:r,d:pos&&r.lat!=null&&r.lng!=null?ZS.km(pos,[r.lat,r.lng]):null}));
+ const ql=q.toLowerCase(),allR=rests.filter(r=>!ZS.isHotel(r)).map(r=>({r,d:pos&&r.lat!=null&&r.lng!=null?ZS.km(pos,[r.lat,r.lng]):null})),allH=rests.filter(r=>ZS.isHotel(r)).map(r=>({r,d:pos&&r.lat!=null&&r.lng!=null?ZS.km(pos,[r.lat,r.lng]):null}));
+ let list=rests.filter(r=>cat==='hotel'?ZS.isHotel(r):cat==='resto'?!ZS.isHotel(r):false).map(r=>({r,d:pos&&r.lat!=null&&r.lng!=null?ZS.km(pos,[r.lat,r.lng]):null}));
  if(ql)list=list.filter(x=>(x.r.name||'').toLowerCase().includes(ql)||(x.r.menu||[]).some(p=>((p.n||'')+' '+(p.desc||'')).toLowerCase().includes(ql)));
  if(sort==='fee')list.sort((a,b)=>(ZS.fee(a.r,a.d)??1e12)-(ZS.fee(b.r,b.d)??1e12));else list.sort((a,b)=>(a.d??1e9)-(b.d??1e9));
  const keep=document.activeElement&&document.activeElement.id==='pcSearch'?document.activeElement.selectionStart:null;
  let html=catBar();
- if(cat==='none')html+='<section class="market-section pc-category-prompt"><h3>Choisissez une catégorie</h3><p class="pc-mut">Les catalogues et leurs produits s’afficheront après votre sélection.</p></section>';
- else{
+ if(cat==='none'){
+  html+='<div class="pc-bar"><input id="pcSearch" type="search" placeholder="Rechercher dans tous les catalogues…" value="'+esc(q)+'" aria-label="Rechercher">'+(pos?'<span class="pc-b">📍 Position active</span>':'<button type="button" class="btn btn-gold" id="pcLoc">📍 Activer ma localisation</button>')+'</div>';
+  const partners=phRests(),restaurants=allR.filter(x=>!ql||(x.r.name||'').toLowerCase().includes(ql)),hotels=allH.filter(x=>!ql||(x.r.name||'').toLowerCase().includes(ql)),rp=partners.filter(o=>o.organization_type==='restaurant'&&(!ql||(o.public_name||'').toLowerCase().includes(ql))),hp=partners.filter(o=>o.organization_type==='hotel'&&(!ql||(o.public_name||'').toLowerCase().includes(ql)));
+  html+='<section class="market-section"><div class="market-heading"><h3>🍽️ Restaurants partenaires</h3><span class="market-count">'+(restaurants.length+rp.length)+'</span></div>'+restaurants.map(card).join('')+rp.map(phCard).join('')+(!restaurants.length&&!rp.length?'<p class="pc-mut">Aucun restaurant publié pour le moment.</p>':'')+'</section>';
+  html+='<section class="market-section"><div class="market-heading"><h3>🏨 Hôtels partenaires</h3><span class="market-count">'+(hotels.length+hp.length)+'</span></div>'+hotels.map(card).join('')+hp.map(phCard).join('')+(!hotels.length&&!hp.length?'<p class="pc-mut">Aucun hôtel publié pour le moment.</p>':'')+'</section>';
+  html+=agroHTML(true)+marketHTML(true);
+  const ds=orgs.filter(o=>['delivery','delivery_service','logistics'].includes(o.organization_type)&&(!ql||(o.public_name||'').toLowerCase().includes(ql)));
+  html+='<section class="market-section"><div class="market-heading"><h3>🚚 Livraison</h3><span class="market-count">'+ds.length+'</span></div>'+(ds.length?'<div class="market-grid">'+ds.map(o=>'<article class="market-product"><div class="market-photo">🚚</div><div class="market-product-body"><h4>'+esc(o.public_name)+'</h4><p>'+esc([o.address,o.city].filter(Boolean).join(', '))+'</p><a class="pc-add" href="messagerie.html?kind=org&ref='+encodeURIComponent(o.id)+'">💬 Contacter</a></div></article>').join('')+'</div>':'<p class="pc-mut">Aucun service de livraison publié.</p>')+'</section><section class="market-section"><h3>🌐 Réseau social ZUMUYA</h3><a class="btn btn-gold" href="reseau-social.html">Ouvrir le réseau social →</a></section>';
+ }else{
   html+='<div class="pc-bar"><input id="pcSearch" type="search" placeholder="Rechercher dans le catalogue…" value="'+esc(q)+'" aria-label="Rechercher">'+(cat==='agro'||cat==='market'?'':'<select id="pcSort"><option value="near"'+(sort==='near'?' selected':'')+'>Les plus proches</option><option value="fee"'+(sort==='fee'?' selected':'')+'>Livraison la moins chère</option></select>')+(pos?'<span class="pc-b">📍 Position active</span>':'<button type="button" class="btn btn-gold" id="pcLoc">📍 Activer ma localisation</button>')+'</div>';
   if(err)html+='<div class="pc-err">'+esc(err)+'</div>';
-  if(cat==='resto'||cat==='hotel'){
-   const ph=phRests().filter(o=>(cat==='hotel')===(o.organization_type==='hotel')&&(!ql||(o.public_name||'').toLowerCase().includes(ql)));
-   if(loading)html+='<p class="empty">Chargement des catalogues…</p>';
-   else if(list.length||ph.length)html+=list.map(card).join('')+ph.map(phCard).join('');
-   else html+='<p class="empty">Aucun partenaire disponible pour le moment.</p>';
-  }else if(cat==='agro')html+=agroHTML(false);
-  else if(cat==='market')html+=marketHTML(false);
-  else if(cat==='social')html+='<section class="market-section"><h3>🌐 Réseau social ZUMUYA</h3><a class="btn btn-gold" href="reseau-social.html">Ouvrir le réseau social →</a></section>';
-  else if(cat==='delivery'){
-   const ds=orgs.filter(o=>['delivery','delivery_service','logistics'].includes(o.organization_type));
-   html+=ds.length?'<section class="market-section"><h3>🚚 Services de livraison partenaires</h3><div class="market-grid">'+ds.map(o=>'<article class="market-product"><div class="market-photo">🚚</div><div class="market-product-body"><h4>'+esc(o.public_name||'Service de livraison')+'</h4><p>'+esc([o.address,o.city].filter(Boolean).join(', '))+'</p><a class="pc-add" href="messagerie.html?kind=org&ref='+encodeURIComponent(o.id)+'">💬 Contacter</a></div></article>').join('')+'</div></section>':'<p class="empty">Aucun service de livraison partenaire disponible.</p>';
-  }
+  if(cat==='resto'||cat==='hotel'){const ph=phRests().filter(o=>(cat==='hotel')===(o.organization_type==='hotel')&&(!ql||(o.public_name||'').toLowerCase().includes(ql)));if(loading)html+='<p class="empty">Chargement des catalogues…</p>';else if(list.length||ph.length)html+=list.map(card).join('')+ph.map(phCard).join('');else html+='<p class="empty">Aucun partenaire disponible pour le moment.</p>'}
+  else if(cat==='agro')html+=agroHTML(false);else if(cat==='market')html+=marketHTML(false);else if(cat==='social')html+='<section class="market-section"><h3>🌐 Réseau social ZUMUYA</h3><a class="btn btn-gold" href="reseau-social.html">Ouvrir le réseau social →</a></section>';
+  else if(cat==='delivery'){const ds=orgs.filter(o=>['delivery','delivery_service','logistics'].includes(o.organization_type));html+=ds.length?'<section class="market-section"><h3>🚚 Services de livraison partenaires</h3><div class="market-grid">'+ds.map(o=>'<article class="market-product"><div class="market-photo">🚚</div><div class="market-product-body"><h4>'+esc(o.public_name||'Service de livraison')+'</h4><p>'+esc([o.address,o.city].filter(Boolean).join(', '))+'</p><a class="pc-add" href="messagerie.html?kind=org&ref='+encodeURIComponent(o.id)+'">💬 Contacter</a></div></article>').join('')+'</div></section>':'<p class="empty">Aucun service de livraison partenaire disponible.</p>'}
  }
  if(!html.trim())html='<p class="empty">Aucun contenu disponible pour le moment.</p>';
- root.innerHTML=html;const s=$('#pcSearch');
- if(s){s.oninput=e=>{q=e.target.value;draw()};if(keep!=null){s.focus();s.setSelectionRange(keep,keep)}}
- if($('#pcSort'))$('#pcSort').onchange=e=>{sort=e.target.value;draw()};
- const l=$('#pcLoc');if(l)l.onclick=locate;
+ root.innerHTML=html;const inp=$('#pcSearch');if(inp){inp.oninput=e=>{q=e.target.value;draw()};if(keep!=null){inp.focus();inp.setSelectionRange(keep,keep)}}if($('#pcSort'))$('#pcSort').onchange=e=>{sort=e.target.value;draw()};const l=$('#pcLoc');if(l)l.onclick=locate;
 }
 root.addEventListener('click',e=>{const c=e.target.closest('[data-cat]');if(c){cat=c.dataset.cat;try{sessionStorage.setItem('zg_cat',cat)}catch(_){}draw();return}const b=e.target.closest('[data-open]');if(b){open[b.dataset.open]=1;draw()}});
 
@@ -78,8 +73,8 @@ function marketHTML(hideEmpty){
  return '<section class="market-section"><div class="market-heading"><div><span class="market-kicker">PÔLE MARKETPLACE</span><h3>Produits des boutiques partenaires</h3><p>Catalogues classés par catégorie.</p></div><span class="market-count">'+items.length+' produits</span></div>'+categoryGroups(items,p=>p.commerce_categories?.name||'Autres',p=>'<article class="market-product">'+(p.image_url?'<img loading="lazy" src="'+esc(p.image_url)+'" alt="">':'<div class="market-photo">🛍️</div>')+'<div class="market-product-body"><h4>'+esc(p.title)+'</h4><p>'+esc(p.description||'')+'</p><div class="market-owner">🏪 '+esc(p.commerce_stores?.store_name||'Boutique')+(p.commerce_stores?.city?' · '+esc(p.commerce_stores.city):'')+'</div><div class="market-buy"><b>'+ZS.money(p.price,p.currency||'XOF')+'</b><a class="btn btn-gold" href="marketplace.html?product='+encodeURIComponent(p.id)+'">＋ Ajouter au panier →</a> <a class="pc-add" style="text-decoration:none;display:inline-block" href="'+chatHref('store',p.store_id,'Question sur : '+p.title)+'">💬 Contacter</a></div></div></article>')+'</section>'}
 async function loadMarket(){
  const c=window.ZUMAYA_CONFIG||{};if(!c.SUPABASE_URL||!c.SUPABASE_ANON_KEY)return;
- try{const r=await fetch(c.SUPABASE_URL+'/rest/v1/commerce_products?select=id,title,description,price,currency,image_url,stock_quantity,store_id,commerce_stores(store_name,city),commerce_categories(name)&status=eq.active&stock_quantity=gt.0&order=created_at.desc&limit=60',{headers:{apikey:c.SUPABASE_ANON_KEY,Authorization:'Bearer '+c.SUPABASE_ANON_KEY}});
-  if(!r.ok)return;mktProducts=await r.json();draw()}catch(_){}
+ try{const u=c.SUPABASE_URL+'/rest/v1/commerce_products?select=id,title,description,price,currency,image_url,stock_quantity,store_id,commerce_stores!inner(store_name,city,is_active),commerce_categories(name)&status=eq.active&stock_quantity=gt.0&commerce_stores.is_active=eq.true&order=created_at.desc&limit=60',r=await fetch(u,{headers:{apikey:c.SUPABASE_ANON_KEY,Authorization:'Bearer '+c.SUPABASE_ANON_KEY}});
+ if(!r.ok)throw Error('Marketplace public : '+r.status+' '+(await r.text()).slice(0,160));mktProducts=await r.json();draw()}catch(e){err='Marketplace : '+(e.message||'chargement impossible');draw()}
 }
 async function loadOrgs(){
  const c=window.ZUMAYA_CONFIG||{};if(!c.SUPABASE_URL||!c.SUPABASE_ANON_KEY)return;
@@ -136,6 +131,6 @@ root.addEventListener('click',e=>{
  }
 });
 async function locate(){try{pos=await ZS.locate();err=''}catch(e){err='Position indisponible : autorisez la localisation pour trier les restaurants et calculer les frais de livraison.'}ZC.setData(rests,pos);draw()}
-async function load(){try{rests=(await ZS.rests()).filter(r=>ZS.subOk(r));err='';ZC.setData(rests,pos)}catch(e){err='Impossible de charger les restaurants. Vérifiez votre connexion.'}loading=false;draw()}
+async function load(){try{rests=await ZS.rests();err='';ZC.setData(rests,pos)}catch(e){err='Impossible de charger les restaurants. Vérifiez votre connexion.'}loading=false;draw()}
 ZC.init({onChange:draw});draw();load();loadAgro();loadMarket();loadOrgs();setInterval(loadOrgs,120000);setInterval(load,60000);setInterval(loadAgro,120000);setInterval(loadMarket,120000);
 })();
