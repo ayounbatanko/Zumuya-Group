@@ -32,7 +32,7 @@ if(type==='universal'||((type==='restaurant'||type==='hotel')&&!md.organization_
       x0.open('GET',C0.SUPABASE_URL+'/rest/v1/rg_organizations?owner_id=eq.'+encodeURIComponent(pu.id)+'&organization_type=in.(restaurant,hotel)&select=id,organization_type,public_name,legal_name,city,address,contact_phone,latitude,longitude',false);
       x0.setRequestHeader('apikey',C0.SUPABASE_ANON_KEY);x0.setRequestHeader('Authorization','Bearer '+s.access_token);x0.send();
       if(x0.status===200){var os=JSON.parse(x0.responseText)||[];
-        var og=os.filter(function(o){return o.organization_type===want})[0]||os.filter(function(o){return o.id===md.organization_id})[0]||os[0];
+        var og=(want?os.filter(function(o){return o.organization_type===want})[0]:null)||os.filter(function(o){return o.id===md.organization_id})[0]||(!requestedPortal&&os.length===1?os[0]:null);
         if(og){type=og.organization_type;
           md=Object.assign({},md,{organization_id:og.id,organization_name:og.public_name||og.legal_name||md.organization_name,org_city:og.city||md.org_city,org_address:og.address||md.org_address,org_phone:og.contact_phone||md.org_phone,org_lat:og.latitude!=null?og.latitude:md.org_lat,org_lng:og.longitude!=null?og.longitude:md.org_lng})}}
     }catch(e){}
